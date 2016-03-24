@@ -22,6 +22,7 @@ public class MainActivity extends Activity {
 		setContentView(R.layout.activity_main);
 		
 		LoadTabs();
+		//Toolbar a = 
 
 	    //setupTab(new TextView(this), "Tab 1");
 	    //setupTab(new TextView(this), "Tab 2");
