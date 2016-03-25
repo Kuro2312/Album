@@ -5,7 +5,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 
-
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -20,6 +19,7 @@ import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.EditText;
 import android.widget.GridView;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TabHost;
@@ -43,11 +43,29 @@ public class MainActivity extends Activity {
 		setContentView(R.layout.activity_main);
 		
 		LoadTabs();
-		//Toolbar a = 
-
 		LoadImages();
-
+		
+		ImageButton b = (ImageButton) findViewById(R.id.btnNote);
+		b.setOnClickListener(new View.OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+				TurnOnSelectionMode();
+			}
+		});
+		
+		ImageButton b1 = (ImageButton) findViewById(R.id.btnTrash);
+		b1.setOnClickListener(new View.OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+				TurnOffSelectionMode();
+			}
+		});
 	}
+	
 
 	public void LoadImages()
 	{		
@@ -115,6 +133,51 @@ public class MainActivity extends Activity {
             	DirFolder(f);
 		}
 		
+	}
+	
+	public void TurnOnSelectionMode()
+	{
+		int count = _adapter.getCount();
+		
+		for (int i = 0; i < count; i++)
+		{		
+			View view = getViewByPosition(i, _gridViewAll);
+			//view.g
+			ViewHolder holder = (ViewHolder) view.getTag();
+			
+			holder.checkbox.setVisibility(View.VISIBLE);
+			holder.checkbox.setChecked(false);
+		}
+	}
+
+	public void TurnOffSelectionMode()
+	{
+		int count = _adapter.getCount();
+		
+		for (int i = 0; i < count; i++)
+		{		
+			View view = getViewByPosition(i, _gridViewAll);
+			//view.g
+			ViewHolder holder = (ViewHolder) view.getTag();
+			
+			holder.checkbox.setVisibility(View.INVISIBLE);
+			holder.checkbox.setChecked(false);
+		}
+	}
+	
+	public View getViewByPosition(int pos, GridView listView) 
+	{
+	    final int firstListItemPosition = listView.getFirstVisiblePosition();
+	    final int lastListItemPosition = firstListItemPosition + listView.getChildCount() - 1;
+
+	    if (pos < firstListItemPosition || pos > lastListItemPosition ) 
+	    {
+	        return listView.getAdapter().getView(pos, null, listView);
+	    } else 
+	    {
+	        final int childIndex = pos - firstListItemPosition;
+	        return listView.getChildAt(childIndex);
+	    }
 	}
 	
 	@Override
