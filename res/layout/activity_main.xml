@@ -2,27 +2,82 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    tools:context="com.example.galleryds.MainActivity">
 
-    tools:context="com.example.galleryds.MainActivity" >
-        
-	<TextView
-	    android:id="@+id/toolBar"
-	    android:layout_width="match_parent"
-	    android:layout_height="50dip"
-	    android:layout_alignParentBottom="true"
-	    android:layout_alignParentLeft="true"
-	    android:background="@color/blue"
-	    android:gravity="center_vertical|center_horizontal"
-	    android:text="This is a toolbar"
-	    android:textSize="20dp" />
-        
+      <android.support.v7.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="50dip"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentBottom="true"
+        android:background="@android:color/black">
+
+        <LinearLayout
+            android:id="@+id/toolbarContainer"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            android:gravity="center">
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_weight="1" >
+            </View>
+
+            <ImageButton
+                android:layout_width="wrap_content"
+                android:layout_height="30dp"
+                android:clickable="true"
+                android:scaleType="fitCenter"
+                android:src = "@drawable/note"
+                android:background="@android:color/transparent"/>
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_weight="1" >
+            </View>
+
+            <ImageButton
+                android:layout_width="wrap_content"
+                android:layout_height="30dp"
+                android:clickable="true"
+                android:scaleType="fitCenter"
+                android:src = "@drawable/star"
+                android:background="@android:color/transparent" />
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_weight="1" >
+            </View>
+
+            <ImageButton
+                android:layout_width="wrap_content"
+                android:layout_height="30dp"
+                android:clickable="true"
+                android:scaleType="fitCenter"
+                android:src = "@drawable/trash"
+                android:background="@android:color/transparent"/>
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_weight="1" >
+            </View>
+
+        </LinearLayout>
+
+    </android.support.v7.widget.Toolbar>
+      
     <TabHost
         android:id="@+id/tabhost"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_above="@+id/toolbar"
         android:layout_alignParentLeft="true"
-        android:layout_above="@+id/toolBar"
-        android:layout_alignParentTop="true">
+        android:layout_alignParentTop="true" >
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -71,8 +126,7 @@
             </FrameLayout>
         </LinearLayout>
     </TabHost>
-	
-
-
-
+    
+    
+    
 </RelativeLayout>
