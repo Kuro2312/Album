@@ -2,17 +2,10 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="com.example.galleryds.MainActivity" >
 
-    <item
+	<item
         android:id="@+id/action_settings"
         android:orderInCategory="100"
         android:showAsAction="never"
-        android:icon="@drawable/ic_launcher"
-        android:title="Icon" android:visible="true"/>
-	
-    <item
-        android:id="@+id/action_about"
-        android:orderInCategory="100"
-        android:showAsAction="never|withText"
-        android:title="Visible"/>
+        android:title="@string/action_settings"/>
     
 </menu>
