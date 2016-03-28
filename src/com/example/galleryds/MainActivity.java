@@ -14,6 +14,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.os.Environment;
+import android.provider.MediaStore.Files;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -32,6 +33,7 @@ import android.support.v7.widget.Toolbar;
 import android.widget.TabHost.TabSpec;
 import android.widget.TextView;
 
+
 public class MainActivity extends Activity {
 
 	TabHost _mainTabHost;
@@ -40,6 +42,7 @@ public class MainActivity extends Activity {
 	ArrayList<Bitmap> _allImages;
 	ArrayList<File> _allImageFiles;
 	private ImageAdapter _adapter;
+	//	        Toast.makeText(this, "Successfully", Toast.LENGTH_SHORT).show();
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -78,8 +81,17 @@ public class MainActivity extends Activity {
 				DeleteSelectedImages();
 			}
 		});
+		
+		//CreateAlbum("Kuro");
+		//DeleteAlbum("Kuro");
+		
+		//foo();
+		ArrayList<String> arr = ImageSupporter.foo(this);
+		
+		for (int i = 0; i < arr.size(); i++)
+			Toast.makeText(this, arr.get(i), Toast.LENGTH_SHORT).show();
+		
 	}
-
 
 	public void LoadImages()
 	{		
@@ -126,12 +138,69 @@ public class MainActivity extends Activity {
 		_mainTabHost.setCurrentTab(0);
 	}
 	 
+	public void CreateAlbum(String name)
+	{
+		File path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
+
+		// Kiểm tra có tạo folder thành công không
+		if (ImageSupporter.CreateFolder(path.getAbsolutePath(), name)) 
+		{
+			// Cập nhật giao diện
+			Toast.makeText(this, "Create Album Successfully", Toast.LENGTH_SHORT).show();
+		} 
+		else 
+		{
+			// Xử lý lỗi
+			Toast.makeText(this, "Fail To Create Album", Toast.LENGTH_SHORT).show();
+		}
+	}
+	
+	public void RenameAlbum(File album, String newName)
+	{
+		// Xử lý giao diện gì đó đó
+		ImageSupporter.RenameFile(album, newName);
+	}
+	
+	// Xóa toàn bộ ảnh trong album
+	public void DeleteWholeAlbum(String name)
+	{
+		File path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
+		
+		ImageSupporter.DeleteWholeFolder(path.getAbsolutePath(), name);
+		
+		// Cập nhật giao diện
+	}
+		
+	// Chỉ xóa album và chuyển ảnh sang chỗ khác
+	public void DeleteAlbum(String name)
+	{
+		File path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
+		File folder = new File(path.getAbsolutePath() + File.separator + name);
+
+		// Kiểm tra có tồn tại folder đó không
+		if (folder.exists()) 
+		{
+			File[] files = folder.listFiles();
+			
+		    if (files != null)	    
+		    	for (File f : files) 
+		    		ImageSupporter.moveFile(f.getParent(), f.getName(), path.getAbsolutePath());
+		    	   
+	        folder.delete();
+	        
+	        Toast.makeText(this, "Successfully", Toast.LENGTH_SHORT).show();
+		}
+	}
+	
 	public void DirFolder(File file)
 	{
 		if (file.getName().equals(".thumbnails"))
 			return;
 		
 		File[] files = file.listFiles();
+		
+		if (files == null)
+			return;
 		
 		for (File f : files)
 		{			
