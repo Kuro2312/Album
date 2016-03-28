@@ -4,6 +4,9 @@ import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Dictionary;
+import java.util.HashMap;
+import java.util.Map;
 
 import android.app.Activity;
 import android.content.Context;
@@ -35,6 +38,7 @@ public class MainActivity extends Activity {
 	File _imageDir;
 	GridView _gridViewAll;
 	ArrayList<Bitmap> _allImages;
+	ArrayList<File> _allImageFiles;
 	private ImageAdapter _adapter;
 	
 	@Override
@@ -55,7 +59,7 @@ public class MainActivity extends Activity {
 			}
 		});
 		
-		ImageButton b1 = (ImageButton) findViewById(R.id.btnTrash);
+		ImageButton b1 = (ImageButton) findViewById(R.id.btnStar);
 		b1.setOnClickListener(new View.OnClickListener() {
 			
 			@Override
@@ -64,8 +68,18 @@ public class MainActivity extends Activity {
 				TurnOffSelectionMode();
 			}
 		});
+		
+		ImageButton b2 = (ImageButton) findViewById(R.id.btnTrash);
+		b2.setOnClickListener(new View.OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+				DeleteSelectedImages();
+			}
+		});
 	}
-	
+
 
 	public void LoadImages()
 	{		
@@ -75,10 +89,12 @@ public class MainActivity extends Activity {
 		if (_imageDir.exists())
 	    {			
 			_allImages = new ArrayList<Bitmap>();
+			_allImageFiles = new ArrayList<File>();
+						
 			DirFolder(_imageDir);
 			
-			_adapter = new ImageAdapter(this, _allImages);
-			_gridViewAll.setAdapter(_adapter);			
+			_adapter = new ImageAdapter(this, DataHolder.Convert(_allImageFiles, _allImages));
+			_gridViewAll.setAdapter(_adapter);
 	    }
 	}
 	
@@ -120,10 +136,8 @@ public class MainActivity extends Activity {
 		for (File f : files)
 		{			
 			if (ImageSupporter.IsImage(f))
-            {
-            	//EditText t = new EditText(this);
-            	//t.setLayoutParams(new LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-				//t.setText(f.getName() + "-" + f.getAbsolutePath());
+            {			
+				_allImageFiles.add(f);
 				
 				Bitmap b =  ImageSupporter.DecodeSampledBitmapFromFile(f, 100, 100);
 				_allImages.add(b);
@@ -142,7 +156,7 @@ public class MainActivity extends Activity {
 		for (int i = 0; i < count; i++)
 		{		
 			View view = getViewByPosition(i, _gridViewAll);
-			//view.g
+
 			ViewHolder holder = (ViewHolder) view.getTag();
 			
 			holder.checkbox.setVisibility(View.VISIBLE);
@@ -150,6 +164,23 @@ public class MainActivity extends Activity {
 		}
 	}
 
+	public void DeleteSelectedImages()
+	{
+		int count = _adapter.getCount();
+		
+		for (int i = count - 1; i >= 0; i--)
+		{		
+			View view = getViewByPosition(i, _gridViewAll);
+
+			ViewHolder holder = (ViewHolder) view.getTag();
+			
+			if (holder.checkbox.isChecked() == true)
+			{				
+				_adapter.remove(holder.id);			
+			}
+		}
+	}
+	
 	public void TurnOffSelectionMode()
 	{
 		int count = _adapter.getCount();
@@ -157,7 +188,7 @@ public class MainActivity extends Activity {
 		for (int i = 0; i < count; i++)
 		{		
 			View view = getViewByPosition(i, _gridViewAll);
-			//view.g
+
 			ViewHolder holder = (ViewHolder) view.getTag();
 			
 			holder.checkbox.setVisibility(View.INVISIBLE);
