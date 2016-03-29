@@ -37,20 +37,36 @@ import android.widget.TextView;
 public class MainActivity extends Activity {
 
 	TabHost _mainTabHost;
-	File _imageDir;
+	
+	// Cho việc thao tác trên mục toàn bô ảnh
 	GridView _gridViewAll;
-	ArrayList<Bitmap> _allImages;
-	ArrayList<File> _allImageFiles;
-	private ImageAdapter _adapter;
-	//	        Toast.makeText(this, "Successfully", Toast.LENGTH_SHORT).show();
+	ArrayList<DataHolder> _allImageData;
+	private ImageAdapter _allImageAdapter;
+	
+	// Cho việc thao tác trên mục album ảnh
+	GridView _gridViewAlbum;
+	ArrayList<DataHolder> _albumData;
+	private ImageAdapter _albumAdapter;
+	
+	// Cho việc thao tác trên mục yêu thích
+	GridView _gridViewFavourite;
+	ArrayList<DataHolder> _favouriteData;
+	private ImageAdapter _favouriteAdapter;
+		
+	//Toast.makeText(this, "Successfully", Toast.LENGTH_SHORT).show();
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		
-		LoadTabs();
-		LoadImages();
+		_gridViewAll = (GridView) findViewById(R.id.gridView1);
+		_gridViewFavourite = (GridView) findViewById(R.id.gridView2);
+		//_gridViewAlbum = (GridView) findViewById(R.id.gridView3);
+		//_gridViewAlbumImages = (GridView) findViewById(R.id.gridView4);
+		
+		loadTabs();
+		loadImages();
 		
 		ImageButton b = (ImageButton) findViewById(R.id.btnNote);
 		b.setOnClickListener(new View.OnClickListener() {
@@ -58,7 +74,7 @@ public class MainActivity extends Activity {
 			@Override
 			public void onClick(View v) {
 				// TODO Auto-generated method stub
-				TurnOnSelectionMode();
+				turnOnSelectionMode(_gridViewAll, _allImageAdapter);
 			}
 		});
 		
@@ -68,7 +84,7 @@ public class MainActivity extends Activity {
 			@Override
 			public void onClick(View v) {
 				// TODO Auto-generated method stub
-				TurnOffSelectionMode();
+				addToFavourite(_gridViewAll, _allImageAdapter);
 			}
 		});
 		
@@ -78,39 +94,112 @@ public class MainActivity extends Activity {
 			@Override
 			public void onClick(View v) {
 				// TODO Auto-generated method stub
-				DeleteSelectedImages();
+				deleteSelectedImages(_gridViewAll, _allImageAdapter);
 			}
 		});
 		
-		//CreateAlbum("Kuro");
-		//DeleteAlbum("Kuro");
+		ImageButton b3 = (ImageButton) findViewById(R.id.btnDeNote);
+		b2.setOnClickListener(new View.OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+				turnOffSelectionMode(_gridViewAll, _allImageAdapter);
+			}
+		});
 		
-		//foo();
+		/* Khu vực để test: hô hô hô ^_^
+		
+		createAlbum("Kuro");
+		deleteAlbum("Kuro");
+		
+		code test file in private mode
 		ArrayList<String> arr = ImageSupporter.foo(this);
 		
 		for (int i = 0; i < arr.size(); i++)
 			Toast.makeText(this, arr.get(i), Toast.LENGTH_SHORT).show();
+			
+		code to reset favourite
+		ImageSupporter.saveFavouriteImagePaths(this, null);
+			
+		ArrayList<String> arr = ImageSupporter.getFavouriteImagePaths(this);
 		
+		for (int i = 0; i < arr.size(); i++)
+			Toast.makeText(this, arr.get(i), Toast.LENGTH_SHORT).show(); */	
+		
+		loadFavouriteImages();
 	}
 
-	public void LoadImages()
-	{		
-		_gridViewAll = (GridView) findViewById(R.id.gridView1);
-		_imageDir = new File(Environment.getExternalStorageDirectory().toString());
+	public void addToFavourite(GridView gridview, ImageAdapter adapter)
+	{
+		int count = adapter.getCount();
 		
-		if (_imageDir.exists())
-	    {			
-			_allImages = new ArrayList<Bitmap>();
-			_allImageFiles = new ArrayList<File>();
-						
-			DirFolder(_imageDir);
+		for (int i = count - 1; i >= 0; i--)
+		{		
+			View view = getViewByPosition(i, gridview);
+
+			ViewHolder holder = (ViewHolder) view.getTag();
 			
-			_adapter = new ImageAdapter(this, DataHolder.Convert(_allImageFiles, _allImages));
-			_gridViewAll.setAdapter(_adapter);
+			if (holder.checkbox.isChecked() == true)
+			{				
+				DataHolder data = (DataHolder) adapter.getItem(holder.id);
+				
+				_favouriteAdapter.add(data);
+				
+				ArrayList<DataHolder> d = _favouriteAdapter.getData();
+				ArrayList<String> s = new ArrayList<String>();
+				
+				for (int j = 0; j < d.size(); j++)
+				{
+					if (d.get(j) != null)
+						s.add(d.get(j)._file.getAbsolutePath());
+				}
+				
+				ImageSupporter.saveFavouriteImagePaths(this, s);
+			}
+		}
+	}
+	
+	// Nạp toàn bộ ảnh trong máy lên
+	public void loadImages()
+	{		
+		File imageDir = new File(Environment.getExternalStorageDirectory().toString());
+		
+		if (imageDir.exists())
+	    {			
+			_allImageData = new ArrayList<DataHolder>();
+			
+			dirFolder(imageDir);
+			
+			_allImageAdapter = new ImageAdapter(this, _allImageData);
+			_gridViewAll.setAdapter(_allImageAdapter);
 	    }
 	}
 	
-	public void LoadTabs()
+	// Nạp các ảnh ưa thích lên
+	public void loadFavouriteImages()
+	{		
+		ArrayList<String> data = ImageSupporter.getFavouriteImagePaths(this);	
+		
+		if (data != null)
+		{
+			_favouriteData = new ArrayList<DataHolder>();
+			
+			for (int i = 0; i < data.size(); i++)
+			{
+				File f = new File(data.get(i));
+				Bitmap b =  ImageSupporter.decodeSampledBitmapFromFile(f, 100, 100);
+				
+				_favouriteData.add(new DataHolder(f,b));
+			}
+			
+			_favouriteAdapter = new ImageAdapter(this, _favouriteData);
+			_gridViewFavourite.setAdapter(_favouriteAdapter);
+		}
+	}
+	
+	// Nạp các tab cần thể hiện cho tabhost
+	public void loadTabs()
 	{
 		// Lấy TabHost từ Id cho trước
 		_mainTabHost = (TabHost) findViewById(R.id.tabhost);
@@ -138,12 +227,13 @@ public class MainActivity extends Activity {
 		_mainTabHost.setCurrentTab(0);
 	}
 	 
-	public void CreateAlbum(String name)
+	// Tạo mới Album
+	public void createAlbum(String name)
 	{
 		File path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
 
 		// Kiểm tra có tạo folder thành công không
-		if (ImageSupporter.CreateFolder(path.getAbsolutePath(), name)) 
+		if (ImageSupporter.createFolder(path.getAbsolutePath(), name)) 
 		{
 			// Cập nhật giao diện
 			Toast.makeText(this, "Create Album Successfully", Toast.LENGTH_SHORT).show();
@@ -155,24 +245,25 @@ public class MainActivity extends Activity {
 		}
 	}
 	
-	public void RenameAlbum(File album, String newName)
+	// Đổi tên 1 Album
+	public void renameAlbum(File album, String newName)
 	{
 		// Xử lý giao diện gì đó đó
-		ImageSupporter.RenameFile(album, newName);
+		ImageSupporter.renameFile(album, newName);
 	}
 	
 	// Xóa toàn bộ ảnh trong album
-	public void DeleteWholeAlbum(String name)
+	public void deleteWholeAlbum(String name)
 	{
 		File path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
 		
-		ImageSupporter.DeleteWholeFolder(path.getAbsolutePath(), name);
+		ImageSupporter.deleteWholeFolder(path.getAbsolutePath(), name);
 		
 		// Cập nhật giao diện
 	}
 		
 	// Chỉ xóa album và chuyển ảnh sang chỗ khác
-	public void DeleteAlbum(String name)
+	public void deleteAlbum(String name)
 	{
 		File path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
 		File folder = new File(path.getAbsolutePath() + File.separator + name);
@@ -192,7 +283,8 @@ public class MainActivity extends Activity {
 		}
 	}
 	
-	public void DirFolder(File file)
+	// Duyệt và tìm kiếm tất cả tập tin hình ảnh
+	public void dirFolder(File file)
 	{
 		if (file.getName().equals(".thumbnails"))
 			return;
@@ -204,27 +296,27 @@ public class MainActivity extends Activity {
 		
 		for (File f : files)
 		{			
-			if (ImageSupporter.IsImage(f))
+			if (ImageSupporter.isImage(f))
             {			
-				_allImageFiles.add(f);
-				
-				Bitmap b =  ImageSupporter.DecodeSampledBitmapFromFile(f, 100, 100);
-				_allImages.add(b);
+				Bitmap b =  ImageSupporter.decodeSampledBitmapFromFile(f, 100, 100);
+
+				_allImageData.add(new DataHolder(f,b));
             }
             
             if (f.isDirectory())
-            	DirFolder(f);
+            	dirFolder(f);
 		}
 		
 	}
 	
-	public void TurnOnSelectionMode()
+	// Bật chế độ chọn hình ảnh
+	public void turnOnSelectionMode(GridView gridView, ImageAdapter adapter)
 	{
-		int count = _adapter.getCount();
+		int count = adapter.getCount();
 		
 		for (int i = 0; i < count; i++)
 		{		
-			View view = getViewByPosition(i, _gridViewAll);
+			View view = getViewByPosition(i, gridView);
 
 			ViewHolder holder = (ViewHolder) view.getTag();
 			
@@ -233,30 +325,32 @@ public class MainActivity extends Activity {
 		}
 	}
 
-	public void DeleteSelectedImages()
+	// Xóa ảnh đã chọn
+	public void deleteSelectedImages(GridView gridView, ImageAdapter adapter)
 	{
-		int count = _adapter.getCount();
+		int count = adapter.getCount();
 		
 		for (int i = count - 1; i >= 0; i--)
 		{		
-			View view = getViewByPosition(i, _gridViewAll);
+			View view = getViewByPosition(i, gridView);
 
 			ViewHolder holder = (ViewHolder) view.getTag();
 			
 			if (holder.checkbox.isChecked() == true)
 			{				
-				_adapter.remove(holder.id);			
+				adapter.remove(holder.id);			
 			}
 		}
 	}
 	
-	public void TurnOffSelectionMode()
+	// Tắt chế độ chọn hình ảnh
+	public void turnOffSelectionMode(GridView gridView, ImageAdapter adapter)
 	{
-		int count = _adapter.getCount();
+		int count = adapter.getCount();
 		
 		for (int i = 0; i < count; i++)
 		{		
-			View view = getViewByPosition(i, _gridViewAll);
+			View view = getViewByPosition(i, gridView);
 
 			ViewHolder holder = (ViewHolder) view.getTag();
 			
