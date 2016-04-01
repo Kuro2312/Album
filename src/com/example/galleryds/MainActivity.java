@@ -46,12 +46,15 @@ public class MainActivity extends Activity {
 	// Cho việc thao tác trên mục album ảnh
 	GridView _gridViewAlbum;
 	ArrayList<DataHolder> _albumData;
-	private ImageAdapter _albumAdapter;
+	private AlbumAdapter _albumAdapter;
 	
 	// Cho việc thao tác trên mục yêu thích
 	GridView _gridViewFavourite;
 	ArrayList<DataHolder> _favouriteData;
 	private ImageAdapter _favouriteAdapter;
+		
+	HashMap<String, DataHolder> _allMap;
+	HashMap<String, String> _favouriteMap;
 		
 	//Toast.makeText(this, "Successfully", Toast.LENGTH_SHORT).show();
 	
@@ -62,7 +65,7 @@ public class MainActivity extends Activity {
 		
 		_gridViewAll = (GridView) findViewById(R.id.gridView1);
 		_gridViewFavourite = (GridView) findViewById(R.id.gridView2);
-		//_gridViewAlbum = (GridView) findViewById(R.id.gridView3);
+		_gridViewAlbum = (GridView) findViewById(R.id.gridView3);
 		//_gridViewAlbumImages = (GridView) findViewById(R.id.gridView4);
 		
 		loadTabs();
@@ -84,7 +87,7 @@ public class MainActivity extends Activity {
 			@Override
 			public void onClick(View v) {
 				// TODO Auto-generated method stub
-				addToFavourite(_gridViewAll, _allImageAdapter);
+				addToFavourite(_gridViewAll, _allImageAdapter);				
 			}
 		});
 		
@@ -94,17 +97,18 @@ public class MainActivity extends Activity {
 			@Override
 			public void onClick(View v) {
 				// TODO Auto-generated method stub
-				deleteSelectedImages(_gridViewAll, _allImageAdapter);
+				//deleteSelectedImages(_gridViewAll, _allImageAdapter);
+				removeFromFavourite(_gridViewAll, _allImageAdapter);
 			}
 		});
 		
 		ImageButton b3 = (ImageButton) findViewById(R.id.btnDeNote);
-		b2.setOnClickListener(new View.OnClickListener() {
+		b3.setOnClickListener(new View.OnClickListener() {
 			
 			@Override
 			public void onClick(View v) {
 				// TODO Auto-generated method stub
-				turnOffSelectionMode(_gridViewAll, _allImageAdapter);
+				turnOffSelectionMode(_gridViewAll, _allImageAdapter);				
 			}
 		});
 		
@@ -128,11 +132,36 @@ public class MainActivity extends Activity {
 			Toast.makeText(this, arr.get(i), Toast.LENGTH_SHORT).show(); */	
 		
 		loadFavouriteImages();
+		loadAlbums();
 	}
 
+	void foo()
+	{
+		HashMap<String, String> a = new HashMap<String, String>();
+		
+		String c = "kutorot";
+		a.put("Kuro", "1");
+		a.put("Shiro", "2");
+		a.put("d", c);
+		
+		ArrayList<String> b = new ArrayList<String>();
+		//b.set(1, "3");
+		//b.set(0, "4");
+		b.add(c);
+		
+		b.remove(0);
+		
+		//b.remove(a.get("Kuro"));
+		
+		Toast.makeText(this, a.get("d"), Toast.LENGTH_SHORT).show();		
+	}
+	
+	// Thêm vào favourite
+	// Ghi thêm vào file
 	public void addToFavourite(GridView gridview, ImageAdapter adapter)
 	{
 		int count = adapter.getCount();
+		ArrayList<String> newFavourite = new ArrayList<String>();
 		
 		for (int i = count - 1; i >= 0; i--)
 		{		
@@ -144,22 +173,45 @@ public class MainActivity extends Activity {
 			{				
 				DataHolder data = (DataHolder) adapter.getItem(holder.id);
 				
-				_favouriteAdapter.add(data);
-				
-				ArrayList<DataHolder> d = _favouriteAdapter.getData();
-				ArrayList<String> s = new ArrayList<String>();
-				
-				for (int j = 0; j < d.size(); j++)
+				if (_favouriteMap.containsKey(data._file.getAbsolutePath()) == false)
 				{
-					if (d.get(j) != null)
-						s.add(d.get(j)._file.getAbsolutePath());
+					newFavourite.add(data._file.getAbsolutePath());
+					_favouriteAdapter.add(data);
+					_favouriteMap.put(data._file.getAbsolutePath(), data._file.getAbsolutePath());
 				}
-				
-				ImageSupporter.saveFavouriteImagePaths(this, s);
 			}
 		}
+		
+		ImageSupporter.addNewFavouriteImagePaths(this, newFavourite);
 	}
 	
+	// Xóa khỏi favourite
+	// Luu lai vào file
+	public void removeFromFavourite(GridView gridview, ImageAdapter adapter)
+	{
+		int count = adapter.getCount();
+
+		for (int i = count - 1; i >= 0; i--)
+		{		
+			View view = getViewByPosition(i, gridview);
+
+			ViewHolder holder = (ViewHolder) view.getTag();
+			
+			if (holder.checkbox.isChecked() == true)
+			{				
+				DataHolder data = (DataHolder) adapter.getItem(holder.id);
+				
+				if (_favouriteMap.containsKey(data._file.getAbsolutePath()) == true)
+				{
+					_favouriteAdapter.remove(data);
+					_favouriteMap.remove(data._file.getAbsolutePath());
+				}
+			}
+		}
+		
+		ImageSupporter.saveFavouriteImagePaths(this, new ArrayList<String>(_favouriteMap.values()));		
+	}
+		
 	// Nạp toàn bộ ảnh trong máy lên
 	public void loadImages()
 	{		
@@ -168,6 +220,7 @@ public class MainActivity extends Activity {
 		if (imageDir.exists())
 	    {			
 			_allImageData = new ArrayList<DataHolder>();
+			_allMap = new HashMap<String, DataHolder>();
 			
 			dirFolder(imageDir);
 			
@@ -184,20 +237,50 @@ public class MainActivity extends Activity {
 		if (data != null)
 		{
 			_favouriteData = new ArrayList<DataHolder>();
+			_favouriteMap = new HashMap<String, String>();
 			
 			for (int i = 0; i < data.size(); i++)
 			{
-				File f = new File(data.get(i));
-				Bitmap b =  ImageSupporter.decodeSampledBitmapFromFile(f, 100, 100);
+				//File f = new File(data.get(i));
+				//Bitmap b =  ImageSupporter.decodeSampledBitmapFromFile(f, 100, 100);
 				
-				_favouriteData.add(new DataHolder(f,b));
+				//DataHolder tmpData = new DataHolder(f,b);
+				
+				//_favouriteData.add(tmpData);
+				//_favourite.put(f.getAbsolutePath(), tmpData);
+				
+				DataHolder d = _allMap.get(data.get(i));
+				
+				if (d != null)
+				{
+					_favouriteData.add(d);		
+					_favouriteMap.put(d._file.getAbsolutePath(), d._file.getAbsolutePath());
+				}
 			}
-			
+			//new ArrayList<DataHolder>(_favourite.values()
 			_favouriteAdapter = new ImageAdapter(this, _favouriteData);
 			_gridViewFavourite.setAdapter(_favouriteAdapter);
 		}
 	}
 	
+	//ArrayList<String> data;
+	// Nạp các album lên
+	public void loadAlbums()
+	{		
+		ArrayList<String> data = ImageSupporter.getAlbumPaths(this);	
+		
+		data = new ArrayList<String>();
+		data.add("Kuro");
+		data.add("Kuro1");
+		data.add("Kuro2");
+		
+		if (data != null)
+		{
+			_albumAdapter = new AlbumAdapter(this, data);
+			_gridViewAlbum.setAdapter(_albumAdapter);
+		}
+	}
+		
 	// Nạp các tab cần thể hiện cho tabhost
 	public void loadTabs()
 	{
@@ -301,6 +384,7 @@ public class MainActivity extends Activity {
 				Bitmap b =  ImageSupporter.decodeSampledBitmapFromFile(f, 100, 100);
 
 				_allImageData.add(new DataHolder(f,b));
+				_allMap.put(f.getAbsolutePath(), _allImageData.get(_allImageData.size() - 1));
             }
             
             if (f.isDirectory())
