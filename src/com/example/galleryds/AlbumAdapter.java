@@ -33,7 +33,7 @@ public class AlbumAdapter extends ArrayAdapter  {
 	}
 	
 	public Object getItem(int position) {	    	
-		return position;
+		return _items.get(position);
     }
 
     public long getItemId(int position) {

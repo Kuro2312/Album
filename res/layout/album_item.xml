@@ -9,7 +9,7 @@
         android:layout_centerInParent="true"
         android:gravity="center|center_vertical"
 		android:layout_gravity="center|center_vertical"
-		android:background="@color/lightblue"
+		android:src="@drawable/album"
 		android:adjustViewBounds  ="true"
 		android:longClickable="true" />
 

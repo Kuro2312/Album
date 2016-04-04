@@ -7,6 +7,7 @@ import java.util.HashMap;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.media.Image;
 import android.os.Bundle;
 import android.os.Environment;
 import android.view.ContextMenu;
@@ -185,7 +186,15 @@ public class MainActivity extends Activity {
             public void onClick(View v) {
                 if (_mainTabHost.getCurrentTab() == 0)
                     deleteSelectedImages(_gridViewAll, _allImageAdapter);
-                //else
+                else {
+                    int count = _albumAdapter.getCount();
+
+                    for (int i = count - 1; i >= 0; i--) {
+                        View view = getViewByPosition(i, _gridViewAlbum);
+
+                        AlbumViewHolder holder = (AlbumViewHolder) view.getTag();
+                    }
+                }
             }
         });
 
@@ -348,15 +357,10 @@ public class MainActivity extends Activity {
     public void loadAlbums() {
         ArrayList<String> data = ImageSupporter.getAlbumPaths(this);
 
-        data = new ArrayList<String>();
-        data.add("Kuro");
-        data.add("Kuro1");
-        data.add("Kuro2");
-
-        if (data != null) {
-            _albumAdapter = new AlbumAdapter(this, data);
-            _gridViewAlbum.setAdapter(_albumAdapter);
-        }
+        if (data == null)
+            data = new ArrayList<String>();
+        _albumAdapter = new AlbumAdapter(this, data);
+        _gridViewAlbum.setAdapter(_albumAdapter);
     }
 
     // Nạp các tab cần thể hiện cho tabhost
@@ -394,7 +398,13 @@ public class MainActivity extends Activity {
         // Kiểm tra có tạo folder thành công không
         if (ImageSupporter.createFolder(path.getAbsolutePath(), name)) {
             // Cập nhật giao diện
+            ArrayList<String> data = new ArrayList<String>();
+            data.add(name);
+            ImageSupporter.addNewAlbumPaths(this, data);
+            _albumAdapter.add(name);
+
             Toast.makeText(this, "Create Album Successfully", Toast.LENGTH_SHORT).show();
+
         } else {
             // Xử lý lỗi
             Toast.makeText(this, "Fail To Create Album", Toast.LENGTH_SHORT).show();
@@ -402,8 +412,20 @@ public class MainActivity extends Activity {
     }
 
     // Đổi tên 1 Album
-    public void renameAlbum(File album, String newName) {
-        // Xử lý giao diện gì đó đó
+    public void renameAlbum(String oldName, String newName) {
+        File path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
+        File album = new File(path.getAbsolutePath() + File.separator + oldName);
+
+        ArrayList<String> data = ImageSupporter.getAlbumPaths(this);
+        for(int i = 0; i < data.size(); i++) {
+            if (data.get(i).equals(oldName))
+                data.set(i, newName);
+        }
+        ImageSupporter.saveAlbumPaths(this, data);
+
+        _albumAdapter.remove(oldName);
+        _albumAdapter.add(newName);
+
         ImageSupporter.renameFile(album, newName);
     }
 
@@ -433,6 +455,15 @@ public class MainActivity extends Activity {
 
             Toast.makeText(this, "Successfully", Toast.LENGTH_SHORT).show();
         }
+
+        ArrayList<String> data = ImageSupporter.getAlbumPaths(this);
+        for(int i = 0; i < data.size(); i++)
+            if (data.get(i).equals(name)) {
+                data.remove(i);
+                break;
+            }
+        ImageSupporter.saveAlbumPaths(this, data);
+        _albumAdapter.remove(name);
     }
 
     // Duyệt và tìm kiếm tất cả tập tin hình ảnh
@@ -605,6 +636,8 @@ public class MainActivity extends Activity {
                     break;
 
                 case EDIT_ALBUM:
+                    AlbumViewHolder holder = (AlbumViewHolder) getViewByPosition(_contextPosition, _gridViewAlbum).getTag();
+                    renameAlbum(holder.textview.getText().toString(), name);
             }
         }
     }
@@ -649,11 +682,15 @@ public class MainActivity extends Activity {
                 break;
 
             case 1: // tab Albums
-                if (item.getTitle().equals("Delete Album"))
+                AlbumViewHolder holder1 = (AlbumViewHolder) getViewByPosition(_contextPosition, _gridViewAlbum).getTag();
 
+                if (item.getTitle().equals("Delete Album")) {
+                    deleteAlbum(holder1.textview.getText().toString());
+                }
                 if (item.getTitle().equals("Edit")) {
-                    ViewHolder holder1 = (ViewHolder) getViewByPosition(_contextPosition, _gridViewAlbum).getTag();
-
+                    Intent albumIntent = new Intent(MainActivity.this, AlbumActivity.class);
+                    albumIntent.putExtra("Name", holder1.textview.getText().toString());
+                    MainActivity.this.startActivityForResult(albumIntent, EDIT_ALBUM);
                 }
                 break;
 
