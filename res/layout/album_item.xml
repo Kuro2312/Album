@@ -10,7 +10,8 @@
         android:gravity="center|center_vertical"
 		android:layout_gravity="center|center_vertical"
 		android:background="@color/lightblue"
-		android:adjustViewBounds  ="true"/>
+		android:adjustViewBounds  ="true"
+		android:longClickable="true" />
 
 	<TextView
 	    android:id="@+id/textView1"
