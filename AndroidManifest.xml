@@ -28,6 +28,10 @@
             android:name=".AlbumActivity"
             android:label="@string/title_activity_album" >
         </activity>
+        <activity
+            android:name=".ViewAlbumImagesActivity"
+            android:label="@string/title_activity_view_album_images" >
+        </activity>
     </application>
 
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />

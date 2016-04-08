@@ -22,6 +22,8 @@ import android.widget.Toast;
 
 public class ImageSupporter 
 {
+	//public static Bitmap
+	
 	// Tính toán kích cỡ hợp lý với kích cỡ thể hiện
 	public static int calculateInSampleSize(BitmapFactory.Options options, int reqWidth, int reqHeight) 
 	{

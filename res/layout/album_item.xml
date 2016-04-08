@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8"?><RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="100dip"
     android:layout_height="100dip" >
     
@@ -22,6 +21,15 @@
 	    android:adjustViewBounds="true"
 	    android:text="name"
 	    android:textSize="20dp"
+	    android:clickable="false"
 	    android:textColor="@android:color/black" />
+
+	<CheckBox
+	    android:id="@+id/checkBox1"
+	    android:layout_width="wrap_content"
+	    android:layout_height="wrap_content"
+	    android:layout_alignParentLeft="true"
+	    android:layout_alignParentTop="true"
+	     android:visibility="invisible"/>
 
 </RelativeLayout>

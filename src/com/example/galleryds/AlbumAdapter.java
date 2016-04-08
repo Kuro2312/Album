@@ -16,6 +16,7 @@ class AlbumViewHolder
 {
     public ImageView imageview;
     public TextView textview;
+    public CheckBox checkbox;
     public int id;
 }
 
@@ -53,7 +54,8 @@ public class AlbumAdapter extends ArrayAdapter  {
 			holder = new AlbumViewHolder();
 			holder.imageview = (ImageView) convertView.findViewById(R.id.imageView1);
 			holder.textview = (TextView) convertView.findViewById(R.id.textView1);	
-		        
+			holder.checkbox = (CheckBox) convertView.findViewById(R.id.checkBox1);	
+			
 			convertView.setTag(holder);
 		}
 		else
@@ -61,14 +63,34 @@ public class AlbumAdapter extends ArrayAdapter  {
 		
 		
 		holder.imageview.setOnClickListener(new View.OnClickListener() {
+			
+		    public void onClick(View v) {
 
-            public void onClick(View v) {
-
-            }
-        });
+		        CheckBox cb = (CheckBox) v.getTag();
+		        
+		        if (cb.getVisibility() == View.VISIBLE)
+		        {
+			        if (cb.isChecked())
+			            cb.setChecked(false);
+			        else 
+			            cb.setChecked(true);
+		        }
+		        else
+		        {
+		        	if(_context instanceof MainActivity)
+		        	{
+		        		((MainActivity) _context).viewAllAlbumImages(_items.get(cb.getId()));  
+		        	}
+		        }
+		    }
+		});
         
+	    //holder.checkbox.setTag(_items.get(position));
+	    holder.imageview.setTag(holder.checkbox); 
+	    
 	   	holder.textview.setId(position);
 	   	holder.imageview.setId(position); 
+	   	holder.checkbox.setId(position);
    	 
         //holder.imageview.setImageBitmap(_items.get(position)._bitmap);
 	   	holder.textview.setText(_items.get(position));

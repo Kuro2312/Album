@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -16,17 +17,21 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.GridView;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TabHost;
 import android.widget.Toast;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.TabHost.TabSpec;
 import android.widget.TextView;
 
 
 public class MainActivity extends Activity {
 
+	public static ImageAdapter _albumImagesAdapter = null;
+	
     TabHost _mainTabHost;
 
     // Cho việc thao tác trên mục toàn bô ảnh
@@ -36,14 +41,16 @@ public class MainActivity extends Activity {
 
     // Cho việc thao tác trên mục album ảnh
     GridView _gridViewAlbum;
-    ArrayList<DataHolder> _albumData;
     private AlbumAdapter _albumAdapter;
-
+    ArrayList<String> _albumList;
+    
     // Cho việc thao tác trên mục yêu thích
     GridView _gridViewFavourite;
     ArrayList<DataHolder> _favouriteData;
     private ImageAdapter _favouriteAdapter;
 
+    // Các HashMap cần sử dụng 
+    HashMap<String, ArrayList<DataHolder>> _albumData;
     HashMap<String, DataHolder> _allMap;
     HashMap<String, String> _favouriteMap;
 
@@ -95,7 +102,7 @@ public class MainActivity extends Activity {
                             turnOffSelectionMode(_gridViewAll, _allImageAdapter);
                             break;
                         case 1: // tab Albums
-                            //turnOffSelectionMode(_gridViewAlbum, _albumAdapter);
+                        	turnOffSelectionAlbumMode(_gridViewAlbum, _albumAdapter);
                             break;
                         case 2: // tab Favourite
                             turnOffSelectionMode(_gridViewFavourite, _favouriteAdapter);
@@ -109,10 +116,9 @@ public class MainActivity extends Activity {
             }
         });
 
-
+        loadAlbums();
         loadImages();
         loadFavouriteImages();
-        loadAlbums();
 
         registerForContextMenu(_gridViewAll);
         registerForContextMenu(_gridViewAlbum);
@@ -135,7 +141,7 @@ public class MainActivity extends Activity {
                             turnOffSelectionMode(_gridViewAll, _allImageAdapter);
                             break;
                         case 1: // tab Albums
-                            //turnOffSelectionMode(_gridViewAlbum, _albumAdapter);
+                        	turnOffSelectionAlbumMode(_gridViewAlbum, _albumAdapter);
                             break;
                         case 2: // tab Favourite
                             turnOffSelectionMode(_gridViewFavourite, _favouriteAdapter);
@@ -148,7 +154,7 @@ public class MainActivity extends Activity {
                             turnOnSelectionMode(_gridViewAll, _allImageAdapter);
                             break;
                         case 1: // tab Albums
-                            //turnOnSelectionMode(_gridViewAlbum, _albumAdapter);
+                            turnOnSelectionAlbumMode(_gridViewAlbum, _albumAdapter);
                             break;
                         case 2: // tab Favourite
                             turnOnSelectionMode(_gridViewFavourite, _favouriteAdapter);
@@ -187,13 +193,7 @@ public class MainActivity extends Activity {
                 if (_mainTabHost.getCurrentTab() == 0)
                     deleteSelectedImages(_gridViewAll, _allImageAdapter);
                 else {
-                    int count = _albumAdapter.getCount();
-
-                    for (int i = count - 1; i >= 0; i--) {
-                        View view = getViewByPosition(i, _gridViewAlbum);
-
-                        AlbumViewHolder holder = (AlbumViewHolder) view.getTag();
-                    }
+                	deleteSelectedAlbums(_gridViewAlbum, _albumAdapter);
                 }
             }
         });
@@ -213,48 +213,37 @@ public class MainActivity extends Activity {
 
                 }
             }
-    });
-
-		/* Khu vực để test: hô hô hô ^_^
-
-		createAlbum("Kuro");
-		deleteAlbum("Kuro");
-
-		code test file in private mode
-		ArrayList<String> arr = ImageSupporter.foo(this);
-
-		for (int i = 0; i < arr.size(); i++)
-			Toast.makeText(this, arr.get(i), Toast.LENGTH_SHORT).show();
-
-		code to reset favourite
-		ImageSupporter.saveFavouriteImagePaths(this, null);
-
-		ArrayList<String> arr = ImageSupporter.getFavouriteImagePaths(this);
-
-		for (int i = 0; i < arr.size(); i++)
-			Toast.makeText(this, arr.get(i), Toast.LENGTH_SHORT).show(); */
+        });
+        
+        _gridViewAlbum.setOnItemClickListener(new OnItemClickListener() {
+			
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                
+            	ViewHolder holder = (ViewHolder) view.getTag();
+            	
+            	if (holder.checkbox.getVisibility() == View.VISIBLE)
+            		holder.checkbox.setChecked(!holder.checkbox.isChecked());
+            	
+            }
+        });
     }
 
-    void foo() {
-        HashMap<String, String> a = new HashMap<String, String>();
-
-        String c = "kutorot";
-        a.put("Kuro", "1");
-        a.put("Shiro", "2");
-        a.put("d", c);
-
-        ArrayList<String> b = new ArrayList<String>();
-        //b.set(1, "3");
-        //b.set(0, "4");
-        b.add(c);
-
-        b.remove(0);
-
-        //b.remove(a.get("Kuro"));
-
-        Toast.makeText(this, a.get("d"), Toast.LENGTH_SHORT).show();
+    // Gọi hàm này để chạy sự kiện mới: xem ảnh trong album
+    public void viewAllAlbumImages(String albumName)
+    {
+    	ArrayList dataHolder = _albumData.get(albumName);
+    	
+    	if (_albumImagesAdapter == null)
+    		_albumImagesAdapter = new ImageAdapter(this, dataHolder);
+    	else
+    		_albumImagesAdapter.updateData(dataHolder);	
+    	
+    	Intent intent = new Intent(this, ViewAlbumImagesActivity.class);
+    	intent.putExtra("AlbumName", albumName);
+    	startActivity(intent);
     }
-
+    
     // Thêm vào favourite
     // Ghi thêm vào file
     public void addToFavourite(GridView gridview, ImageAdapter adapter) {
@@ -331,16 +320,10 @@ public class MainActivity extends Activity {
         _favouriteAdapter = new ImageAdapter(this, _favouriteData);
         _gridViewFavourite.setAdapter(_favouriteAdapter);
 
-        if (data != null) {
-            for (int i = 0; i < data.size(); i++) {
-                //File f = new File(data.get(i));
-                //Bitmap b =  ImageSupporter.decodeSampledBitmapFromFile(f, 100, 100);
-
-                //DataHolder tmpData = new DataHolder(f,b);
-
-                //_favouriteData.add(tmpData);
-                //_favourite.put(f.getAbsolutePath(), tmpData);
-
+        if (data != null)
+        {
+            for (int i = 0; i < data.size(); i++) 
+            {
                 DataHolder d = _allMap.get(data.get(i));
 
                 if (d != null) {
@@ -348,19 +331,25 @@ public class MainActivity extends Activity {
                     _favouriteMap.put(d._file.getAbsolutePath(), d._file.getAbsolutePath());
                 }
             }
-            //new ArrayList<DataHolder>(_favourite.values()
         }
     }
 
     //ArrayList<String> data;
     // Nạp các album lên
-    public void loadAlbums() {
-        ArrayList<String> data = ImageSupporter.getAlbumPaths(this);
+    public void loadAlbums()
+    {
+        _albumList = ImageSupporter.getAlbumPaths(this);
 
-        if (data == null)
-            data = new ArrayList<String>();
-        _albumAdapter = new AlbumAdapter(this, data);
+        if (_albumList == null)
+        	_albumList = new ArrayList<String>();
+        
+        _albumAdapter = new AlbumAdapter(this, _albumList);
         _gridViewAlbum.setAdapter(_albumAdapter);
+        
+        _albumData = new HashMap<String, ArrayList<DataHolder>>();
+        
+        for (int i = 0; i < _albumList.size(); i++)
+        	_albumData.put(_albumList.get(i), new ArrayList<DataHolder>());
     }
 
     // Nạp các tab cần thể hiện cho tabhost
@@ -480,8 +469,13 @@ public class MainActivity extends Activity {
             if (ImageSupporter.isImage(f)) {
                 Bitmap b = ImageSupporter.decodeSampledBitmapFromFile(f, 100, 100);
 
-                _allImageData.add(new DataHolder(f, b));
-                _allMap.put(f.getAbsolutePath(), _allImageData.get(_allImageData.size() - 1));
+                DataHolder dataHolder = new DataHolder(f, b);
+                _allImageData.add(dataHolder);
+                _allMap.put(f.getAbsolutePath(), dataHolder);
+                
+                String parentName = f.getParentFile().getName();
+                if (_albumData.containsKey(parentName))
+                	_albumData.get(parentName).add(dataHolder);
             }
 
             if (f.isDirectory())
@@ -491,7 +485,21 @@ public class MainActivity extends Activity {
     }
 
     // Bật chế độ chọn hình ảnh
-    public void turnOnSelectionMode(GridView gridView, ImageAdapter adapter) {
+    public void turnOnSelectionAlbumMode(GridView gridView, ArrayAdapter adapter) {
+        int count = adapter.getCount();
+
+        for (int i = 0; i < count; i++) {
+            View view = getViewByPosition(i, gridView);
+
+            AlbumViewHolder holder = (AlbumViewHolder) view.getTag();
+
+            holder.checkbox.setVisibility(View.VISIBLE);
+            holder.checkbox.setChecked(false);
+        }
+    }
+    
+    // Bật chế độ chọn hình ảnh
+    public void turnOnSelectionMode(GridView gridView, ArrayAdapter adapter) {
         int count = adapter.getCount();
 
         for (int i = 0; i < count; i++) {
@@ -503,9 +511,39 @@ public class MainActivity extends Activity {
             holder.checkbox.setChecked(false);
         }
     }
+    
+ // Bật chế độ chọn hình ảnh
+    public void turnOffSelectionAlbumMode(GridView gridView, ArrayAdapter adapter) {
+        int count = adapter.getCount();
 
+        for (int i = 0; i < count; i++) {
+            View view = getViewByPosition(i, gridView);
+
+            AlbumViewHolder holder = (AlbumViewHolder) view.getTag();
+
+            holder.checkbox.setVisibility(View.INVISIBLE);
+            holder.checkbox.setChecked(false);
+        }
+    }
+
+    
     // Xóa ảnh đã chọn
-    public void deleteSelectedImages(GridView gridView, ImageAdapter adapter) {
+    public void deleteSelectedAlbums(GridView gridView, ArrayAdapter adapter) {
+        int count = adapter.getCount();
+
+        for (int i = count - 1; i >= 0; i--) {
+            View view = getViewByPosition(i, gridView);
+
+            AlbumViewHolder holder = (AlbumViewHolder) view.getTag();
+
+            if (holder.checkbox.isChecked() == true) {
+            	deleteAlbum(holder.textview.getText().toString());
+            }
+        }
+    }
+    
+    // Xóa ảnh đã chọn
+    public void deleteSelectedImages(GridView gridView, ArrayAdapter adapter) {
         int count = adapter.getCount();
 
         for (int i = count - 1; i >= 0; i--) {
@@ -520,7 +558,7 @@ public class MainActivity extends Activity {
     }
 
     // Tắt chế độ chọn hình ảnh
-    public void turnOffSelectionMode(GridView gridView, ImageAdapter adapter) {
+    public void turnOffSelectionMode(GridView gridView, ArrayAdapter adapter) {
         int count = adapter.getCount();
 
         for (int i = 0; i < count; i++) {
@@ -677,7 +715,7 @@ public class MainActivity extends Activity {
 
                     ImageSupporter.addNewFavouriteImagePaths(this, newFavourite);
                 }
-                if (item.getTitle().equals("Add to Album"))
+                //if (item.getTitle().equals("Add to Album"))
 
                 break;
 

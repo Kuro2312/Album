@@ -100,33 +100,22 @@ public class ImageAdapter extends ArrayAdapter {
     	 holder.checkbox.setId(position);
     	 holder.imageview.setId(position);
     	 holder.imageview.setTag(holder.checkbox);     
-    	 holder.checkbox.setOnClickListener(new View.OnClickListener() {
-
-            public void onClick(View v) 
-            {
-                CheckBox cb = (CheckBox) v;
-                /*if (cb.isChecked())
-                    cb.setChecked(false);
-                else 
-                    cb.setChecked(true);*/
-            }
-        });
         
-        holder.imageview.setOnClickListener(new View.OnClickListener() {
-
-            public void onClick(View v) {
-                //Intent intent = new Intent();
-                //intent.setAction(Intent.ACTION_VIEW);
-                //intent.setDataAndType(Uri.parse("file://" + arrPath[id]), "image/*");
-                //MainActivity.this.startActivity(intent);
-                CheckBox cb = (CheckBox) v.getTag();
-                
-                if (cb.isChecked())
-                    cb.setChecked(false);
-                else 
-                    cb.setChecked(true);
-            }
-        });
+		holder.imageview.setOnClickListener(new View.OnClickListener() {
+		
+		    public void onClick(View v) {
+		        //Intent intent = new Intent();
+		        //intent.setAction(Intent.ACTION_VIEW);
+		        //intent.setDataAndType(Uri.parse("file://" + arrPath[id]), "image/*");
+		        //MainActivity.this.startActivity(intent);
+		        CheckBox cb = (CheckBox) v.getTag();
+		        
+		        if (cb.isChecked())
+		            cb.setChecked(false);
+		        else 
+		            cb.setChecked(true);
+		    }
+		});
         
 	    holder.checkbox.setTag(_items.get(position)._file);
         holder.imageview.setImageBitmap(_items.get(position)._bitmap);
@@ -139,6 +128,12 @@ public class ImageAdapter extends ArrayAdapter {
     public void remove(int position)
     {
     	ImageSupporter.deleteFile(_items.get(position)._file);
-    	this.remove(_items.get(position));
+    	super.remove(_items.get(position));
+    }
+    
+    public void updateData(ArrayList<DataHolder> data)
+    {
+    	_items = data;
+    	super.notifyDataSetChanged();
     }
 }
