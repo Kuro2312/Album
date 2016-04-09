@@ -1,6 +1,7 @@
 package com.example.galleryds;
 
 import java.io.File;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Map;
@@ -19,7 +20,7 @@ import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-class ViewHolder 
+class ViewHolder
 {
     public ImageView imageview;
     public CheckBox checkbox;

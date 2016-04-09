@@ -1,11 +1,14 @@
 package com.example.galleryds;
 
 import java.io.File;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.media.Image;
@@ -31,7 +34,6 @@ import android.widget.TextView;
 public class MainActivity extends Activity {
 
 	public static ImageAdapter _albumImagesAdapter = null;
-	
     TabHost _mainTabHost;
 
     // Cho việc thao tác trên mục toàn bô ảnh
@@ -67,14 +69,17 @@ public class MainActivity extends Activity {
     private LinearLayout llSelect;
     private ImageButton btnSelect;
     private TextView tvSelect;
+    
     private View vwFavourite;
     private LinearLayout llFavourite;
     private ImageButton btnFavourite;
     private TextView tvFavourite;
+    
     private View vwDelete;
     private LinearLayout llDelete;
     private ImageButton btnDelete;
     private TextView tvDelete;
+    
     private View vwAdd;
     private LinearLayout llAdd;
     private ImageButton btnAdd;
@@ -210,7 +215,7 @@ public class MainActivity extends Activity {
                     Intent albumIntent = new Intent(MainActivity.this, AlbumActivity.class);
                     MainActivity.this.startActivityForResult(albumIntent, ADD_ALBUM);
                 } else {
-
+                	ChooseAlbum();
                 }
             }
         });
@@ -229,6 +234,63 @@ public class MainActivity extends Activity {
         });
     }
 
+    // Xóa ảnh đã chọn
+    public void addSelectedImagesToAlbum(String albumName) {
+        int count = _allImageAdapter.getCount();
+
+        for (int i = count - 1; i >= 0; i--) {
+            View view = getViewByPosition(i, _gridViewAll);
+
+            ViewHolder holder = (ViewHolder) view.getTag();
+
+            if (holder.checkbox.isChecked() == true) {
+                
+            	File path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
+            	File f =  (File) holder.checkbox.getTag();
+            	
+            	if (f.getParent() != path.getAbsolutePath() + File.pathSeparator + albumName)
+            	{
+            		ImageSupporter.moveFile(f.getParent(), f.getName(), path.getAbsolutePath() + File.separator + albumName);
+            		ArrayList<DataHolder> albumData = _albumData.get(albumName);
+            		albumData.add(_allMap.get(f.getAbsolutePath()));
+            	}
+            }
+        }
+    }   
+    
+    // Hiện dialog dể chọn album 
+    public void ChooseAlbum()
+    {
+    	AlertDialog.Builder builderSingle = new AlertDialog.Builder(this);
+    	builderSingle.setIcon(R.drawable.ic_launcher);
+    	builderSingle.setTitle("Select One Album: ");
+
+    	final ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(this, android.R.layout.select_dialog_singlechoice);
+    	
+    	arrayAdapter.addAll(_albumList);
+
+    	builderSingle.setNegativeButton(
+    	        "Cancel",
+    	        new DialogInterface.OnClickListener() {
+    	            @Override
+    	            public void onClick(DialogInterface dialog, int which) {
+    	                dialog.dismiss();
+    	            }
+    	        });
+
+    	builderSingle.setAdapter(
+    	        arrayAdapter,
+    	        new DialogInterface.OnClickListener() {
+    	            @Override
+    	            public void onClick(DialogInterface dialog, int which) {
+    	                String strName = arrayAdapter.getItem(which);
+    	                MainActivity main = (MainActivity) arrayAdapter.getContext();
+    	                main.addSelectedImagesToAlbum(strName);
+    	            }
+    	        });
+    	builderSingle.show();
+    }
+    
     // Gọi hàm này để chạy sự kiện mới: xem ảnh trong album
     public void viewAllAlbumImages(String albumName)
     {
@@ -240,7 +302,11 @@ public class MainActivity extends Activity {
     		_albumImagesAdapter.updateData(dataHolder);	
     	
     	Intent intent = new Intent(this, ViewAlbumImagesActivity.class);
-    	intent.putExtra("AlbumName", albumName);
+    	
+    	Bundle bundle = new Bundle();
+    	bundle.putString("AlbumName", albumName);
+    	
+    	intent.putExtras(bundle);
     	startActivity(intent);
     }
     
@@ -571,7 +637,7 @@ public class MainActivity extends Activity {
         }
     }
 
-    public View getViewByPosition(int pos, GridView listView) {
+    public static View getViewByPosition(int pos, GridView listView) {
         final int firstListItemPosition = listView.getFirstVisiblePosition();
         final int lastListItemPosition = firstListItemPosition + listView.getChildCount() - 1;
 
