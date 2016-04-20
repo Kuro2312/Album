@@ -33,12 +33,12 @@
             android:name=".ViewAlbumImagesActivity"
             android:label="@string/title_activity_view_album_images" >
         </activity>
-        <activity
+        <!--  <activity
             android:name=".ViewImageActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/title_activity_view_image"
             android:theme="@style/FullscreenTheme" >
-        </activity>
+        </activity>-->
     </application>
 
 </manifest>

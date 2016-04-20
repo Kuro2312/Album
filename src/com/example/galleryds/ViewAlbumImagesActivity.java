@@ -38,12 +38,10 @@ public class ViewAlbumImagesActivity extends Activity {
     private View vwFavourite;
     private LinearLayout llFavourite;
     private ImageButton btnFavourite;
-    private TextView tvFavourite;
     
     private View vwDelete;
     private LinearLayout llDelete;
     private ImageButton btnDelete;
-    private TextView tvDelete;
     
     private View vwRemove;
     private LinearLayout llRemove;
@@ -70,9 +68,9 @@ public class ViewAlbumImagesActivity extends Activity {
 		
 		_inSelectionMode = false;
 		
-		llSelect = (LinearLayout) findViewById(R.id.llSelect);
-        tvSelect = (TextView) findViewById(R.id.tvSelect);
-        btnSelect = (ImageButton) findViewById(R.id.btnSelect);
+		llSelect = (LinearLayout) findViewById(R.id.llSelect2);
+        tvSelect = (TextView) findViewById(R.id.tvSelect2);
+        btnSelect = (ImageButton) findViewById(R.id.btnSelect2);
         btnSelect.setOnClickListener(new View.OnClickListener() {
 
             @Override
@@ -89,33 +87,31 @@ public class ViewAlbumImagesActivity extends Activity {
             }
         });
 
-        vwFavourite = (View) findViewById(R.id.vwFavourite);
-        llFavourite = (LinearLayout) findViewById(R.id.llFavourite);
-        tvFavourite = (TextView) findViewById(R.id.tvFavourite);
-        btnFavourite = (ImageButton) findViewById(R.id.btnFavourite);
+        vwFavourite = (View) findViewById(R.id.vwFavourite2);
+        llFavourite = (LinearLayout) findViewById(R.id.llFavourite2);
+        btnFavourite = (ImageButton) findViewById(R.id.btnFavourite2);
         btnFavourite.setOnClickListener(new View.OnClickListener() {
 
             @Override
             public void onClick(View v) {
-                    addToFavourite();
+                addToFavourite();
             }
         });
 
-        vwDelete = (View) findViewById(R.id.vwDelete);
-        llDelete = (LinearLayout) findViewById(R.id.llDelete);
-        tvDelete = (TextView) findViewById(R.id.tvDelete);
-        btnDelete = (ImageButton) findViewById(R.id.btnDelete);
+        vwDelete = (View) findViewById(R.id.vwDelete2);
+        llDelete = (LinearLayout) findViewById(R.id.llDelete2);
+        btnDelete = (ImageButton) findViewById(R.id.btnDelete2);
         btnDelete.setOnClickListener(new View.OnClickListener() {
 
             @Override
             public void onClick(View v) {
-                    MainActivity.deleteSelectedImages(_gridViewAlbumImages, _albumImagesAdapter);
+                MainActivity.deleteSelectedImages(_gridViewAlbumImages, _albumImagesAdapter);
             }
         });
 
-        vwRemove = (View) findViewById(R.id.vwAdd);
-        llRemove = (LinearLayout) findViewById(R.id.llAdd);
-        btnRemove = (ImageButton) findViewById(R.id.btnAdd);
+        vwRemove = (View) findViewById(R.id.vwRemove2);
+        llRemove = (LinearLayout) findViewById(R.id.llRemove2);
+        btnRemove = (ImageButton) findViewById(R.id.btnRemove2);
         btnRemove.setOnClickListener(new View.OnClickListener() {
 
             @Override
@@ -208,8 +204,6 @@ public class ViewAlbumImagesActivity extends Activity {
 
             vwFavourite.setVisibility(View.VISIBLE);
             llFavourite.setVisibility(View.VISIBLE);
-            btnFavourite.setImageResource(R.drawable.favourite);
-            tvFavourite.setText("Favourite");
 
             vwDelete.setVisibility(View.VISIBLE);
             llDelete.setVisibility(View.VISIBLE);

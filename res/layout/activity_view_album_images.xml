@@ -30,7 +30,7 @@
     </ScrollView>
     
     <android.support.v7.widget.Toolbar
-        android:id="@+id/toolbar"
+        android:id="@+id/toolbar2"
         android:layout_width="match_parent"
         android:layout_height="50dip"
         android:layout_alignParentLeft="true"
@@ -50,13 +50,13 @@
                 android:layout_weight="1" />
 
             <LinearLayout
-                android:id="@+id/llSelect"
+                android:id="@+id/llSelect2"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:orientation="vertical">
 
                 <ImageButton
-                    android:id="@+id/btnSelect"
+                    android:id="@+id/btnSelect2"
                     android:layout_width="30dp"
                     android:layout_height="30dp"
                     android:clickable="true"
@@ -65,7 +65,7 @@
                     android:src = "@drawable/select"
                     android:background="@android:color/transparent"/>
                 <TextView
-                    android:id="@+id/tvSelect"
+                    android:id="@+id/tvSelect2"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textAlignment="center"
@@ -76,21 +76,21 @@
             </LinearLayout>
 
             <View
-                android:id="@+id/vwFavourite"
+                android:id="@+id/vwFavourite2"
                 android:layout_width="0dp"
                 android:layout_height="1dp"
                 android:layout_weight="1"
                 android:visibility="gone" />
 
             <LinearLayout
-                android:id="@+id/llFavourite"
+                android:id="@+id/llFavourite2"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:orientation="vertical"
                 android:visibility="gone">
 
                 <ImageButton
-                    android:id="@+id/btnFavourite"
+                    android:id="@+id/btnFavourite2"
                     android:layout_width="30dp"
                     android:layout_height="30dp"
                     android:clickable="true"
@@ -99,7 +99,6 @@
                     android:src = "@drawable/favourite"
                     android:background="@android:color/transparent"/>
                 <TextView
-                    android:id="@+id/tvFavourite"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textAlignment="center"
@@ -110,21 +109,21 @@
             </LinearLayout>
 
             <View
-                android:id="@+id/vwDelete"
+                android:id="@+id/vwDelete2"
                 android:layout_width="0dp"
                 android:layout_height="1dp"
                 android:layout_weight="1"
                 android:visibility="gone" />
 
             <LinearLayout
-                android:id="@+id/llDelete"
+                android:id="@+id/llDelete2"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:orientation="vertical"
                 android:visibility="gone">
 
                 <ImageButton
-                    android:id="@+id/btnDelete"
+                    android:id="@+id/btnDelete2"
                     android:layout_width="30dp"
                     android:layout_height="30dp"
                     android:clickable="true"
@@ -133,7 +132,6 @@
                     android:src = "@drawable/delete"
                     android:background="@android:color/transparent"/>
                 <TextView
-                    android:id="@+id/tvDelete"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textAlignment="center"
@@ -144,21 +142,21 @@
             </LinearLayout>
 
             <View
-                android:id="@+id/vwRemove"
+                android:id="@+id/vwRemove2"
                 android:layout_width="0dp"
                 android:layout_height="1dp"
                 android:layout_weight="1"
                 android:visibility="gone" />
 
             <LinearLayout
-                android:id="@+id/llRemove"
+                android:id="@+id/llRemove2"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:orientation="vertical"
                 android:visibility="gone" >
 
                 <ImageButton
-                    android:id="@+id/btnRemove"
+                    android:id="@+id/btnRemove2"
                     android:layout_width="30dp"
                     android:layout_height="30dp"
                     android:clickable="true"
