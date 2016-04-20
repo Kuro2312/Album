@@ -9,6 +9,7 @@
         android:targetSdkVersion="21" />
 
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
     <application
         android:allowBackup="true"
@@ -32,9 +33,12 @@
             android:name=".ViewAlbumImagesActivity"
             android:label="@string/title_activity_view_album_images" >
         </activity>
+        <activity
+            android:name=".ViewImageActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:label="@string/title_activity_view_image"
+            android:theme="@style/FullscreenTheme" >
+        </activity>
     </application>
-
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
 </manifest>

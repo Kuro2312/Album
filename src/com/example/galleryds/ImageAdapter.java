@@ -11,6 +11,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
+import android.os.Bundle;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -111,10 +114,24 @@ public class ImageAdapter extends ArrayAdapter {
 		        //MainActivity.this.startActivity(intent);
 		        CheckBox cb = (CheckBox) v.getTag();
 		        
-		        if (cb.isChecked())
-		            cb.setChecked(false);
-		        else 
-		            cb.setChecked(true);
+		        if (cb.getVisibility() == View.VISIBLE) {
+			        if (cb.isChecked())
+			            cb.setChecked(false);
+			        else 
+			            cb.setChecked(true);
+		        } else {
+		        	
+		        	/*ArrayList<File> files = new ArrayList<File>();		        	
+		        	for (DataHolder d : _items) {
+		        		files.add(d._file);
+		        	}
+		        	
+		        	Intent intent = new Intent(_context, ViewImageActivity.class);
+		        	
+		        	intent.putExtra("files", files);
+		        	intent.putExtra("position", cb.getId());
+		        	_context.startActivity(intent);*/
+		        }
 		    }
 		});
         
@@ -134,7 +151,8 @@ public class ImageAdapter extends ArrayAdapter {
     
     public void updateData(ArrayList<DataHolder> data)
     {
-    	_items = data;
+    	_items.clear();
+    	_items.addAll(data);
     	super.notifyDataSetChanged();
     }
 }

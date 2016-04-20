@@ -8,6 +8,7 @@ import java.util.HashMap;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -49,12 +50,12 @@ public class MainActivity extends Activity {
     // Cho việc thao tác trên mục yêu thích
     GridView _gridViewFavourite;
     ArrayList<DataHolder> _favouriteData;
-    private ImageAdapter _favouriteAdapter;
+    static ImageAdapter _favouriteAdapter = null;
 
     // Các HashMap cần sử dụng 
     HashMap<String, ArrayList<DataHolder>> _albumData;
     HashMap<String, DataHolder> _allMap;
-    HashMap<String, String> _favouriteMap;
+    static HashMap<String, String> _favouriteMap = null;
 
     //Toast.makeText(this, "Successfully", Toast.LENGTH_SHORT).show();
 
@@ -234,7 +235,7 @@ public class MainActivity extends Activity {
         });
     }
 
-    // Xóa ảnh đã chọn
+    // Thêm ảnh đã chọn vào album
     public void addSelectedImagesToAlbum(String albumName) {
         int count = _allImageAdapter.getCount();
 
@@ -298,8 +299,8 @@ public class MainActivity extends Activity {
     	
     	if (_albumImagesAdapter == null)
     		_albumImagesAdapter = new ImageAdapter(this, dataHolder);
-    	else
-    		_albumImagesAdapter.updateData(dataHolder);	
+
+		_albumImagesAdapter.updateData(dataHolder);	
     	
     	Intent intent = new Intent(this, ViewAlbumImagesActivity.class);
     	
@@ -565,7 +566,7 @@ public class MainActivity extends Activity {
     }
     
     // Bật chế độ chọn hình ảnh
-    public void turnOnSelectionMode(GridView gridView, ArrayAdapter adapter) {
+    public static void turnOnSelectionMode(GridView gridView, ArrayAdapter adapter) {
         int count = adapter.getCount();
 
         for (int i = 0; i < count; i++) {
@@ -609,7 +610,7 @@ public class MainActivity extends Activity {
     }
     
     // Xóa ảnh đã chọn
-    public void deleteSelectedImages(GridView gridView, ArrayAdapter adapter) {
+    public static void deleteSelectedImages(GridView gridView, ArrayAdapter adapter) {
         int count = adapter.getCount();
 
         for (int i = count - 1; i >= 0; i--) {
@@ -624,7 +625,7 @@ public class MainActivity extends Activity {
     }
 
     // Tắt chế độ chọn hình ảnh
-    public void turnOffSelectionMode(GridView gridView, ArrayAdapter adapter) {
+    public static void turnOffSelectionMode(GridView gridView, ArrayAdapter adapter) {
         int count = adapter.getCount();
 
         for (int i = 0; i < count; i++) {
@@ -781,7 +782,7 @@ public class MainActivity extends Activity {
 
                     ImageSupporter.addNewFavouriteImagePaths(this, newFavourite);
                 }
-                //if (item.getTitle().equals("Add to Album"))
+                if (item.getTitle().equals("Add to Album"))
 
                 break;
 

@@ -6,5 +6,8 @@
     <string name="action_settings">Settings</string>
     <string name="title_activity_album">AlbumActivity</string>
     <string name="title_activity_view_album_images">ViewAlbumImagesActivity</string>
+    <string name="title_activity_view_image">ViewImage</string>
+    <string name="dummy_button">Dummy Button</string>
+    <string name="dummy_content">DUMMY\nCONTENT</string>
 
 </resources>
