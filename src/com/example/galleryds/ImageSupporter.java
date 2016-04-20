@@ -18,12 +18,45 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.provider.MediaStore.Files;
+import android.view.View;
+import android.widget.ArrayAdapter;
+import android.widget.GridView;
 import android.widget.Toast;
 
 public class ImageSupporter 
 {
-	//public static Bitmap
-	
+    // Bật chế độ chọn hình ảnh
+    public static void turnOnSelectionMode(GridView gridView, ImageAdapter adapter) 
+    {
+        int count = adapter.getCount();
+
+        for (int i = 0; i < count; i++) {
+            View view = ImageSupporter.getViewByPosition(i, gridView);
+
+            ViewHolder holder = (ViewHolder) view.getTag();
+
+            holder.checkbox.setVisibility(View.VISIBLE);
+            holder.checkbox.setChecked(false);
+        }
+    }  
+ 
+    
+
+    // Tắt chế độ chọn hình ảnh
+    public static void turnOffSelectionMode(GridView gridView, ImageAdapter adapter) 
+    {
+        int count = adapter.getCount();
+
+        for (int i = 0; i < count; i++) {
+            View view = ImageSupporter.getViewByPosition(i, gridView);
+
+            ViewHolder holder = (ViewHolder) view.getTag();
+
+            holder.checkbox.setVisibility(View.INVISIBLE);
+            holder.checkbox.setChecked(false);
+        }
+    }
+   
 	// Tính toán kích cỡ hợp lý với kích cỡ thể hiện
 	public static int calculateInSampleSize(BitmapFactory.Options options, int reqWidth, int reqHeight) 
 	{
@@ -322,6 +355,21 @@ public class ImageSupporter
 	    {
 	        //Log.e("tag", e.getMessage());
 	    }
-
 	}
+	
+	public static View getViewByPosition(int pos, GridView listView)
+	{
+        final int firstListItemPosition = listView.getFirstVisiblePosition();
+        final int lastListItemPosition = firstListItemPosition + listView.getChildCount() - 1;
+
+        if (pos < firstListItemPosition || pos > lastListItemPosition) 
+        {
+            return listView.getAdapter().getView(pos, null, listView);
+        } 
+        else 
+        {
+            final int childIndex = pos - firstListItemPosition;
+            return listView.getChildAt(childIndex);
+        }
+    }
 }

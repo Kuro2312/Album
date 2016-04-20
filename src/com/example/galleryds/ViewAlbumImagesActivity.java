@@ -63,12 +63,12 @@ public class ViewAlbumImagesActivity extends Activity {
 		_albumImagesAdapter = MainActivity._albumImagesAdapter;
 		_gridViewAlbumImages.setAdapter(_albumImagesAdapter);
 		
-		_favouriteAdapter = MainActivity._favouriteAdapter;
-		_favouriteMap = MainActivity._favouriteMap;
+		//_favouriteAdapter = MainActivity._favouriteAdapter;
+		//_favouriteMap = MainActivity._favouriteMap;
 		
 		registerForContextMenu(_gridViewAlbumImages);
 		
-		_inSelectionMode = false;
+		/*_inSelectionMode = false;
 		
 		llSelect = (LinearLayout) findViewById(R.id.llSelect);
         tvSelect = (TextView) findViewById(R.id.tvSelect);
@@ -122,7 +122,7 @@ public class ViewAlbumImagesActivity extends Activity {
             public void onClick(View v) {
             	removeFromAlbum();
             }
-        });
+        });*/
 		
 	}
 	
@@ -139,7 +139,7 @@ public class ViewAlbumImagesActivity extends Activity {
 	 
 	 @Override
     public boolean onContextItemSelected(MenuItem item) {
-        ViewHolder holder = (ViewHolder) MainActivity.getViewByPosition(_contextPosition, _gridViewAlbumImages).getTag();
+        ViewHolder holder = (ViewHolder) ImageSupporter.getViewByPosition(_contextPosition, _gridViewAlbumImages).getTag();
 
         if (item.getTitle().equals("Delete"))
             _albumImagesAdapter.remove(holder.id);
@@ -177,7 +177,7 @@ public class ViewAlbumImagesActivity extends Activity {
 	        ArrayList<String> newFavourite = new ArrayList<String>();
 
 	        for (int i = count - 1; i >= 0; i--) {
-	            View view = MainActivity.getViewByPosition(i, _gridViewAlbumImages);
+	            View view = ImageSupporter.getViewByPosition(i, _gridViewAlbumImages);
 
 	            ViewHolder holder = (ViewHolder) view.getTag();
 
@@ -239,7 +239,7 @@ public class ViewAlbumImagesActivity extends Activity {
         int count = _albumImagesAdapter.getCount();
 
         for (int i = count - 1; i >= 0; i--) {
-            View view = MainActivity.getViewByPosition(i, _gridViewAlbumImages);
+            View view = ImageSupporter.getViewByPosition(i, _gridViewAlbumImages);
 
             ViewHolder holder = (ViewHolder) view.getTag();
 
