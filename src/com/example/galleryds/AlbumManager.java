@@ -13,19 +13,46 @@ import android.widget.Toast;
 
 public class AlbumManager {
 
+	// Singleton 
+	protected static AlbumManager _instance = null;
+	
     // Cho việc thao tác trên mục album ảnh
 	private GridView _gridViewAlbum;
     protected AlbumAdapter _albumAdapter;
     protected ArrayList<String> _albumList;
     protected HashMap<String, ArrayList<DataHolder>> _albumData;
+    protected ImageAdapter _selectedAlbumImagesAdapter;
     
     // Khởi tạo
-    public AlbumManager(Context context, GridView gridViewAlbum)
+    protected AlbumManager(Context context, GridView gridViewAlbum)
     {
     	_gridViewAlbum = gridViewAlbum;
-    	loadAlbums(context);
+    	_selectedAlbumImagesAdapter = new ImageAdapter(context, new ArrayList<DataHolder>());
+    	
+    	loadAlbums();
     }
-	
+    
+    public static AlbumManager CreateInstance(Context context, GridView gridView)
+    {
+    	if (_instance == null)
+    		_instance = new AlbumManager(context, gridView);
+    	
+    	return _instance;
+    }
+    
+    public static AlbumManager GetInstance()
+    {
+    	return _instance;
+    }
+    
+    public ImageAdapter getSelectedAlbumAdapter(String albumName)
+    {
+    	ArrayList<DataHolder> dataHolder = this.getAlbumData(albumName);
+    	_selectedAlbumImagesAdapter.updateData(dataHolder);	
+    	
+    	return _selectedAlbumImagesAdapter;
+    }
+    
     // Lấy GridView của Album
     public GridView getGridViewAlbum() 
     {
@@ -52,15 +79,47 @@ public class AlbumManager {
     	return _albumData.containsKey(albumName);
     }
     
-    // Nạp các album lên
-    public void loadAlbums(Context context)
+    public Context getContext()
     {
-        _albumList = ImageSupporter.getAlbumPaths(context);
+    	return _selectedAlbumImagesAdapter.getContext();
+    }
+
+    public void removeImageFromAlbum(DataHolder data, String album)
+    {   
+    	ArrayList<DataHolder> albumImages = this.getAlbumData(album);
+    	
+    	if (albumImages == null)
+    		return;
+    	
+    	for (int i = 0; i < albumImages.size(); i++)
+    	{
+    		if (albumImages.get(i).equals(data))
+    			albumImages.remove(i);
+    	}
+    	
+    	int a = this.getAlbumData(album).size();
+    }
+    
+    // Thêm ảnh vào album
+    public void addImageToAlbum(DataHolder data, String albumName)
+    {
+    	ArrayList<DataHolder> albumData = this.getAlbumData(albumName);
+    	
+    	if (albumData.contains(data))
+    		return;
+    	
+		albumData.add(data);
+    }
+    
+    // Nạp các album lên
+    public void loadAlbums()
+    {
+        _albumList = ImageSupporter.getAlbumPaths(getContext());
 
         if (_albumList == null)
         	_albumList = new ArrayList<String>();
         
-        _albumAdapter = new AlbumAdapter(context, _albumList);
+        _albumAdapter = new AlbumAdapter(getContext(), _albumList);
         getGridViewAlbum().setAdapter(_albumAdapter);
         
         _albumData = new HashMap<String, ArrayList<DataHolder>>();
@@ -70,7 +129,7 @@ public class AlbumManager {
     }
 
     // Tạo mới Album
-    public boolean createAlbum(Context context, String name) 
+    public boolean createAlbum(String name) 
     {   	
     	try
     	{
@@ -85,7 +144,7 @@ public class AlbumManager {
 	            data.add(name);
 	            
 	            // Cập nhật dữ liệu tập tin 
-	            ImageSupporter.addNewAlbumPaths(context, data);
+	            ImageSupporter.addNewAlbumPaths(getContext(), data);
 	            
 	            // Cập nhật adapter và giao diện
 	            _albumAdapter.add(name);
@@ -102,7 +161,7 @@ public class AlbumManager {
     }
 
     // Đổi tên 1 Album
-    public boolean renameAlbum(Context context, String oldName, String newName) 
+    public boolean renameAlbum(String oldName, String newName) 
     {
     	try
     	{
@@ -113,7 +172,7 @@ public class AlbumManager {
 	        File album = new File(path.getAbsolutePath() + File.separator + oldName);
 	
 	        // Cập nhật trên cơ sở dữ liệu 
-	        renameAlbumDataOnFileByName(context, oldName, newName);
+	        renameAlbumDataOnFileByName(oldName, newName);
 	
 	    	// Cập nhật trên adapter
 	        _albumAdapter.remove(oldName);
@@ -131,7 +190,7 @@ public class AlbumManager {
     }
 
     // Xóa toàn bộ ảnh trong album
-    public boolean deleteWholeAlbum(Context context, String name) 
+    public boolean deleteWholeAlbum(String name) 
     {
     	try
     	{
@@ -150,7 +209,7 @@ public class AlbumManager {
     }
 
     // Xóa album và chuyển ảnh sang chỗ khác
-    public boolean deleteAlbum(Context context, String name) 
+    public boolean deleteAlbum(String name) 
     {
     	try
     	{
@@ -172,7 +231,7 @@ public class AlbumManager {
 	            folder.delete();	
 	            
 	            // Xóa trên cơ sỡ dữ liệu
-	            removeAlbumDataOnFileByName(context, name);
+	            removeAlbumDataOnFileByName(name);
 	            
 	            // Xóa trên adapter
 		        _albumAdapter.remove(name);
@@ -189,10 +248,10 @@ public class AlbumManager {
     }
     
     // Xóa trên cơ sở dữ liệu
-    protected void removeAlbumDataOnFileByName(Context context, String name)
+    protected void removeAlbumDataOnFileByName(String name)
     {
     	// Lấy đường dẫn các album
-    	ArrayList<String> data = ImageSupporter.getAlbumPaths(context);
+    	ArrayList<String> data = ImageSupporter.getAlbumPaths(getContext());
     	
     	// Tìm và xóa album
     	int i =0;
@@ -203,14 +262,14 @@ public class AlbumManager {
         data.remove(i);
       
         // Tìm kiếm và đổi tên mới
-        ImageSupporter.saveAlbumPaths(context, data);
+        ImageSupporter.saveAlbumPaths(getContext(), data);
     }
     
     // Cập nhật trên cơ sở dữ liệu
-    protected void renameAlbumDataOnFileByName(Context context, String oldName, String newName)
+    protected void renameAlbumDataOnFileByName(String oldName, String newName)
     {
 	    // Lấy đường dẫn các album
-	    ArrayList<String> data = ImageSupporter.getAlbumPaths(context);
+	    ArrayList<String> data = ImageSupporter.getAlbumPaths(getContext());
 	    
 	    // Tìm kiếm và đổi tên mới
 	    int i =0;
@@ -221,11 +280,9 @@ public class AlbumManager {
 	    data.set(i, newName);
 	    
 	    // Lưu dữ liệu trên tập tin dữ liệu
-	    ImageSupporter.saveAlbumPaths(context, data);
+	    ImageSupporter.saveAlbumPaths(getContext(), data);
     }
-
-
-  
+ 
     // Bật chế độ chọn hình ảnh
     public void turnOffSelectionAlbumMode()
     {  
@@ -256,7 +313,7 @@ public class AlbumManager {
     }
     
     // Xóa album đã được chọn
-    public void deleteSelectedAlbums(Context context) 
+    public void deleteSelectedAlbums() 
     {
         int count = _albumAdapter.getCount();
 
@@ -267,7 +324,7 @@ public class AlbumManager {
             AlbumViewHolder holder = (AlbumViewHolder) view.getTag();
 
             if (holder.checkbox.isChecked() == true)
-            	this.deleteAlbum(context, holder.textview.getText().toString());
+            	this.deleteAlbum(holder.textview.getText().toString());
         }
     } 
 }

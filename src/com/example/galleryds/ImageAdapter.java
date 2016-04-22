@@ -149,6 +149,12 @@ public class ImageAdapter extends ArrayAdapter {
     	super.remove(_items.get(position));
     }
     
+    public void remove(DataHolder data)
+    {
+    	ImageSupporter.deleteFile(data._file);
+    	super.remove(data);
+    }
+    
     public void updateData(ArrayList<DataHolder> data)
     {
     	_items.clear();

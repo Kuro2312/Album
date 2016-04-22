@@ -36,7 +36,6 @@ import android.widget.TextView;
 
 public class MainActivity extends Activity {
 
-	public static ImageAdapter _albumImagesAdapter = null;
     TabHost _mainTabHost;
 
     protected AlbumManager _albumManager;
@@ -92,9 +91,9 @@ public class MainActivity extends Activity {
         
         loadTabs();
 
-        _albumManager.loadAlbums(this);
+        _albumManager.loadAlbums();
         this.loadImages();
-        _imageManager.loadFavouriteImages(this);
+        _imageManager.loadFavouriteImages();
 
         setOnTabChangedListener_MainTabHost();
 
@@ -112,8 +111,8 @@ public class MainActivity extends Activity {
 
     protected void initializeSystem()
     {
-    	_albumManager = new AlbumManager(this, (GridView) findViewById(R.id.gridView3));
-    	_imageManager = new ImageManager(this, (GridView) findViewById(R.id.gridView1), (GridView) findViewById(R.id.gridView2));
+    	_albumManager = AlbumManager.CreateInstance(this, (GridView) findViewById(R.id.gridView3));
+    	_imageManager = ImageManager.CreateInstance(this, (GridView) findViewById(R.id.gridView1), (GridView) findViewById(R.id.gridView2));
     	
         llSelect = (LinearLayout) findViewById(R.id.llSelect);
         tvSelect = (TextView) findViewById(R.id.tvSelect);
@@ -263,9 +262,9 @@ public class MainActivity extends Activity {
             @Override
             public void onClick(View v) {
                 if (_mainTabHost.getCurrentTab() == 0)
-                	_imageManager.addToFavourite(MainActivity.this);
+                	_imageManager.addToFavourite();
                 else
-                	_imageManager.removeFromFavourite(MainActivity.this);
+                	_imageManager.removeFromFavourite();
             }
         });
     }
@@ -277,9 +276,9 @@ public class MainActivity extends Activity {
              @Override
              public void onClick(View v) {
                  if (_mainTabHost.getCurrentTab() == 0)
-                 	_imageManager.deleteSelectedImages(MainActivity.this);
+                 	_imageManager.deleteSelectedImages(_albumManager);
                  else {
-                 	_albumManager.deleteSelectedAlbums(MainActivity.this);
+                 	_albumManager.deleteSelectedAlbums();
                  }
              }
          });
@@ -318,8 +317,7 @@ public class MainActivity extends Activity {
             	if (f.getParent() != path.getAbsolutePath() + File.pathSeparator + albumName)
             	{
             		ImageSupporter.moveFile(f.getParent(), f.getName(), path.getAbsolutePath() + File.separator + albumName);
-            		ArrayList<DataHolder> albumData = _albumManager.getAlbumData(albumName);
-            		albumData.add(_imageManager.getImageDataByName(f.getAbsolutePath()));
+            		_albumManager.addImageToAlbum(_imageManager.getImageDataByName(f.getAbsolutePath()), albumName);
             	}
             }
         }
@@ -358,18 +356,11 @@ public class MainActivity extends Activity {
     // Gọi hàm này để chạy sự kiện mới: xem ảnh trong album
     public void viewAllAlbumImages(String albumName)
     {
-    	ArrayList<DataHolder> dataHolder = _albumManager.getAlbumData(albumName);
-    	
-    	if (_albumImagesAdapter == null)
-    		_albumImagesAdapter = new ImageAdapter(this, new ArrayList<DataHolder>());
-
-		_albumImagesAdapter.updateData(dataHolder);	
-    	
     	Intent intent = new Intent(this, ViewAlbumImagesActivity.class);
     	
     	Bundle bundle = new Bundle();
     	bundle.putString("AlbumName", albumName);
-    	
+
     	intent.putExtras(bundle);
     	startActivity(intent);
     }
@@ -529,13 +520,13 @@ public class MainActivity extends Activity {
 
             switch (requestCode) {
                 case ADD_ALBUM:
-                    _albumManager.createAlbum(this, name);
+                    _albumManager.createAlbum(name);
                     break;
 
                 case EDIT_ALBUM:
                 	GridView gridView = _albumManager.getGridViewAlbum();
                     AlbumViewHolder holder = (AlbumViewHolder) ImageSupporter.getViewByPosition(_contextPosition, gridView).getTag();
-                    _albumManager.renameAlbum(this, holder.textview.getText().toString(), name);
+                    _albumManager.renameAlbum(holder.textview.getText().toString(), name);
             }
         }
     }
@@ -572,10 +563,10 @@ public class MainActivity extends Activity {
                 holder.checkbox.setChecked(true);
                 
                 if (item.getTitle().equals("Delete"))
-                	_imageManager.removeImage(holder.id);
+                	_imageManager.deleteSelectedImage(_imageManager.getImageDataById(holder.id), _albumManager);
                 
                 if (item.getTitle().equals("Add to Favourite")) 
-                    _imageManager.addImageToFavourite(this, _imageManager.getImageDataById(holder.id));
+                    _imageManager.addImageToFavourite(_imageManager.getImageDataById(holder.id));
                 
                 if (item.getTitle().equals("Add to Album"))
                 	chooseAlbum();
@@ -589,7 +580,7 @@ public class MainActivity extends Activity {
                 AlbumViewHolder holder1 = (AlbumViewHolder) ImageSupporter.getViewByPosition(_contextPosition, gridView).getTag();
 
                 if (item.getTitle().equals("Delete Album"))
-                    _albumManager.deleteAlbum(this, holder1.textview.getText().toString());
+                    _albumManager.deleteAlbum(holder1.textview.getText().toString());
                 
                 if (item.getTitle().equals("Edit")) 
                 {
@@ -602,7 +593,7 @@ public class MainActivity extends Activity {
 
             case 2: // tab Favourite
                 ViewHolder holder2 = (ViewHolder) ImageSupporter.getViewByPosition(_contextPosition, _imageManager.getGridViewFavourite()).getTag();
-                _imageManager.removeImageFromFavourite(this, holder2.id);
+                _imageManager.removeImageFromFavourite(holder2.id);
                 break;
         }
         return true;

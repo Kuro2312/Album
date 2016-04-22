@@ -10,6 +10,9 @@ import android.widget.GridView;
 
 public class ImageManager {
 	
+	// Singleton
+	protected static ImageManager _instance = null;
+	
 	// Cho việc thao tác trên mục toàn bô ảnh
     protected GridView _gridViewAll;
     protected ArrayList<DataHolder> _allImageData;
@@ -23,7 +26,7 @@ public class ImageManager {
     protected HashMap<String, String> _favouriteMap = null;
     		
     // Khởi tạo
-    public ImageManager(Context context, GridView gridView, GridView gridViewFavourite)
+    protected ImageManager(Context context, GridView gridView, GridView gridViewFavourite)
     {
     	_gridViewAll = gridView;
     	_gridViewFavourite = gridViewFavourite;
@@ -31,6 +34,24 @@ public class ImageManager {
         _allMap = new HashMap<String, DataHolder>();
         _allImageAdapter = new ImageAdapter(context, _allImageData);
         _gridViewAll.setAdapter(_allImageAdapter);
+    }
+    
+    public static ImageManager CreateInstance(Context context, GridView gridView, GridView gridViewFavourite)
+    {
+    	if (_instance == null)
+    		_instance = new ImageManager(context, gridView, gridViewFavourite);
+    	
+    	return _instance;
+    }
+    
+    public Context getContext()
+    {
+    	return _allImageAdapter.getContext();
+    }
+    
+    public static ImageManager GetInstance()
+    {
+    	return _instance;
     }
 
     // Lấy GridView của tất cả ảnh
@@ -81,12 +102,6 @@ public class ImageManager {
     	}
     }
     
-    // Xóa 1 ảnh
-    public void removeImage(int id)
-    {
-    	_allImageAdapter.remove(id);
-    }
-    
     public ImageAdapter getAllImageAdapter()
     {
     	return _allImageAdapter;
@@ -105,7 +120,7 @@ public class ImageManager {
     }
 
     // Xóa các ảnh được chọn
-    public void deleteSelectedImages(Context context)
+    public void deleteSelectedImages(AlbumManager albumManager)
     {
         int count = _allImageAdapter.getCount();
 
@@ -119,9 +134,46 @@ public class ImageManager {
             {
             	DataHolder data = (DataHolder) _allImageAdapter.getItem(holder.id);
             	_allImageAdapter.remove(holder.id);
+                
+            	_allMap.remove(data._file.getAbsolutePath());
+            	this.removeImageFromFavourite(data);
             	
+            	String album = data._file.getParentFile().getName();
+            	albumManager.removeImageFromAlbum(data, album);
+            }
+        }
+    }
+    
+    public void deleteSelectedImage(DataHolder data, AlbumManager albumManager)
+    {
+    	_allImageAdapter.remove(data);
+    	
+    	_allMap.remove(data._file.getAbsolutePath());
+    	this.removeImageFromFavourite(data);
+    	
+    	String album = data._file.getParentFile().getName();
+    	albumManager.removeImageFromAlbum(data, album);
+    }
+    
+    public void deleteSelectedImages(Context context, GridView gridView, ImageAdapter adapter, AlbumManager albumManager)
+    {
+        int count = adapter.getCount();
+
+        for (int i = count - 1; i >= 0; i--) 
+        {
+            View view = ImageSupporter.getViewByPosition(i, gridView);
+
+            ViewHolder holder = (ViewHolder) view.getTag();
+
+            if (holder.checkbox.isChecked() == true)
+            {
+            	DataHolder data = (DataHolder) adapter.getItem(holder.id);
+            	adapter.remove(holder.id);
             	
-            	this.removeImageFromFavourite(context, data);
+            	this.deleteSelectedImage(data, albumManager);
+            	
+            	String album = data._file.getParentFile().getName();
+            	albumManager.removeImageFromAlbum(data, album);
             }
         }
     }
@@ -152,7 +204,7 @@ public class ImageManager {
     
     // Thêm vào favourite
     // Ghi thêm vào file
-    public void addToFavourite(Context context) 
+    public void addToFavourite() 
     {
         int count = _allImageAdapter.getCount();
         ArrayList<String> newFavourite = new ArrayList<String>();
@@ -177,12 +229,12 @@ public class ImageManager {
             }
         }
 
-        ImageSupporter.addNewFavouriteImagePaths(context, newFavourite);
+        ImageSupporter.addNewFavouriteImagePaths(getContext(), newFavourite);
     }
 
     // Xóa khỏi favourite
     // Luu lai vào file
-    public void removeFromFavourite(Context context) 
+    public void removeFromFavourite() 
     {
         int count = _favouriteAdapter.getCount();
 
@@ -201,17 +253,17 @@ public class ImageManager {
             }
         }
 
-        ImageSupporter.saveFavouriteImagePaths(context, new ArrayList<String>(_favouriteMap.values()));
+        ImageSupporter.saveFavouriteImagePaths(getContext(), new ArrayList<String>(_favouriteMap.values()));
     }
 
     // Nạp các ảnh ưa thích lên
-    public void loadFavouriteImages(Context context) 
+    public void loadFavouriteImages() 
     {
-        ArrayList<String> data = ImageSupporter.getFavouriteImagePaths(context);
+        ArrayList<String> data = ImageSupporter.getFavouriteImagePaths(getContext());
         _favouriteData = new ArrayList<DataHolder>();
         _favouriteMap = new HashMap<String, String>();
 
-        _favouriteAdapter = new ImageAdapter(context, _favouriteData);
+        _favouriteAdapter = new ImageAdapter(getContext(), _favouriteData);
         _gridViewFavourite.setAdapter(_favouriteAdapter);
 
         if (data != null)
@@ -229,7 +281,7 @@ public class ImageManager {
     }
 
     // Thêm ảnh vào mục ưa thích
-    public void addImageToFavourite(Context context, DataHolder imageData)
+    public void addImageToFavourite(DataHolder imageData)
     {
     	 ArrayList<String> newFavourite = new ArrayList<String>();
     	 
@@ -240,11 +292,11 @@ public class ImageManager {
             _favouriteMap.put(imageData._file.getAbsolutePath(), imageData._file.getAbsolutePath());
         }
     	
-    	ImageSupporter.addNewFavouriteImagePaths(context, newFavourite);
+    	ImageSupporter.addNewFavouriteImagePaths(getContext(), newFavourite);
     }
     
     // Bỏ ảnh khỏi mục ưa thích
-    public void removeImageFromFavourite(Context context, int imageId)
+    public void removeImageFromFavourite(int imageId)
     {
     	DataHolder data = (DataHolder) _favouriteAdapter.getItem(imageId);
 
@@ -254,11 +306,11 @@ public class ImageManager {
             _favouriteMap.remove(data._file.getAbsolutePath());
         }
 
-        ImageSupporter.saveFavouriteImagePaths(context, new ArrayList<String>(_favouriteMap.values()));
+        ImageSupporter.saveFavouriteImagePaths(getContext(), new ArrayList<String>(_favouriteMap.values()));
     }
 
     // Bỏ ảnh khỏi mục ưa thích
-    public void removeImageFromFavourite(Context context, DataHolder data)
+    public void removeImageFromFavourite(DataHolder data)
     {
         if (_favouriteMap.containsKey(data._file.getAbsolutePath()) == true)
         {
@@ -266,7 +318,9 @@ public class ImageManager {
             _favouriteMap.remove(data._file.getAbsolutePath());
         }
 
-        ImageSupporter.saveFavouriteImagePaths(context, new ArrayList<String>(_favouriteMap.values()));
+        ImageSupporter.saveFavouriteImagePaths(getContext(), new ArrayList<String>(_favouriteMap.values()));
     }
+    
+
 
 }

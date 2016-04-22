@@ -69,19 +69,10 @@ public class AlbumAdapter extends ArrayAdapter  {
 		        CheckBox cb = (CheckBox) v.getTag();
 		        
 		        if (cb.getVisibility() == View.VISIBLE)
-		        {
-			        if (cb.isChecked())
-			            cb.setChecked(false);
-			        else 
-			            cb.setChecked(true);
-		        }
+		        	cb.setChecked(!cb.isChecked());
 		        else
-		        {
 		        	if(_context instanceof MainActivity)
-		        	{
 		        		((MainActivity) _context).viewAllAlbumImages(_items.get(cb.getId()));  
-		        	}
-		        }
 		    }
 		});
         
