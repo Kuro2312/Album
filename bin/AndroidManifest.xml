@@ -35,7 +35,6 @@
         </activity>
         <activity
             android:name=".ViewImageActivity"
-            android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/title_activity_view_image"
             android:theme="@style/FullscreenTheme" >
         </activity>

@@ -5,6 +5,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
@@ -293,6 +294,7 @@ public class MainActivity extends Activity {
                 if (!_inSelectionMode) {
                     Intent albumIntent = new Intent(MainActivity.this, AlbumActivity.class);
                     MainActivity.this.startActivityForResult(albumIntent, ADD_ALBUM);
+                    MainActivity.this.overridePendingTransition(R.animator.animator_slide_in_right, R.animator.animator_zoom_out);
                 }
                 else 
                 	chooseAlbum();
@@ -363,6 +365,8 @@ public class MainActivity extends Activity {
 
     	intent.putExtras(bundle);
     	startActivity(intent);
+    	
+    	MainActivity.this.overridePendingTransition(R.animator.animator_slide_in_right, R.animator.animator_zoom_out);
     }
        
     // Nạp toàn bộ ảnh trong máy lên
@@ -587,6 +591,7 @@ public class MainActivity extends Activity {
                     Intent albumIntent = new Intent(MainActivity.this, AlbumActivity.class);
                     albumIntent.putExtra("Name", holder1.textview.getText().toString());
                     MainActivity.this.startActivityForResult(albumIntent, EDIT_ALBUM);
+                    MainActivity.this.overridePendingTransition(R.animator.animator_slide_in_right, R.animator.animator_zoom_out);
                 }
                 
                 break;
