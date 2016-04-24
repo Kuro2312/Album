@@ -120,8 +120,8 @@ public class ImageAdapter extends ArrayAdapter {
 			        else 
 			            cb.setChecked(true);
 		        } else {
-		        	
-		        	/*ArrayList<File> files = new ArrayList<File>();		        	
+		        
+		        	ArrayList<File> files = new ArrayList<File>();		        	
 		        	for (DataHolder d : _items) {
 		        		files.add(d._file);
 		        	}
@@ -130,7 +130,7 @@ public class ImageAdapter extends ArrayAdapter {
 		        	
 		        	intent.putExtra("files", files);
 		        	intent.putExtra("position", cb.getId());
-		        	_context.startActivity(intent);*/
+		        	_context.startActivity(intent);
 		        }
 		    }
 		});

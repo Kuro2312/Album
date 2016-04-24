@@ -148,7 +148,6 @@ public class AlbumManager {
 	            
 	            // Cập nhật adapter và giao diện
 	            _albumAdapter.add(name);
-	
 	            return true;
 	        } 
 	        

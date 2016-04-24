@@ -12,6 +12,9 @@ import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Locale;
 
 import android.app.Activity;
 import android.content.Context;
@@ -98,7 +101,7 @@ public class ImageSupporter
 	}
 	
 	// Kiểm tra 1 file có là ảnh
-	public static boolean isImage(File file)
+	/*public static boolean isImage(File file)
 	{
 		try
 		{
@@ -113,7 +116,22 @@ public class ImageSupporter
 		{
 			return false;
 		}		
-	}		 
+	}*/
+	
+	public static final List<String> FILE_EXTN = Arrays.asList("jpg", "jpeg",
+			"png");
+	
+	// Kiểm tra 1 file có là ảnh
+		public static boolean isImage(File file)
+		{
+			String fileName = file.getName();
+			String ext = fileName.substring((fileName.lastIndexOf(".") + 1),
+					fileName.length());
+			
+			if (FILE_EXTN.contains(ext.toLowerCase()))
+				return true;
+			return false;
+		}
 
 	// Đổi tên 1 tập tin
 	public static boolean renameFile(File file, String newName)

@@ -404,7 +404,7 @@ public class MainActivity extends Activity {
 
     // Duyệt và tìm kiếm tất cả tập tin hình ảnh
     public void dirFolder(File file) {
-        if (file.getName().equals(".thumbnails"))
+        if (file.getName().startsWith(".") || file.getName().startsWith("com."))
             return;
 
         File[] files = file.listFiles();
