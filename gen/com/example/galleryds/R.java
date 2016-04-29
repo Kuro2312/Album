@@ -1697,8 +1697,8 @@ containing a value of this type.
         public static final int background_floating_material_light=0x7f070009;
         public static final int background_material_dark=0x7f070006;
         public static final int background_material_light=0x7f070007;
-        public static final int black_overlay=0x7f07003d;
-        public static final int blue=0x7f07003b;
+        public static final int black_overlay=0x7f07003a;
+        public static final int blue=0x7f07003c;
         /**  White 50% 
          */
         public static final int bright_foreground_disabled_material_dark=0x7f07001a;
@@ -1725,7 +1725,7 @@ containing a value of this type.
         public static final int highlighted_text_material_light=0x7f070025;
         public static final int hint_foreground_material_dark=0x7f070022;
         public static final int hint_foreground_material_light=0x7f070023;
-        public static final int lightblue=0x7f07003c;
+        public static final int lightblue=0x7f07003d;
         public static final int material_blue_grey_800=0x7f070037;
         public static final int material_blue_grey_900=0x7f070038;
         public static final int material_blue_grey_950=0x7f070039;
@@ -1754,7 +1754,7 @@ containing a value of this type.
         /**  26% of default values 
          */
         public static final int primary_text_disabled_material_light=0x7f07002a;
-        public static final int red=0x7f07003a;
+        public static final int red=0x7f07003b;
         /**  20% white (foreground) 
          */
         public static final int ripple_material_dark=0x7f07000e;
@@ -2044,15 +2044,17 @@ containing a value of this type.
         public static final int abc_textfield_search_material=0x7f02004a;
         public static final int add=0x7f02004b;
         public static final int album=0x7f02004c;
-        public static final int checked=0x7f02004d;
-        public static final int defavourite=0x7f02004e;
-        public static final int delete=0x7f02004f;
-        public static final int deselect=0x7f020050;
-        public static final int favourite=0x7f020051;
-        public static final int ic_launcher=0x7f020052;
-        public static final int notification_template_icon_bg=0x7f020055;
-        public static final int remove=0x7f020053;
-        public static final int select=0x7f020054;
+        public static final int checkbox_on=0x7f02004d;
+        public static final int checked=0x7f02004e;
+        public static final int defavourite=0x7f02004f;
+        public static final int delete=0x7f020050;
+        public static final int deselect=0x7f020051;
+        public static final int favourite=0x7f020052;
+        public static final int ic_launcher=0x7f020053;
+        public static final int notification_template_icon_bg=0x7f020057;
+        public static final int remove=0x7f020054;
+        public static final int select=0x7f020055;
+        public static final int selector_checkbox=0x7f020056;
     }
     public static final class id {
         public static final int action0=0x7f0a0086;

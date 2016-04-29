@@ -130,6 +130,7 @@ public class ImageAdapter extends ArrayAdapter {
 		        	
 		        	intent.putExtra("files", files);
 		        	intent.putExtra("position", cb.getId());
+		        	
 		        	_context.startActivity(intent);
 		        	
 		        	((Activity) _context).overridePendingTransition(R.animator.animator_slide_in_right, R.animator.animator_zoom_out);

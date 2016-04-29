@@ -100,26 +100,7 @@ public class ImageSupporter
 	    return BitmapFactory.decodeFile(file.getAbsolutePath(), options);
 	}
 	
-	// Kiểm tra 1 file có là ảnh
-	/*public static boolean isImage(File file)
-	{
-		try
-		{
-			Bitmap b = BitmapFactory.decodeFile(file.getAbsolutePath());
-			
-			if (b != null)
-				return true;
-			
-			return false;
-		}
-		catch (Exception e)
-		{
-			return false;
-		}		
-	}*/
-	
-	public static final List<String> FILE_EXTN = Arrays.asList("jpg", "jpeg",
-			"png");
+	public static final List<String> FILE_EXTN = Arrays.asList("jpg", "jpeg", "png");
 	
 	// Kiểm tra 1 file có là ảnh
 		public static boolean isImage(File file)
