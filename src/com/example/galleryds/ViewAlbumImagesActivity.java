@@ -57,20 +57,20 @@ public class ViewAlbumImagesActivity extends Activity {
 		
 		_gridViewAlbumImages = (GridView) findViewById(R.id.gridView4);
 		
+		// Lấy dữ liệu đóng góp
 		Intent intent = getIntent();
 		Bundle bundle = intent.getExtras();
 		
+		// Khởi tạo tên album
 		_albumName = bundle.getString("AlbumName");
 	    this.setTitle("Album: " + _albumName);
 	    
+	    // Lấy đối tượng quảnl ý
 	    _albumManager = AlbumManager.GetInstance();
 	    _imageManager = ImageManager.GetInstance();
 	    _albumImagesAdapter = _albumManager.getSelectedAlbumAdapter(_albumName);
 	    
 		_gridViewAlbumImages.setAdapter(_albumImagesAdapter);
-		
-		//_favouriteAdapter = MainActivity._favouriteAdapter;
-		//_favouriteMap = MainActivity._favouriteMap;
 		
 		registerForContextMenu(_gridViewAlbumImages);
 		
@@ -124,7 +124,7 @@ public class ViewAlbumImagesActivity extends Activity {
 
             @Override
             public void onClick(View v) {
-            	removeFromAlbum();
+            	removeSelectedImagesFromAlbum();
             }
         });	
 	}
@@ -158,11 +158,7 @@ public class ViewAlbumImagesActivity extends Activity {
            	
             // Xóa khỏi adapter + cập nhật giao diện
         	_albumImagesAdapter.remove(holder.id);
-            _albumManager.removeImageFromAlbum(data, data._file.getParentFile().getName());
-            
-            // Di chuyển file
-            File path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
-            ImageSupporter.moveFile(data._file.getParent(), data._file.getName(), path.getAbsolutePath());
+            _albumManager.removeImageFromAlbum(data, _albumName);
         }
             
         return true;
@@ -224,7 +220,7 @@ public class ViewAlbumImagesActivity extends Activity {
         }
     }
 	
-    public void removeFromAlbum()
+    public void removeSelectedImagesFromAlbum()
     {
         int count = _albumImagesAdapter.getCount();
 
@@ -237,15 +233,12 @@ public class ViewAlbumImagesActivity extends Activity {
                 DataHolder data = (DataHolder) _albumImagesAdapter.getItem(holder.id);
             	
                 // Xóa khỏi adapter + cập nhật giao diện
-                _albumImagesAdapter.remove(data);
-                _albumManager.removeImageFromAlbum(data, data._file.getParent());
-                
-                // Di chuyển file
-                File path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
-                ImageSupporter.moveFile(data._file.getParent(), data._file.getName(), path.getAbsolutePath());
+                _albumImagesAdapter.remove(holder.id);
+                _albumManager.removeImageFromAlbum(data, _albumName);
             }
         }
     }
+    
 	   
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {

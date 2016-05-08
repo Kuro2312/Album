@@ -2,6 +2,7 @@ package com.example.galleryds;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 
 import android.content.Context;
@@ -97,7 +98,14 @@ public class AlbumManager {
     			albumImages.remove(i);
     	}
     	
-    	int a = this.getAlbumData(album).size();
+        // Di chuyển file
+        String path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).getAbsolutePath();
+        String fName = data._file.getName();
+        
+        ImageSupporter.moveFile(data._file.getParentFile().getAbsolutePath(), fName, path);
+        
+        // Cập nhật thông tin file mới
+        data.setFile(new File(path + File.separator + fName));
     }
     
     // Thêm ảnh vào album
@@ -328,4 +336,13 @@ public class AlbumManager {
             	this.deleteAlbum(holder.textview.getText().toString());
         }
     } 
+
+    // Áp dụng insert sort với độ phức tạp O(n)
+    // Tiện cho việc tìm kiếm nhị phân
+    public void insertImageDataToAlbum(String albumName, DataHolder data)
+    {
+    	ArrayList<DataHolder> array = this.getAlbumData(albumName);
+    	
+    	ImageSupporter.binaryInsertByLastModifiedDate(array, data);
+    }
 }

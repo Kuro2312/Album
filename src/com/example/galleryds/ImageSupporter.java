@@ -13,6 +13,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
@@ -21,6 +22,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.provider.MediaStore.Files;
+import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.GridView;
@@ -348,6 +350,8 @@ public class ImageSupporter
 
     	catch (FileNotFoundException fnfe1) 
 	    {
+    		int a = 2;
+    		a = 0;
 	        //Log.e("tag", fnfe1.getMessage());
 	    }
 	    catch (Exception e) 
@@ -370,5 +374,61 @@ public class ImageSupporter
             final int childIndex = pos - firstListItemPosition;
             return listView.getChildAt(childIndex);
         }
+    }
+	
+	public static void binaryInsertByLastModifiedDate(ArrayList<DataHolder> array, DataHolder data)
+    {
+    	Date lastModDate = new Date(data._file.lastModified());
+    	
+    	int right = array.size() - 1;
+    	int left = 0;
+    	
+    	if (array.size() == 0)
+    	{
+    		array.add(data);
+    		return;
+    	}
+    	
+    	Date lastModDate1 = new Date(array.get(right)._file.lastModified());
+    	if (lastModDate1.compareTo(lastModDate) < 0)
+    	{
+    		array.add(data);
+    		return;
+    	}
+    	
+    	lastModDate1 = new Date(array.get(left)._file.lastModified());
+    	if (lastModDate1.compareTo(lastModDate) > 0)
+    	{
+    		array.add(0, data);
+    		return;
+    	}
+    	
+    	
+    	while (left < right)
+    	{
+    		int median = (right + left) / 2;
+    		
+    		lastModDate1 = new Date(array.get(median)._file.lastModified());
+    		
+    		if (lastModDate1.compareTo(lastModDate) == 0)
+    		{
+    			array.add(median + 1, data);
+    			return;
+    		}
+    		else if (lastModDate1.compareTo(lastModDate) < 0)
+    			left = median + 1;
+    		else
+    			right = median - 1;
+    	}
+    	
+    	if (left == right)
+    	{
+    		lastModDate1 = new Date(array.get(left)._file.lastModified());
+    		
+    		if (lastModDate1.compareTo(lastModDate) < 0)
+    			array.add(left + 1, data);
+    		else if (left > 0)
+    			array.add(left - 1, data);
+    	} 	
     }
 }

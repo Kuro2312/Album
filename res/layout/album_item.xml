@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?><RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="100dip"
-    android:layout_height="100dip" >
+    android:layout_width="90dip"
+    android:layout_height="90dip" >
     
     <ImageView android:id="@+id/imageView1" 
         android:layout_width="match_parent"
@@ -20,18 +20,18 @@
 	    android:layout_centerHorizontal="true"
 	    android:adjustViewBounds="true"
 	    android:text="name"
-	    android:textSize="20dp"
+	    android:textSize="15sp"
 	    android:clickable="false"
 	    android:textColor="@android:color/black" />
 
 	<CheckBox
 	    android:id="@+id/checkBox1"
-	    android:layout_width="40dip"
-	    android:layout_height="40dip"
+	    android:layout_width="35dip"
+	    android:layout_height="35dip"
 	    android:layout_alignParentLeft="true"
 	    android:layout_alignParentTop="true"
 	    android:visibility="invisible"
 	    android:button="@null"
-    	android:background="@drawable/selector_checkbox"/>/>
+    	android:background="@drawable/selector_checkbox"/>
 
 </RelativeLayout>

@@ -83,6 +83,7 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        // Khởi tạo dữ liệu cho hệ thống
         initializeSystem();
 
         //_gridViewAlbumImages = (GridView) findViewById(R.id.gridView4);
@@ -90,12 +91,19 @@ public class MainActivity extends Activity {
         // Xử lý lỗi
        // Toast.makeText(context, "Album Have Existed", Toast.LENGTH_SHORT).show();
         
+        // Load dữ liệu của các tab thể hiện
         loadTabs();
 
+        // Load dữ liệu album
         _albumManager.loadAlbums();
+        
+        // Load ảnh
         this.loadImages();
+        
+        // Load dữ liệu ảnh ưa thích
         _imageManager.loadFavouriteImages();
 
+        // Tạo các sự kiện lắng nghe cho các View
         setOnTabChangedListener_MainTabHost();
 
         registerForContextMenu(_imageManager.getGridViewAll());
@@ -225,12 +233,15 @@ public class MainActivity extends Activity {
                 if (_inSelectionMode) {
                     switch (currentTab) {
                         case 0: // tab All
+                        	// Tắt chế độ chọn
                         	_imageManager.turnOffAllImagesSelectionMode();
                             break;
                         case 1: // tab Albums
+                        	// Tắt chế độ chọn
                         	_albumManager.turnOffSelectionAlbumMode();
                             break;
                         case 2: // tab Favourite
+                        	// Tắt chế độ chọn
                         	_imageManager.turnOffFavouriteSelectionMode();
                             break;
                     }
@@ -239,12 +250,15 @@ public class MainActivity extends Activity {
                 } else {
                     switch (currentTab) {
                         case 0: // tab All
+                        	// Bật chế độ chọn
                         	_imageManager.turnOnAllImagesSelectionMode();
                             break;
                         case 1: // tab Albums
+                        	// Bật chế độ chọn
                         	_albumManager.turnOnSelectionAlbumMode();
                             break;
                         case 2: // tab Favourite
+                        	// Bật chế độ chọn
                         	_imageManager.turnOnFavouriteSelectionMode();
                             break;
                     }
@@ -263,9 +277,9 @@ public class MainActivity extends Activity {
             @Override
             public void onClick(View v) {
                 if (_mainTabHost.getCurrentTab() == 0)
-                	_imageManager.addToFavourite();
+                	_imageManager.addToFavourite();	// thêm ảnh vào mục ưa thích
                 else
-                	_imageManager.removeFromFavourite();
+                	_imageManager.removeFromFavourite(); // bỏ ảnh ra khỏi mục ưa thích
             }
         });
     }
@@ -277,9 +291,9 @@ public class MainActivity extends Activity {
              @Override
              public void onClick(View v) {
                  if (_mainTabHost.getCurrentTab() == 0)
-                 	_imageManager.deleteSelectedImages(_albumManager);
+                 	_imageManager.deleteSelectedImages(_albumManager); // Xóa ảnh
                  else {
-                 	_albumManager.deleteSelectedAlbums();
+                 	_albumManager.deleteSelectedAlbums(); // Xóa album
                  }
              }
          });
@@ -292,12 +306,15 @@ public class MainActivity extends Activity {
             @Override
             public void onClick(View v) {
                 if (!_inSelectionMode) {
+                	// Chuyển sang activity tạo album
                     Intent albumIntent = new Intent(MainActivity.this, AlbumActivity.class);
+                    
+                    // Animation cho chuyện cảnh
                     MainActivity.this.startActivityForResult(albumIntent, ADD_ALBUM);
                     MainActivity.this.overridePendingTransition(R.animator.animator_slide_in_right, R.animator.animator_zoom_out);
                 }
                 else 
-                	chooseAlbum();
+                	chooseAlbum();	// Kích hoạt sự kiện chọn album 
             }
         });
     }
@@ -311,15 +328,27 @@ public class MainActivity extends Activity {
 
             ViewHolder holder = (ViewHolder) view.getTag();
 
+            // Kiểm tra cái nào được chọn
             if (holder.checkbox.isChecked() == true) {
                 
             	File path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
             	File f =  (File) holder.checkbox.getTag();
             	
+            	// Kiểm tra file có nằm trong thư mục
             	if (f.getParent() != path.getAbsolutePath() + File.pathSeparator + albumName)
             	{
-            		ImageSupporter.moveFile(f.getParent(), f.getName(), path.getAbsolutePath() + File.separator + albumName);
-            		_albumManager.addImageToAlbum(_imageManager.getImageDataByName(f.getAbsolutePath()), albumName);
+            		// Di chuyển file
+            		ImageSupporter.moveFile(f.getParentFile().getAbsolutePath(), f.getName(), path.getAbsolutePath() + File.separator + albumName);
+            		
+            		// Lấy dữ liệu file cũ
+            		DataHolder data = _imageManager.getImageDataByName(f.getAbsolutePath());
+            		
+            		// Cập nhật thông tin file
+            		String newPath = path.getAbsolutePath() + File.separator + albumName + File.separator + f.getName();
+            		data.setFile(new File(newPath));
+            		
+            		// Thêm vào album
+            		_albumManager.addImageToAlbum(data, albumName);
             	}
             }
         }
@@ -328,14 +357,17 @@ public class MainActivity extends Activity {
     // Hiện dialog dể chọn album 
     public void chooseAlbum()
     {
+    	// Tạo 1 alert (thông báo)
     	AlertDialog.Builder builderSingle = new AlertDialog.Builder(this);
     	builderSingle.setIcon(R.drawable.ic_launcher);
     	builderSingle.setTitle("Select One Album: ");
 
     	final ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(this, android.R.layout.select_dialog_singlechoice);
     	
+    	// Nạp dữ liệu cho thông báo qua adapter 
     	arrayAdapter.addAll(_albumManager.getAlbumList());
 
+    	// Tạo sự kiện cho nút hủy thông báo
     	builderSingle.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
     	            @Override
     	            public void onClick(DialogInterface dialog, int which) {
@@ -343,11 +375,14 @@ public class MainActivity extends Activity {
     	            }
     	        });
 
+    	// Tạo sự kiện cho nút chọn album
     	builderSingle.setAdapter(arrayAdapter, new DialogInterface.OnClickListener() {
     	            @Override
     	            public void onClick(DialogInterface dialog, int which) {
     	                String strName = arrayAdapter.getItem(which);
     	                MainActivity main = (MainActivity) arrayAdapter.getContext();
+    	                
+    	                // Thực hiện thêm ảnh vào album
     	                main.addSelectedImagesToAlbum(strName);
     	            }
     	        });
@@ -360,12 +395,14 @@ public class MainActivity extends Activity {
     {
     	Intent intent = new Intent(this, ViewAlbumImagesActivity.class);
     	
+    	// Đóng gói dữ liệu gửi sang activity mới
     	Bundle bundle = new Bundle();
     	bundle.putString("AlbumName", albumName);
 
     	intent.putExtras(bundle);
     	startActivity(intent);
     	
+    	// Animation cho chuyển cảnh
     	MainActivity.this.overridePendingTransition(R.animator.animator_slide_in_right, R.animator.animator_zoom_out);
     }
        
@@ -380,6 +417,7 @@ public class MainActivity extends Activity {
 
     // Nạp các tab cần thể hiện cho tabhost
     public void loadTabs() {
+    	
         // Lấy TabHost từ Id cho trước
         _mainTabHost = (TabHost) findViewById(R.id.tabhost);
         _mainTabHost.setup();
@@ -408,28 +446,37 @@ public class MainActivity extends Activity {
 
     // Duyệt và tìm kiếm tất cả tập tin hình ảnh
     public void dirFolder(File file) {
+    	
+    	// Kiểm tra tên có hợp lệ không
         if (file.getName().startsWith(".") || file.getName().startsWith("com."))
             return;
 
         File[] files = file.listFiles();
 
+        // Kiễm tra các tập tin con có rỗng không
         if (files == null)
             return;
 
         for (File f : files) {
+        	
+        	// Kiểm tra xem có phải ảnh không
             if (ImageSupporter.isImage(f)) 
             {
+            	// Tạo mới dữ liệu của ảnh
                 Bitmap b = ImageSupporter.decodeSampledBitmapFromFile(f, 100, 100);
                 DataHolder dataHolder = new DataHolder(f, b);
                 
-                _imageManager.getImageList().add(dataHolder);
+                // Nập dữ liệu vào bộ quản lý ảnh
+                _imageManager.insertImageData(dataHolder);
                 _imageManager.addImageData(f.getAbsolutePath(), dataHolder);
                 
+                // Nạp dữ liệu vào bộ quản lý album
                 String parentName = f.getParentFile().getName();
                 if (_albumManager.containsAlbum(parentName))
-                	_albumManager.getAlbumData(parentName).add(dataHolder);
+                	_albumManager.insertImageDataToAlbum(parentName, dataHolder);
             }
 
+            // Kiểm tra phải thư mục không
             if (f.isDirectory())
                 dirFolder(f);
         }
@@ -524,10 +571,11 @@ public class MainActivity extends Activity {
 
             switch (requestCode) {
                 case ADD_ALBUM:
-                    _albumManager.createAlbum(name);
+                    _albumManager.createAlbum(name);	// Tạo album mới
                     break;
 
                 case EDIT_ALBUM:
+                	// Cập nhật thông tin album
                 	GridView gridView = _albumManager.getGridViewAlbum();
                     AlbumViewHolder holder = (AlbumViewHolder) ImageSupporter.getViewByPosition(_contextPosition, gridView).getTag();
                     _albumManager.renameAlbum(holder.textview.getText().toString(), name);
@@ -604,6 +652,7 @@ public class MainActivity extends Activity {
         return true;
     }
 
+    // Sự kiện cho việc quẹt trái phải để chuyển tab 
     public void setTouchEventForTabHost()
 	{
 		int numberOfTabs = _mainTabHost.getTabWidget().getChildCount();

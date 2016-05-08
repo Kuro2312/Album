@@ -54,6 +54,11 @@ class DataHolder
 		
 		return result;
 	}
+	
+	public void setFile(File file)
+	{
+		_file = file;
+	}
 }
 
 public class ImageAdapter extends ArrayAdapter {
@@ -148,13 +153,13 @@ public class ImageAdapter extends ArrayAdapter {
     
     public void remove(int position)
     {
-    	ImageSupporter.deleteFile(_items.get(position)._file);
+    	//ImageSupporter.deleteFile(_items.get(position)._file);
     	super.remove(_items.get(position));
     }
     
     public void remove(DataHolder data)
     {
-    	ImageSupporter.deleteFile(data._file);
+    	//ImageSupporter.deleteFile(data._file);
     	super.remove(data);
     }
     

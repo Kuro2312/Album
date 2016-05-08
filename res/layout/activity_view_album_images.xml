@@ -5,29 +5,20 @@
     android:layout_height="match_parent"
     tools:context="com.example.galleryds.ViewAlbumImagesActivity" >
 
-    <ScrollView
-        android:id="@+id/scrollView4"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginLeft="5dp"
-        android:layout_marginRight="5dp"
-        android:layout_marginTop="10dip"
-        android:fillViewport="true" >
+ 	<GridView
+   	    android:id="@+id/gridView4"
+   	    android:layout_width="match_parent"
+   	    android:layout_height="match_parent"
+   	    android:layout_marginTop="10dip"
+   	    android:columnWidth="100dip"
+   	    android:gravity="center"
+   	    android:horizontalSpacing="2dip"
+   	    android:numColumns="auto_fit"
+   	    android:stretchMode="spacingWidth"
+   	    android:verticalSpacing="5dip" >
+		
+   	</GridView>
 
-    	<GridView
-    	    android:id="@+id/gridView4"
-    	    android:layout_width="match_parent"
-    	    android:layout_height="match_parent"
-    	    android:columnWidth="100dip"
-    	    android:gravity="center"
-    	    android:horizontalSpacing="2dip"
-    	    android:numColumns="auto_fit"
-    	    android:stretchMode="spacingWidth"
-    	    android:verticalSpacing="5dip" >
-			
-    	</GridView>
-
-    </ScrollView>
     
     <android.support.v7.widget.Toolbar
         android:id="@+id/toolbar2"
@@ -70,7 +61,7 @@
                     android:layout_height="wrap_content"
                     android:textAlignment="center"
                     android:textColor="@android:color/white"
-                    android:textSize="12dp"
+                    android:textSize="12sp"
                     android:text="Select"
                     />
             </LinearLayout>
@@ -103,7 +94,7 @@
                     android:layout_height="wrap_content"
                     android:textAlignment="center"
                     android:textColor="@android:color/white"
-                    android:textSize="12dp"
+                    android:textSize="12sp"
                     android:text="Favourite"
                     />
             </LinearLayout>
@@ -136,7 +127,7 @@
                     android:layout_height="wrap_content"
                     android:textAlignment="center"
                     android:textColor="@android:color/white"
-                    android:textSize="12dp"
+                    android:textSize="12sp"
                     android:text="Delete"
                     />
             </LinearLayout>
@@ -170,7 +161,7 @@
                     android:layout_height="wrap_content"
                     android:textAlignment="center"
                     android:textColor="@android:color/white"
-                    android:textSize="12dp"
+                    android:textSize="12sp"
                     android:text="Remove from Album"
                     />
             </LinearLayout>

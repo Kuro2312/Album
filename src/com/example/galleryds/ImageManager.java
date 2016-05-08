@@ -4,9 +4,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.GridView;
+import android.widget.Toast;
 
 public class ImageManager {
 	
@@ -25,6 +27,13 @@ public class ImageManager {
     protected ImageAdapter _favouriteAdapter = null;
     protected HashMap<String, String> _favouriteMap = null;
     		
+    
+    public void foo()
+    {
+    	for (int i = 0 ; i < _allImageData.size(); i++)
+    		Toast.makeText(getContext(), _allImageData.get(i)._file.getParentFile().getName(), Toast.LENGTH_SHORT).show();
+    }
+    
     // Khởi tạo
     protected ImageManager(Context context, GridView gridView, GridView gridViewFavourite)
     {
@@ -133,26 +142,43 @@ public class ImageManager {
             if (holder.checkbox.isChecked() == true)
             {
             	DataHolder data = (DataHolder) _allImageAdapter.getItem(holder.id);
+            	
+            	// Xóa trên adapter của mục All
             	_allImageAdapter.remove(holder.id);
                 
+            	// Xóa trên dữ liệu lưu dạng map
             	_allMap.remove(data._file.getAbsolutePath());
+            	
+            	// Xóa trên dữ liệu mục Favourite
             	this.removeImageFromFavourite(data);
             	
+            	// Xóa ảnh khỏi dữ liệu album
             	String album = data._file.getParentFile().getName();
             	albumManager.removeImageFromAlbum(data, album);
+            	
+            	// Xóa ảnh thực sự
+            	ImageSupporter.deleteFile(data._file);
             }
         }
     }
     
     public void deleteSelectedImage(DataHolder data, AlbumManager albumManager)
     {
+    	// Xóa trên adapter của mục All
     	_allImageAdapter.remove(data);
     	
+    	// Xóa trên dữ liệu lưu dạng map
     	_allMap.remove(data._file.getAbsolutePath());
+    	
+    	// Xóa trên dữ liệu mục Favourite
     	this.removeImageFromFavourite(data);
     	
+    	// Xóa ảnh khỏi dữ liệu album
     	String album = data._file.getParentFile().getName();
     	albumManager.removeImageFromAlbum(data, album);
+    	
+    	// Xóa ảnh thực sự
+    	ImageSupporter.deleteFile(data._file);
     }
     
     public void deleteSelectedImages(Context context, GridView gridView, ImageAdapter adapter, AlbumManager albumManager)
@@ -321,6 +347,11 @@ public class ImageManager {
         ImageSupporter.saveFavouriteImagePaths(getContext(), new ArrayList<String>(_favouriteMap.values()));
     }
     
-
+    // Áp dụng insert sort với độ phức tạp O(n)
+    // Tiện cho việc tìm kiếm nhị phân
+    public void insertImageData(DataHolder data)
+    { 	
+    	ImageSupporter.binaryInsertByLastModifiedDate(_allImageData, data);
+    }
 
 }
