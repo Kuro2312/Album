@@ -122,7 +122,7 @@ public class MainActivity extends Activity {
             public void run() { 
             	_imageManager.getGridViewAll().setSelection(_imageManager.getNumberOfImages() - 1);
             } 
-        });        
+        });   
     }
 
     protected void doStrategyLoading_V1()

@@ -36,7 +36,7 @@
                 android:scaleType="fitCenter"
                 android:layout_gravity="center"
                 android:src = "@drawable/select"
-                android:background="@android:color/transparent"/>
+                android:background="@drawable/selector_circle_button"/>
             <TextView
                 android:id="@+id/tvSelect"
                 android:layout_width="wrap_content"
@@ -70,7 +70,7 @@
                 android:scaleType="fitCenter"
                 android:layout_gravity="center"
                 android:src = "@drawable/favourite"
-                android:background="@android:color/transparent"/>
+                android:background="@drawable/selector_heart_button"/>
             <TextView
                 android:id="@+id/tvFavourite"
                 android:layout_width="wrap_content"
@@ -104,7 +104,7 @@
                 android:scaleType="fitCenter"
                 android:layout_gravity="center"
                 android:src = "@drawable/delete"
-                android:background="@android:color/transparent"/>
+                android:background="@drawable/selector_trash_button"/>
             <TextView
                 android:id="@+id/tvDelete"
                 android:layout_width="wrap_content"
@@ -136,7 +136,7 @@
                 android:scaleType="fitCenter"
                 android:layout_gravity="center"
                 android:src = "@drawable/add"
-                android:background="@android:color/transparent"/>
+                android:background="@drawable/selector_circle_button"/>
 
             <TextView
                 android:id="@+id/tvAdd"

@@ -2044,17 +2044,24 @@ containing a value of this type.
         public static final int abc_textfield_search_material=0x7f02004a;
         public static final int add=0x7f02004b;
         public static final int album=0x7f02004c;
-        public static final int checkbox_on=0x7f02004d;
-        public static final int checked=0x7f02004e;
-        public static final int defavourite=0x7f02004f;
-        public static final int delete=0x7f020050;
-        public static final int deselect=0x7f020051;
-        public static final int favourite=0x7f020052;
-        public static final int ic_launcher=0x7f020053;
-        public static final int notification_template_icon_bg=0x7f020057;
-        public static final int remove=0x7f020054;
-        public static final int select=0x7f020055;
-        public static final int selector_checkbox=0x7f020056;
+        public static final int button_bg=0x7f02004d;
+        public static final int checkbox_on=0x7f02004e;
+        public static final int checked=0x7f02004f;
+        public static final int circle_bg_selected=0x7f020050;
+        public static final int defavourite=0x7f020051;
+        public static final int delete=0x7f020052;
+        public static final int deselect=0x7f020053;
+        public static final int favourite=0x7f020054;
+        public static final int heart_bg_selected=0x7f020055;
+        public static final int ic_launcher=0x7f020056;
+        public static final int notification_template_icon_bg=0x7f02005e;
+        public static final int remove=0x7f020057;
+        public static final int select=0x7f020058;
+        public static final int selector_checkbox=0x7f020059;
+        public static final int selector_circle_button=0x7f02005a;
+        public static final int selector_heart_button=0x7f02005b;
+        public static final int selector_trash_button=0x7f02005c;
+        public static final int trash_bg_selected=0x7f02005d;
     }
     public static final class id {
         public static final int action0=0x7f0a0083;

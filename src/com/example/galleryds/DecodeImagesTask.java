@@ -32,7 +32,7 @@ class LoadFavouriteImageTask extends AsyncTask<ImageManager, Void, Integer> {
     	
     	//Load dữ liệu ảnh ưa thích
     	imageManager[0].loadFavouriteImages();
-    	imageManager[0].getGridViewFavourite().setSelection(imageManager[0].getNumberOfFavouriteImages() - 1);
+    	//imageManager[0].getGridViewFavourite().setSelection(imageManager[0].getNumberOfFavouriteImages() - 1);
     	return 1;
     }
 
