@@ -66,7 +66,7 @@ public class ViewAlbumImagesActivity extends Activity {
 	    this.setTitle("Album: " + _albumName);
 	    
 	    // Lấy đối tượng quảnl ý
-	    _albumManager = AlbumManager.GetInstance();
+	    _albumManager = AlbumManager.getInstance();
 	    _imageManager = ImageManager.GetInstance();
 	    _albumImagesAdapter = _albumManager.getSelectedAlbumAdapter(_albumName);
 	    

@@ -13,6 +13,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.media.Image;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.view.ContextMenu;
@@ -85,23 +86,24 @@ public class MainActivity extends Activity {
 
         // Khởi tạo dữ liệu cho hệ thống
         initializeSystem();
-
-        //_gridViewAlbumImages = (GridView) findViewById(R.id.gridView4);
-      //Toast.makeText(context, "Create Album Successfully", Toast.LENGTH_SHORT).show();
-        // Xử lý lỗi
-       // Toast.makeText(context, "Album Have Existed", Toast.LENGTH_SHORT).show();
         
         // Load dữ liệu của các tab thể hiện
         loadTabs();
-
+      
         // Load dữ liệu album
         _albumManager.loadAlbums();
         
         // Load ảnh
-        this.loadImages();
+        //this.loadImages();
+        new LoadImagesTask().execute(this);
+      
         
         // Load dữ liệu ảnh ưa thích
         _imageManager.loadFavouriteImages();
+        //new LoadFavouriteImageTask().execute(_imageManager);
+        
+        int a = _imageManager.foo();
+        Toast.makeText(this, String.valueOf(a), Toast.LENGTH_SHORT).show();
 
         // Tạo các sự kiện lắng nghe cho các View
         setOnTabChangedListener_MainTabHost();
@@ -120,7 +122,7 @@ public class MainActivity extends Activity {
 
     protected void initializeSystem()
     {
-    	_albumManager = AlbumManager.CreateInstance(this, (GridView) findViewById(R.id.gridView3));
+    	_albumManager = AlbumManager.getInstance(this, (GridView) findViewById(R.id.gridView3));
     	_imageManager = ImageManager.CreateInstance(this, (GridView) findViewById(R.id.gridView1), (GridView) findViewById(R.id.gridView2));
     	
         llSelect = (LinearLayout) findViewById(R.id.llSelect);
@@ -252,6 +254,7 @@ public class MainActivity extends Activity {
                         case 0: // tab All
                         	// Bật chế độ chọn
                         	_imageManager.turnOnAllImagesSelectionMode();
+                        	
                             break;
                         case 1: // tab Albums
                         	// Bật chế độ chọn
@@ -337,11 +340,14 @@ public class MainActivity extends Activity {
             	// Kiểm tra file có nằm trong thư mục
             	if (f.getParent() != path.getAbsolutePath() + File.pathSeparator + albumName)
             	{
-            		// Di chuyển file
-            		ImageSupporter.moveFile(f.getParentFile().getAbsolutePath(), f.getName(), path.getAbsolutePath() + File.separator + albumName);
-            		
             		// Lấy dữ liệu file cũ
             		DataHolder data = _imageManager.getImageDataByName(f.getAbsolutePath());
+            		
+            		// Xóa ảnh khỏi album cũ nếu phải
+            		_albumManager.removeImageDataIfExistInOtherAlbum(data);
+            		
+            		// Di chuyển file
+            		ImageSupporter.moveFile(f.getParentFile().getAbsolutePath(), f.getName(), path.getAbsolutePath() + File.separator + albumName);
             		
             		// Cập nhật thông tin file
             		String newPath = path.getAbsolutePath() + File.separator + albumName + File.separator + f.getName();
@@ -749,5 +755,33 @@ public class MainActivity extends Activity {
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+}
+
+class LoadImagesTask extends AsyncTask<MainActivity, Void, Integer> {
+
+    protected Integer doInBackground(MainActivity... activity) {
+    	//Load dữ liệu ảnh ưa thích
+    	activity[0].loadImages();
+    	return 1;
+    }
+
+
+    protected void onPostExecute(Integer a) {
+        //mImageView.setImageBitmap(result);
+    }
+}
+
+class LoadFavouriteImageTask extends AsyncTask<ImageManager, Void, Integer> {
+
+    protected Integer doInBackground(ImageManager... imageManager) {
+    	//Load dữ liệu ảnh ưa thích
+    	imageManager[0].loadFavouriteImages();
+    	return 1;
+    }
+
+
+    protected void onPostExecute(Integer a) {
+        //mImageView.setImageBitmap(result);
     }
 }

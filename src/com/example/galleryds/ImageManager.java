@@ -28,10 +28,9 @@ public class ImageManager {
     protected HashMap<String, String> _favouriteMap = null;
     		
     
-    public void foo()
+    public int foo()
     {
-    	for (int i = 0 ; i < _allImageData.size(); i++)
-    		Toast.makeText(getContext(), _allImageData.get(i)._file.getParentFile().getName(), Toast.LENGTH_SHORT).show();
+    	return _allImageData.size();
     }
     
     // Khởi tạo
@@ -352,6 +351,7 @@ public class ImageManager {
     public void insertImageData(DataHolder data)
     { 	
     	ImageSupporter.binaryInsertByLastModifiedDate(_allImageData, data);
+    	//_allImageData.add(data);
     }
 
 }

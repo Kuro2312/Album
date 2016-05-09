@@ -390,14 +390,14 @@ public class ImageSupporter
     	}
     	
     	Date lastModDate1 = new Date(array.get(right)._file.lastModified());
-    	if (lastModDate1.compareTo(lastModDate) < 0)
+    	if (lastModDate1.compareTo(lastModDate) <= 0)
     	{
     		array.add(data);
     		return;
     	}
     	
     	lastModDate1 = new Date(array.get(left)._file.lastModified());
-    	if (lastModDate1.compareTo(lastModDate) > 0)
+    	if (lastModDate1.compareTo(lastModDate) >= 0)
     	{
     		array.add(0, data);
     		return;
@@ -421,14 +421,6 @@ public class ImageSupporter
     			right = median - 1;
     	}
     	
-    	if (left == right)
-    	{
-    		lastModDate1 = new Date(array.get(left)._file.lastModified());
-    		
-    		if (lastModDate1.compareTo(lastModDate) < 0)
-    			array.add(left + 1, data);
-    		else if (left > 0)
-    			array.add(left - 1, data);
-    	} 	
+    	array.add(left , data);
     }
 }

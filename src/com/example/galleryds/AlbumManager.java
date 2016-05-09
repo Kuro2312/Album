@@ -29,11 +29,10 @@ public class AlbumManager {
     {
     	_gridViewAlbum = gridViewAlbum;
     	_selectedAlbumImagesAdapter = new ImageAdapter(context, new ArrayList<DataHolder>());
-    	
-    	loadAlbums();
     }
     
-    public static AlbumManager CreateInstance(Context context, GridView gridView)
+    // Khởi tạo với tham số
+    public static AlbumManager getInstance(Context context, GridView gridView)
     {
     	if (_instance == null)
     		_instance = new AlbumManager(context, gridView);
@@ -41,11 +40,12 @@ public class AlbumManager {
     	return _instance;
     }
     
-    public static AlbumManager GetInstance()
+    public static AlbumManager getInstance()
     {
     	return _instance;
     }
     
+    // Lấy adapter cho album được chọn
     public ImageAdapter getSelectedAlbumAdapter(String albumName)
     {
     	ArrayList<DataHolder> dataHolder = this.getAlbumData(albumName);
@@ -85,6 +85,26 @@ public class AlbumManager {
     	return _selectedAlbumImagesAdapter.getContext();
     }
 
+    public void removeImageDataIfExistInOtherAlbum(DataHolder data)
+    {
+    	int n = _albumList.size();
+    	
+    	for (int i = 0; i < n; i++)
+    	{
+    		String oldAlbumName = _albumList.get(i);
+    		
+    		if (oldAlbumName.equals(data._file.getParentFile().getName()))
+    		{
+    			ArrayList<DataHolder> albumImages = this.getAlbumData(oldAlbumName);
+    	    	
+    	    	if (albumImages != null)  	    	
+	    	    	for (int j = 0; j < albumImages.size(); j++)
+	    	    		if (albumImages.get(j).equals(data))
+	    	    			albumImages.remove(j);
+    		}
+    	}
+    }
+    
     public void removeImageFromAlbum(DataHolder data, String album)
     {   
     	ArrayList<DataHolder> albumImages = this.getAlbumData(album);
