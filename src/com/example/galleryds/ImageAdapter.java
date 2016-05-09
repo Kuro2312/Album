@@ -27,53 +27,62 @@ class ViewHolder
 {
     public ImageView imageview;
     public CheckBox checkbox;
+    public String filePath;
     public int id;
 }
 
 class DataHolder
 {
-	File _file;
-	Bitmap _bitmap;
+	private String _filePath;
+	private long _modifiedTime;
+	private Bitmap _bitmap;
 	
-	public DataHolder(File file, Bitmap bitmap)
+	public DataHolder(String filePath, Bitmap bitmap, long lastModified)
 	{
-		_file = file; 
+		_filePath = filePath; 
 		_bitmap = bitmap;
+		_modifiedTime = lastModified;
+	}
+
+	public boolean setFilePath(String filePath)
+	{
+		if (filePath == "")
+			return false;
+		
+		_filePath = filePath; 
+		return true;
 	}
 	
-	public static ArrayList<DataHolder> convert(ArrayList<File> files, ArrayList<Bitmap> bitmaps)
+	public void loadBitmap()
 	{
-		if (files.size() != bitmaps.size())
-			return null;
-		
-		ArrayList<DataHolder> result = new ArrayList<DataHolder>();
-		for (int i = 0; i < files.size(); i++)		
-		{
-			result.add(new DataHolder(files.get(i), bitmaps.get(i)));		
-		}
-		
-		return result;
+		_bitmap = ImageSupporter.decodeSampledBitmapFromFile(new File(_filePath), ImageManager.IMAGE_WIDTH, ImageManager.IMAGE_HEIGHT);
+	}
+
+	public String getFilePath()
+	{
+		return _filePath;
 	}
 	
-	public void setFile(File file)
+	public Bitmap getBitmap()
 	{
-		_file = file;
+		return _bitmap;
+	}
+	
+	public long getLastModified()
+	{
+		return _modifiedTime;
 	}
 }
 
-public class ImageAdapter extends ArrayAdapter {
-	
+public class ImageAdapter extends ArrayAdapter 
+{
 	private ArrayList<DataHolder> _items;
-	Context _context;
-	
-	public ArrayList<DataHolder> getData ( )
-    {
-        return _items;
-    }
+	private Context _context;
 	
 	public ImageAdapter(Context context, ArrayList<DataHolder> data) 
 	{
 		 super(context, R.layout.image_item, data);
+		 
 		 // TODO Auto-generated constructor stub
 		 this._context = context;
 		 this._items = data;
@@ -89,7 +98,7 @@ public class ImageAdapter extends ArrayAdapter {
     }
 
     @Override
-	 public View getView(int position, View convertView, ViewGroup parent) 
+	public View getView(int position, View convertView, ViewGroup parent) 
 	 {
     	 ViewHolder holder;
     	 if (convertView == null) 
@@ -110,27 +119,24 @@ public class ImageAdapter extends ArrayAdapter {
     	 holder.imageview.setId(position);
     	 holder.imageview.setTag(holder.checkbox);     
         
-		holder.imageview.setOnClickListener(new View.OnClickListener() {
+    	 holder.imageview.setOnClickListener(new View.OnClickListener() {
 		
 		    public void onClick(View v) {
-		        //Intent intent = new Intent();
-		        //intent.setAction(Intent.ACTION_VIEW);
-		        //intent.setDataAndType(Uri.parse("file://" + arrPath[id]), "image/*");
-		        //MainActivity.this.startActivity(intent);
+
 		        CheckBox cb = (CheckBox) v.getTag();
 		        
-		        if (cb.getVisibility() == View.VISIBLE) {
-			        if (cb.isChecked())
-			            cb.setChecked(false);
-			        else 
-			            cb.setChecked(true);
-		        } else {
+		        // Khi nhấn vào 1 ảnh
+		        if (cb.getVisibility() == View.VISIBLE) 
+		        	 cb.setChecked(!cb.isChecked());
+		        else {
 		        
+		        	// Có thể truyền String thôi được không
 		        	ArrayList<File> files = new ArrayList<File>();		        	
 		        	for (DataHolder d : _items) {
-		        		files.add(d._file);
+		        		files.add(new File(d.getFilePath()));
 		        	}
 		        	
+		        	// Đóng góp dữ liệu truyền đi
 		        	Intent intent = new Intent(_context, ViewImageActivity.class);
 		        	
 		        	intent.putExtra("files", files);
@@ -138,31 +144,32 @@ public class ImageAdapter extends ArrayAdapter {
 		        	
 		        	_context.startActivity(intent);
 		        	
+		        	// Thêm animation chuyển cảnh
 		        	((Activity) _context).overridePendingTransition(R.animator.animator_slide_in_right, R.animator.animator_zoom_out);
 		        }
 		    }
 		});
         
-	    holder.checkbox.setTag(_items.get(position)._file);
-        holder.imageview.setImageBitmap(_items.get(position)._bitmap);
+	    holder.filePath = _items.get(position).getFilePath();
+        holder.imageview.setImageBitmap(_items.get(position).getBitmap());
 		holder.checkbox.setChecked(false);
         holder.id = position;
         
         return convertView;
     }
     
+    // Xóa khỏi adapter
     public void remove(int position)
     {
-    	//ImageSupporter.deleteFile(_items.get(position)._file);
     	super.remove(_items.get(position));
     }
     
     public void remove(DataHolder data)
     {
-    	//ImageSupporter.deleteFile(data._file);
     	super.remove(data);
     }
     
+    // Cập toàn bộ dữ liệu 
     public void updateData(ArrayList<DataHolder> data)
     {
     	_items.clear();

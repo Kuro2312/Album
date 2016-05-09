@@ -21,8 +21,11 @@ import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.Environment;
 import android.provider.MediaStore.Files;
+import android.util.DisplayMetrics;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.GridView;
@@ -30,12 +33,27 @@ import android.widget.Toast;
 
 public class ImageSupporter 
 {
+	public static final List<String> FILE_EXTN = Arrays.asList("jpg", "jpeg", "png");
+	public static final String DEFAULT_PICTUREPATH = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).getAbsolutePath();
+	
+	// Kiểm tra 1 file có là ảnh
+	public static boolean isImage(File file)
+	{
+		// Lấy thông tin đuôi file (extension)
+		String fileName = file.getName();
+		String ext = fileName.substring((fileName.lastIndexOf(".") + 1), fileName.length());
+		
+		// Kiểm tra có trùng với các đuôi ảnh chương trình cho phép không
+		return FILE_EXTN.contains(ext.toLowerCase());
+	}
+	
     // Bật chế độ chọn hình ảnh
     public static void turnOnSelectionMode(GridView gridView, ImageAdapter adapter) 
     {
         int count = adapter.getCount();
 
-        for (int i = 0; i < count; i++) {
+        for (int i = 0; i < count; i++) 
+        {
             View view = ImageSupporter.getViewByPosition(i, gridView);
 
             ViewHolder holder = (ViewHolder) view.getTag();
@@ -45,8 +63,6 @@ public class ImageSupporter
         }
     }  
  
-    
-
     // Tắt chế độ chọn hình ảnh
     public static void turnOffSelectionMode(GridView gridView, ImageAdapter adapter) 
     {
@@ -62,6 +78,12 @@ public class ImageSupporter
         }
     }
    
+    public static float dipToPixels(Context context, float dipValue) 
+    {
+        DisplayMetrics metrics = context.getResources().getDisplayMetrics();
+        return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dipValue, metrics);
+    }
+    
 	// Tính toán kích cỡ hợp lý với kích cỡ thể hiện
 	public static int calculateInSampleSize(BitmapFactory.Options options, int reqWidth, int reqHeight) 
 	{
@@ -102,20 +124,6 @@ public class ImageSupporter
 	    return BitmapFactory.decodeFile(file.getAbsolutePath(), options);
 	}
 	
-	public static final List<String> FILE_EXTN = Arrays.asList("jpg", "jpeg", "png");
-	
-	// Kiểm tra 1 file có là ảnh
-		public static boolean isImage(File file)
-		{
-			String fileName = file.getName();
-			String ext = fileName.substring((fileName.lastIndexOf(".") + 1),
-					fileName.length());
-			
-			if (FILE_EXTN.contains(ext.toLowerCase()))
-				return true;
-			return false;
-		}
-
 	// Đổi tên 1 tập tin
 	public static boolean renameFile(File file, String newName)
 	{		
@@ -156,168 +164,18 @@ public class ImageSupporter
 		{
 			File[] files = folder.listFiles();
 			
+			// Xóa tất cả file trong thư mục
 		    if (files != null)	    
 		    	for (File f : files) 
 		    		f.delete();
 			
+		    // Xóa thư mục
 		    folder.delete();
 		}
 	}
 	
-	// Lấy thông tin ảnh ưa thích
-	public static ArrayList<String> getFavouriteImagePaths(Context context)
-	{
-		ArrayList<String> result = null;
-		
-	    try 
-	    {
-	        InputStream inputStream = context.openFileInput("GalleryDS_Favourite.txt");
-	        result = new ArrayList<String>();
-	        
-	        if ( inputStream != null )
-	        {
-	            InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-	            BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-	            String receiveString = "";
-
-	            while ((receiveString = bufferedReader.readLine()) != null) 
-	                result.add(receiveString);
-
-	            inputStream.close();
-	        }
-	    }
-	    catch (FileNotFoundException e) {
-	        //Log.e(TAG, "File not found: " + e.toString());
-	    } catch (IOException e) {
-	        //Log.e(TAG, "Can not read file: " + e.toString());
-	    }
-
-	    return result;
-	}
-
-	// Lưu thông tin ảnh ưa thích
-	public static void saveFavouriteImagePaths(Context context, ArrayList<String> data)
-	{
-		try
-		{
-			FileOutputStream fos = context.openFileOutput("GalleryDS_Favourite.txt", Context.MODE_PRIVATE);
-			
-			if (data != null)
-				for (int i = 0; i < data.size(); i++) 
-					fos.write((data.get(i) + "\n").getBytes());
-			
-			fos.close();		
-		}
-		catch (Exception e)
-		{
-			
-		}
-	}
-	
-	// Lưu thêm thông tin ảnh ưa thích
-	public static void addNewFavouriteImagePaths(Context context, ArrayList<String> data)
-	{
-		try
-		{
-			FileOutputStream fos = context.openFileOutput("GalleryDS_Favourite.txt", Context.MODE_PRIVATE | Context.MODE_APPEND);
-			
-			if (data != null)
-				for (int i = 0; i < data.size(); i++) 
-					fos.write((data.get(i) + "\n").getBytes());
-			
-			fos.close();		
-		}
-		catch (Exception e)
-		{
-			
-		}
-	}
-	
-	// Lấy thông tin ảnh ưa thích
-	public static ArrayList<String> getAlbumPaths(Context context)
-	{
-		ArrayList<String> result = null;
-		
-	    try 
-	    {
-	        InputStream inputStream = context.openFileInput("GalleryDS_Album.txt");
-	        result = new ArrayList<String>();
-	        
-	        if ( inputStream != null )
-	        {
-	            InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-	            BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-	            String receiveString = "";
-
-	            while ((receiveString = bufferedReader.readLine()) != null) 
-	                result.add(receiveString);
-
-	            inputStream.close();
-	        }
-	    }
-	    catch (FileNotFoundException e) {
-	        //Log.e(TAG, "File not found: " + e.toString());
-	    } catch (IOException e) {
-	        //Log.e(TAG, "Can not read file: " + e.toString());
-	    }
-
-	    return result;
-	}
-
-	// Lưu thông tin ảnh ưa thích
-	public static void saveAlbumPaths(Context context, ArrayList<String> data)
-	{
-		try
-		{
-			FileOutputStream fos = context.openFileOutput("GalleryDS_Album.txt", Context.MODE_PRIVATE);
-			
-			if (data != null)
-				for (int i = 0; i < data.size(); i++) 
-					fos.write((data.get(i) + "\n").getBytes());
-			
-			fos.close();		
-		}
-		catch (Exception e)
-		{
-			
-		}
-	}
-		
-	// Lưu thêm thông tin ảnh ưa thích
-	public static void addNewAlbumPaths(Context context, ArrayList<String> data)
-	{
-		try
-		{
-			FileOutputStream fos = context.openFileOutput("GalleryDS_Album.txt", Context.MODE_PRIVATE | Context.MODE_APPEND);
-			
-			if (data != null)
-				for (int i = 0; i < data.size(); i++) 
-					fos.write((data.get(i) + "\n").getBytes());
-			
-			fos.close();		
-		}
-		catch (Exception e)
-		{
-			
-		}
-	}
-	
-	// Test thử
-	public static ArrayList<String> foo(Context context)
-	{
-		ArrayList<String> arr = new ArrayList<String>();
-		arr.add("Kuro");
-		arr.add("Shiro");
-		arr.add("Hiraki");
-		arr.add("Nova");
-		
-		saveFavouriteImagePaths(context, arr);
-		
-		return getFavouriteImagePaths(context);
-	}
-	
 	// Di chuyển tập tin 
-	public static void moveFile(String inputPath, String inputFile, String outputPath) 
+	public static boolean moveFile(String inputPath, String inputFile, String outputPath) 
 	{
 	    InputStream in = null;
 	    OutputStream out = null;
@@ -329,16 +187,18 @@ public class ImageSupporter
 	        if (!dir.exists())
 	            dir.mkdirs();
 
-
+	        // Khởi tạo file để đọc & ghi
 	        in = new FileInputStream(inputPath + File.separator + inputFile);        
 	        out = new FileOutputStream(outputPath + File.separator + inputFile);
 
 	        byte[] buffer = new byte[1024];
 	        int read;
 	        
+	        // Đọc và ghi cho tới hết
 	        while ((read = in.read(buffer)) != -1) 
 	            out.write(buffer, 0, read);
 	        
+	        // Kết thúc đóng file
             out.flush();
 	        out.close();        
 	        in.close();
@@ -346,39 +206,37 @@ public class ImageSupporter
 	        // Xóa file gốc
 	        File file = new File(inputPath + File.separator + inputFile);
 	        file.delete();
+	        
+	        return true;
 	    } 
-
     	catch (FileNotFoundException fnfe1) 
 	    {
-    		int a = 2;
-    		a = 0;
-	        //Log.e("tag", fnfe1.getMessage());
+	        Log.e("GalleryDS_moveFile", fnfe1.getMessage());
+	        return false;
 	    }
 	    catch (Exception e) 
 	    {
-	        //Log.e("tag", e.getMessage());
+	        Log.e("GalleryDS_moveFile", e.getMessage());
+	        return false;
 	    }
 	}
 	
+	// Lấy View tại 1 vị trí i
 	public static View getViewByPosition(int pos, GridView listView)
 	{
         final int firstListItemPosition = listView.getFirstVisiblePosition();
         final int lastListItemPosition = firstListItemPosition + listView.getChildCount() - 1;
-
+        
         if (pos < firstListItemPosition || pos > lastListItemPosition) 
-        {
             return listView.getAdapter().getView(pos, null, listView);
-        } 
         else 
-        {
-            final int childIndex = pos - firstListItemPosition;
-            return listView.getChildAt(childIndex);
-        }
+            return listView.getChildAt(pos - firstListItemPosition);
     }
 	
+	// Thực hiện thêm 1 phần tử vào 1 mãng đã sắp xếp
 	public static void binaryInsertByLastModifiedDate(ArrayList<DataHolder> array, DataHolder data)
     {
-    	Date lastModDate = new Date(data._file.lastModified());
+    	Date lastModDate = new Date(data.getLastModified());
     	
     	int right = array.size() - 1;
     	int left = 0;
@@ -389,14 +247,14 @@ public class ImageSupporter
     		return;
     	}
     	
-    	Date lastModDate1 = new Date(array.get(right)._file.lastModified());
+    	Date lastModDate1 = new Date(array.get(right).getLastModified());
     	if (lastModDate1.compareTo(lastModDate) <= 0)
     	{
     		array.add(data);
     		return;
     	}
     	
-    	lastModDate1 = new Date(array.get(left)._file.lastModified());
+    	lastModDate1 = new Date(array.get(left).getLastModified());
     	if (lastModDate1.compareTo(lastModDate) >= 0)
     	{
     		array.add(0, data);
@@ -408,7 +266,7 @@ public class ImageSupporter
     	{
     		int median = (right + left) / 2;
     		
-    		lastModDate1 = new Date(array.get(median)._file.lastModified());
+    		lastModDate1 = new Date(array.get(median).getLastModified());
     		
     		if (lastModDate1.compareTo(lastModDate) == 0)
     		{

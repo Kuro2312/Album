@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Environment;
@@ -67,66 +68,12 @@ public class ViewAlbumImagesActivity extends Activity {
 	    
 	    // Lấy đối tượng quảnl ý
 	    _albumManager = AlbumManager.getInstance();
-	    _imageManager = ImageManager.GetInstance();
+	    _imageManager = ImageManager.getInstance();
 	    _albumImagesAdapter = _albumManager.getSelectedAlbumAdapter(_albumName);
 	    
 		_gridViewAlbumImages.setAdapter(_albumImagesAdapter);
 		
 		registerForContextMenu(_gridViewAlbumImages);
-		
-		_inSelectionMode = false;
-		
-		llSelect = (LinearLayout) findViewById(R.id.llSelect2);
-        tvSelect = (TextView) findViewById(R.id.tvSelect2);
-        btnSelect = (ImageButton) findViewById(R.id.btnSelect2);
-        btnSelect.setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-                if (_inSelectionMode) {
-                    ImageSupporter.turnOffSelectionMode(_gridViewAlbumImages, _albumImagesAdapter);
-                    _inSelectionMode = false;
-                } else {
-                	ImageSupporter.turnOnSelectionMode(_gridViewAlbumImages, _albumImagesAdapter);
-                    _inSelectionMode = true;
-                }
-
-                populateToolbar();
-            }
-        });
-
-        vwFavourite = (View) findViewById(R.id.vwFavourite2);
-        llFavourite = (LinearLayout) findViewById(R.id.llFavourite2);
-        btnFavourite = (ImageButton) findViewById(R.id.btnFavourite2);
-        btnFavourite.setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-                addToFavourite();
-            }
-        });
-
-        vwDelete = (View) findViewById(R.id.vwDelete2);
-        llDelete = (LinearLayout) findViewById(R.id.llDelete2);
-        btnDelete = (ImageButton) findViewById(R.id.btnDelete2);
-        btnDelete.setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-            	_imageManager.deleteSelectedImages(getApplicationContext(), _gridViewAlbumImages, _albumImagesAdapter, _albumManager);
-            }
-        });
-
-        vwRemove = (View) findViewById(R.id.vwRemove2);
-        llRemove = (LinearLayout) findViewById(R.id.llRemove2);
-        btnRemove = (ImageButton) findViewById(R.id.btnRemove2);
-        btnRemove.setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-            	removeSelectedImagesFromAlbum();
-            }
-        });	
 	}
 	
 	 @Override
@@ -141,21 +88,21 @@ public class ViewAlbumImagesActivity extends Activity {
     }
 	 
 	 @Override
-    public boolean onContextItemSelected(MenuItem item) {
+    public boolean onContextItemSelected(MenuItem item) 
+	 {
         ViewHolder holder = (ViewHolder) ImageSupporter.getViewByPosition(_contextPosition, _gridViewAlbumImages).getTag();
         DataHolder data = (DataHolder) _albumImagesAdapter.getItem(holder.id);
         
         if (item.getTitle().equals("Delete"))
         {
+        	// Xóa khỏi adapter + cập nhật giao diện
             _albumImagesAdapter.remove(holder.id);
-            _imageManager.deleteSelectedImage(data, _albumManager);
+            _imageManager.deleteSelectedImage(data);
         }      
-        else if (item.getTitle().equals("Add to Favourite")) {
-            ArrayList<String> newFavourite = new ArrayList<String>();         
-            _imageManager.addImageToFavourite(data);
-        }       
-        else if (item.getTitle().equals("Remove from Album")) {
-           	
+        else if (item.getTitle().equals("Add to Favourite"))      
+            _imageManager.addImageToFavourite(data);      
+        else if (item.getTitle().equals("Remove from Album")) 
+        {   	
             // Xóa khỏi adapter + cập nhật giao diện
         	_albumImagesAdapter.remove(holder.id);
             _albumManager.removeImageFromAlbum(data, _albumName);
@@ -164,29 +111,63 @@ public class ViewAlbumImagesActivity extends Activity {
         return true;
     } 
 	 
-	 public void addToFavourite() {
+	 public void addToFavourite() 
+	 {
 	        int count = _albumImagesAdapter.getCount();
-	        ArrayList<String> newFavourite = new ArrayList<String>();
 
 	        for (int i = count - 1; i >= 0; i--) {
+	        	
 	            View view = ImageSupporter.getViewByPosition(i, _gridViewAlbumImages);
-
 	            ViewHolder holder = (ViewHolder) view.getTag();
 
 	            if (holder.checkbox.isChecked() == true) {
 	                holder.checkbox.setChecked(false);
 
-	                DataHolder data = (DataHolder) _albumImagesAdapter.getItem(holder.id);
-
-	                _imageManager.addImageToFavourite(data);
+	                _imageManager.addImageToFavourite((DataHolder) _albumImagesAdapter.getItem(holder.id));
 
 	                holder.checkbox.setChecked(true);
 	            }
 	        }
-
-	        ImageSupporter.addNewFavouriteImagePaths(this, newFavourite);
 	    }
-	
+
+	 public void removeSelectedImagesFromAlbum()
+     {
+         int count = _albumImagesAdapter.getCount();
+
+         for (int i = count - 1; i >= 0; i--) {
+             View view = ImageSupporter.getViewByPosition(i, _gridViewAlbumImages);
+ 
+             ViewHolder holder = (ViewHolder) view.getTag();
+
+             if (holder.checkbox.isChecked() == true) 
+             {
+                 // Xóa khỏi adapter + cập nhật giao diện
+                 _albumImagesAdapter.remove(holder.id);
+                 _albumManager.removeImageFromAlbum((DataHolder) _albumImagesAdapter.getItem(holder.id), _albumName);
+             }
+         }
+     }
+	   
+	 public void deleteSelectedImages()
+	 {		 
+		 int count = _albumImagesAdapter.getCount();
+
+		 for (int i = count - 1; i >= 0; i--) 
+		 {
+			 View view = ImageSupporter.getViewByPosition(i, _gridViewAlbumImages);
+
+			 ViewHolder holder = (ViewHolder) view.getTag();
+
+			 if (holder.checkbox.isChecked() == true)
+			 {
+				 DataHolder data = (DataHolder) _albumImagesAdapter.getItem(holder.id);
+				 _albumImagesAdapter.remove(holder.id);
+            	
+				 _imageManager.deleteSelectedImage(data);
+			 }
+		 }
+	 }
+	 
 	 // Tạo nút cho toolbar. Phải thay đổi giá trị _inSelectionMode trước khi gọi
 	 public void populateToolbar() {
         if (_inSelectionMode) {
@@ -219,43 +200,86 @@ public class ViewAlbumImagesActivity extends Activity {
 
         }
     }
-	
-    public void removeSelectedImagesFromAlbum()
-    {
-        int count = _albumImagesAdapter.getCount();
+	   	   
+	 public void initializeSystem()
+	 {
+		 _inSelectionMode = false;
+			
+		llSelect = (LinearLayout) findViewById(R.id.llSelect2);
+        tvSelect = (TextView) findViewById(R.id.tvSelect2);
+        btnSelect = (ImageButton) findViewById(R.id.btnSelect2);
+        
+        vwFavourite = (View) findViewById(R.id.vwFavourite2);
+        llFavourite = (LinearLayout) findViewById(R.id.llFavourite2);
+        btnFavourite = (ImageButton) findViewById(R.id.btnFavourite2);
+        
+        vwDelete = (View) findViewById(R.id.vwDelete2);
+        llDelete = (LinearLayout) findViewById(R.id.llDelete2);
+        btnDelete = (ImageButton) findViewById(R.id.btnDelete2);
+        
+        vwRemove = (View) findViewById(R.id.vwRemove2);
+        llRemove = (LinearLayout) findViewById(R.id.llRemove2);
+        btnRemove = (ImageButton) findViewById(R.id.btnRemove2);
+        
 
-        for (int i = count - 1; i >= 0; i--) {
-            View view = ImageSupporter.getViewByPosition(i, _gridViewAlbumImages);
+        btnSelect.setOnClickListener(new View.OnClickListener() {
 
-            ViewHolder holder = (ViewHolder) view.getTag();
-
-            if (holder.checkbox.isChecked() == true) {
-                DataHolder data = (DataHolder) _albumImagesAdapter.getItem(holder.id);
-            	
-                // Xóa khỏi adapter + cập nhật giao diện
-                _albumImagesAdapter.remove(holder.id);
-                _albumManager.removeImageFromAlbum(data, _albumName);
+            @Override
+            public void onClick(View v) {
+                if (_inSelectionMode)
+                    ImageSupporter.turnOffSelectionMode(_gridViewAlbumImages, _albumImagesAdapter);
+                else
+                	ImageSupporter.turnOnSelectionMode(_gridViewAlbumImages, _albumImagesAdapter);
+                
+                _inSelectionMode = !_inSelectionMode;
+                populateToolbar();
             }
-        }
-    }
-    
-	   
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		// Inflate the menu; this adds items to the action bar if it is present.
-		getMenuInflater().inflate(R.menu.view_album_images, menu);
-		return true;
-	}
+        });
 
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		// Handle action bar item clicks here. The action bar will
-		// automatically handle clicks on the Home/Up button, so long
-		// as you specify a parent activity in AndroidManifest.xml.
-		int id = item.getItemId();
-		if (id == R.id.action_settings) {
-			return true;
-		}
-		return super.onOptionsItemSelected(item);
-	}
+        
+        btnFavourite.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                addToFavourite();
+            }
+        });
+
+        
+        btnDelete.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+            	deleteSelectedImages();
+            }
+        });
+
+
+        btnRemove.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+            	removeSelectedImagesFromAlbum();
+            }
+        });	
+	 }
+	 
+	 @Override
+	 public boolean onCreateOptionsMenu(Menu menu) {
+		 // Inflate the menu; this adds items to the action bar if it is present.
+		 getMenuInflater().inflate(R.menu.view_album_images, menu);
+		 return true;
+	 }
+	
+	 @Override
+	 public boolean onOptionsItemSelected(MenuItem item) {
+		 // Handle action bar item clicks here. The action bar will
+		 // automatically handle clicks on the Home/Up button, so long
+		 // as you specify a parent activity in AndroidManifest.xml.
+		 int id = item.getItemId();
+		 if (id == R.id.action_settings) {
+		 	 return true;
+		 }
+		 return super.onOptionsItemSelected(item);
+	 }
 }

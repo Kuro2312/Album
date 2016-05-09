@@ -93,16 +93,13 @@ public class MainActivity extends Activity {
         // Load dữ liệu album
         _albumManager.loadAlbums();
         
-        // Load ảnh
-        //this.loadImages();
-        new LoadImagesTask().execute(this);
-      
+        // Chiến lược load dữ liệu bình thường
+        // doStrategyLoading_V1();
         
-        // Load dữ liệu ảnh ưa thích
-        _imageManager.loadFavouriteImages();
-        //new LoadFavouriteImageTask().execute(_imageManager);
+        // Sử dụng load dữ liệu hướng bất đồng bộ
+        doStrategyLoading_V2();
         
-        int a = _imageManager.foo();
+        int a = _imageManager.getNumberOfImages();
         Toast.makeText(this, String.valueOf(a), Toast.LENGTH_SHORT).show();
 
         // Tạo các sự kiện lắng nghe cho các View
@@ -118,12 +115,45 @@ public class MainActivity extends Activity {
         setOnClickListener_btnAdd();   
         setOnClickListener_GridViewAlbumItem();      
         setTouchEventForTabHost();
+        
+        
+        // Tự động xuất hiện dưới cùng danh sách
+        _imageManager.getGridViewAll().post(new Runnable() { 
+            public void run() { 
+            	_imageManager.getGridViewAll().setSelection(_imageManager.getNumberOfImages() - 1);
+            } 
+        });        
     }
 
+    protected void doStrategyLoading_V1()
+    {
+    	// Load thông tin ảnh
+    	// Giải mã cập nhật
+    	loadImages();
+    	
+    	// Load ảnh ưa thích
+    	_imageManager.loadFavouriteImages();
+    }
+    
+    // Chiến lược
+    // B1: Tải thông tin tất cả ảnh lên, không giải mã, cho vào adapter (giữ chỗ)
+    // B2: Dùng bất đồng bộ để giải mã
+    protected void doStrategyLoading_V2()
+    {
+    	// Load thông tin ảnh
+    	loadImages_V2();
+    	
+    	// Giải mã và cập nhật
+    	 new DecodeImagesTask().execute(_imageManager);
+    	 
+    	// Load ảnh ưa thích
+    	 new LoadFavouriteImageTask().execute(_imageManager);
+    }
+    
     protected void initializeSystem()
     {
     	_albumManager = AlbumManager.getInstance(this, (GridView) findViewById(R.id.gridView3));
-    	_imageManager = ImageManager.CreateInstance(this, (GridView) findViewById(R.id.gridView1), (GridView) findViewById(R.id.gridView2));
+    	_imageManager = ImageManager.getInstance(this, (GridView) findViewById(R.id.gridView1), (GridView) findViewById(R.id.gridView2));
     	
         llSelect = (LinearLayout) findViewById(R.id.llSelect);
         tvSelect = (TextView) findViewById(R.id.tvSelect);
@@ -162,166 +192,7 @@ public class MainActivity extends Activity {
 		_gridViewList.add(_albumManager.getGridViewAlbum());
 		_gridViewList.add(_imageManager.getGridViewFavourite());
     }
-    
-    public void setOnClickListener_GridViewAlbumItem()
-    {
-    	_albumManager.getGridViewAlbum().setOnItemClickListener(new OnItemClickListener() {
-			
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                
-            	ViewHolder holder = (ViewHolder) view.getTag();
-            	
-            	if (holder.checkbox.getVisibility() == View.VISIBLE)
-            		holder.checkbox.setChecked(!holder.checkbox.isChecked());
-            	
-            }
-        });
-    }
-    
-    public void setOnTabChangedListener_MainTabHost(){
-    	_mainTabHost.setOnTabChangedListener(new TabHost.OnTabChangeListener() {
-            @Override
-            public void onTabChanged(String tabId) {
-                if (_inSelectionMode) {
-                    switch (_lastTab) {
-                        case 0: // tab All
-                        	_imageManager.turnOffAllImagesSelectionMode();
-                            break;
-                        case 1: // tab Albums
-                        	_albumManager.turnOffSelectionAlbumMode();
-                            break;
-                        case 2: // tab Favourite
-                        	_imageManager.turnOffFavouriteSelectionMode();
-                            break;
-                    }
-                }
-                _lastTab = _mainTabHost.getCurrentTab();
-                _inSelectionMode = false;
-
-                populateToolbar();
-                
-                if (_flag == true)
-                {
-	                View nView = _gridViewList.get(ConvertIdToIndex(tabId));            
-	                
-					nView.setAnimation(ani4);
-					nView.getAnimation().start();
-                }
-                
-                _flag = true;
-            }
-        });
-    }
-    
-    public int ConvertIdToIndex(String tabID)
-	{
-		if (tabID == "tab1" || tabID == "0")
-			return 0;
-		else if (tabID == "tab2" || tabID == "1")
-			return 1;
-		else if (tabID == "tab3" || tabID == "2")
-			return 2;
-		
-		return -1;
-	}
-    
-    public void setOnClickListener_btnSelect(){
-    	btnSelect.setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-                int currentTab = _mainTabHost.getCurrentTab();
-                if (_inSelectionMode) {
-                    switch (currentTab) {
-                        case 0: // tab All
-                        	// Tắt chế độ chọn
-                        	_imageManager.turnOffAllImagesSelectionMode();
-                            break;
-                        case 1: // tab Albums
-                        	// Tắt chế độ chọn
-                        	_albumManager.turnOffSelectionAlbumMode();
-                            break;
-                        case 2: // tab Favourite
-                        	// Tắt chế độ chọn
-                        	_imageManager.turnOffFavouriteSelectionMode();
-                            break;
-                    }
-                    
-                    _inSelectionMode = false;
-                } else {
-                    switch (currentTab) {
-                        case 0: // tab All
-                        	// Bật chế độ chọn
-                        	_imageManager.turnOnAllImagesSelectionMode();
-                        	
-                            break;
-                        case 1: // tab Albums
-                        	// Bật chế độ chọn
-                        	_albumManager.turnOnSelectionAlbumMode();
-                            break;
-                        case 2: // tab Favourite
-                        	// Bật chế độ chọn
-                        	_imageManager.turnOnFavouriteSelectionMode();
-                            break;
-                    }
-                    
-                    _inSelectionMode = true;
-                }
-
-                populateToolbar();
-            }
-        });
-    }
-    
-    public void setOnClickListener_btnFavourite(){
-        btnFavourite.setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-                if (_mainTabHost.getCurrentTab() == 0)
-                	_imageManager.addToFavourite();	// thêm ảnh vào mục ưa thích
-                else
-                	_imageManager.removeFromFavourite(); // bỏ ảnh ra khỏi mục ưa thích
-            }
-        });
-    }
-    
-    public void setOnClickListener_btnDelete()
-    {
-    	 btnDelete.setOnClickListener(new View.OnClickListener() {
-
-             @Override
-             public void onClick(View v) {
-                 if (_mainTabHost.getCurrentTab() == 0)
-                 	_imageManager.deleteSelectedImages(_albumManager); // Xóa ảnh
-                 else {
-                 	_albumManager.deleteSelectedAlbums(); // Xóa album
-                 }
-             }
-         });
-    }
-    
-    public void setOnClickListener_btnAdd()
-    {
-        btnAdd.setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-                if (!_inSelectionMode) {
-                	// Chuyển sang activity tạo album
-                    Intent albumIntent = new Intent(MainActivity.this, AlbumActivity.class);
-                    
-                    // Animation cho chuyện cảnh
-                    MainActivity.this.startActivityForResult(albumIntent, ADD_ALBUM);
-                    MainActivity.this.overridePendingTransition(R.animator.animator_slide_in_right, R.animator.animator_zoom_out);
-                }
-                else 
-                	chooseAlbum();	// Kích hoạt sự kiện chọn album 
-            }
-        });
-    }
-    
+   
     // Thêm ảnh đã chọn vào album
     public void addSelectedImagesToAlbum(String albumName) {
         int count = _imageManager.getNumberOfImages();
@@ -332,31 +203,8 @@ public class MainActivity extends Activity {
             ViewHolder holder = (ViewHolder) view.getTag();
 
             // Kiểm tra cái nào được chọn
-            if (holder.checkbox.isChecked() == true) {
-                
-            	File path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
-            	File f =  (File) holder.checkbox.getTag();
-            	
-            	// Kiểm tra file có nằm trong thư mục
-            	if (f.getParent() != path.getAbsolutePath() + File.pathSeparator + albumName)
-            	{
-            		// Lấy dữ liệu file cũ
-            		DataHolder data = _imageManager.getImageDataByName(f.getAbsolutePath());
-            		
-            		// Xóa ảnh khỏi album cũ nếu phải
-            		_albumManager.removeImageDataIfExistInOtherAlbum(data);
-            		
-            		// Di chuyển file
-            		ImageSupporter.moveFile(f.getParentFile().getAbsolutePath(), f.getName(), path.getAbsolutePath() + File.separator + albumName);
-            		
-            		// Cập nhật thông tin file
-            		String newPath = path.getAbsolutePath() + File.separator + albumName + File.separator + f.getName();
-            		data.setFile(new File(newPath));
-            		
-            		// Thêm vào album
-            		_albumManager.addImageToAlbum(data, albumName);
-            	}
-            }
+            if (holder.checkbox.isChecked() == true)
+        		_albumManager.addImageToAlbum(_imageManager.getImageDataById(holder.id), albumName);
         }
     }   
     
@@ -366,7 +214,7 @@ public class MainActivity extends Activity {
     	// Tạo 1 alert (thông báo)
     	AlertDialog.Builder builderSingle = new AlertDialog.Builder(this);
     	builderSingle.setIcon(R.drawable.ic_launcher);
-    	builderSingle.setTitle("Select One Album: ");
+    	builderSingle.setTitle("Select a Album: ");
 
     	final ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(this, android.R.layout.select_dialog_singlechoice);
     	
@@ -374,80 +222,38 @@ public class MainActivity extends Activity {
     	arrayAdapter.addAll(_albumManager.getAlbumList());
 
     	// Tạo sự kiện cho nút hủy thông báo
-    	builderSingle.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-    	            @Override
-    	            public void onClick(DialogInterface dialog, int which) {
-    	                dialog.dismiss();
-    	            }
-    	        });
+    	builderSingle.setNegativeButton("Cancel", new DialogInterface.OnClickListener() 
+    	{
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+    	});
 
     	// Tạo sự kiện cho nút chọn album
-    	builderSingle.setAdapter(arrayAdapter, new DialogInterface.OnClickListener() {
-    	            @Override
-    	            public void onClick(DialogInterface dialog, int which) {
-    	                String strName = arrayAdapter.getItem(which);
-    	                MainActivity main = (MainActivity) arrayAdapter.getContext();
-    	                
-    	                // Thực hiện thêm ảnh vào album
-    	                main.addSelectedImagesToAlbum(strName);
-    	            }
-    	        });
+    	builderSingle.setAdapter(arrayAdapter, new DialogInterface.OnClickListener() 
+    	{
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                String strName = arrayAdapter.getItem(which);
+                MainActivity main = (MainActivity) arrayAdapter.getContext();
+                
+                // Thực hiện thêm ảnh vào album
+                main.addSelectedImagesToAlbum(strName);
+            }
+        });
     	
     	builderSingle.show();
     }
-    
-    // Gọi hàm này để chạy sự kiện mới: xem ảnh trong album
-    public void viewAllAlbumImages(String albumName)
-    {
-    	Intent intent = new Intent(this, ViewAlbumImagesActivity.class);
-    	
-    	// Đóng gói dữ liệu gửi sang activity mới
-    	Bundle bundle = new Bundle();
-    	bundle.putString("AlbumName", albumName);
-
-    	intent.putExtras(bundle);
-    	startActivity(intent);
-    	
-    	// Animation cho chuyển cảnh
-    	MainActivity.this.overridePendingTransition(R.animator.animator_slide_in_right, R.animator.animator_zoom_out);
-    }
-       
+      
     // Nạp toàn bộ ảnh trong máy lên
     public void loadImages() 
     {
         File imageDir = new File(Environment.getExternalStorageDirectory().toString());
 
+        // Duyệt đệ quy
         if (imageDir.exists()) 
             dirFolder(imageDir);     
-    }
-
-    // Nạp các tab cần thể hiện cho tabhost
-    public void loadTabs() {
-    	
-        // Lấy TabHost từ Id cho trước
-        _mainTabHost = (TabHost) findViewById(R.id.tabhost);
-        _mainTabHost.setup();
-
-        // Tạo cấu hình cho tab1 : tab chứa toàn bộ ảnh
-        TabSpec spec = _mainTabHost.newTabSpec("tab1");
-        spec.setContent(R.id.tab1);
-        spec.setIndicator("All");
-        _mainTabHost.addTab(spec);
-
-        // Tạo cấu hình cho tab2 : tab chứa toàn bộ album ảnh
-        spec = _mainTabHost.newTabSpec("tab2");
-        spec.setContent(R.id.tab2);
-        spec.setIndicator("Albums");
-        _mainTabHost.addTab(spec);
-
-        // Tạo cấu hình cho tab3 : tab chứa toàn bộ ảnh yêu thích
-        spec = _mainTabHost.newTabSpec("tab3");
-        spec.setContent(R.id.tab3);
-        spec.setIndicator("Favourite");
-        _mainTabHost.addTab(spec);
-
-        //Thiết lập tab mặc định được chọn ban đầu là tab 0
-        _mainTabHost.setCurrentTab(0);
     }
 
     // Duyệt và tìm kiếm tất cả tập tin hình ảnh
@@ -469,8 +275,8 @@ public class MainActivity extends Activity {
             if (ImageSupporter.isImage(f)) 
             {
             	// Tạo mới dữ liệu của ảnh
-                Bitmap b = ImageSupporter.decodeSampledBitmapFromFile(f, 100, 100);
-                DataHolder dataHolder = new DataHolder(f, b);
+                //Bitmap b = ImageSupporter.decodeSampledBitmapFromFile(f, 100, 100);
+                DataHolder dataHolder = new DataHolder(f.getAbsolutePath(), null, f.lastModified());
                 
                 // Nập dữ liệu vào bộ quản lý ảnh
                 _imageManager.insertImageData(dataHolder);
@@ -489,6 +295,71 @@ public class MainActivity extends Activity {
 
     }
     
+    // Nạp toàn bộ ảnh trong máy lên
+    public void loadImages_V2() 
+    {
+        File imageDir = new File(Environment.getExternalStorageDirectory().toString());
+
+        // Duyệt đệ quy
+        if (imageDir.exists()) 
+            dirFolder_V2(imageDir);     
+    }
+
+    // Duyệt và tìm kiếm tất cả tập tin hình ảnh
+    // Không giải mã ảnh
+    public void dirFolder_V2(File file) {
+    	
+    	// Kiểm tra tên có hợp lệ không
+        if (file.getName().startsWith(".") || file.getName().startsWith("com."))
+            return;
+
+        File[] files = file.listFiles();
+
+        // Kiễm tra các tập tin con có rỗng không
+        if (files == null)
+            return;
+
+        for (File f : files) {
+        	
+        	// Kiểm tra xem có phải ảnh không
+            if (ImageSupporter.isImage(f)) 
+            {
+            	// Tạo mới dữ liệu của ảnh
+                DataHolder dataHolder = new DataHolder(f.getAbsolutePath(), null, f.lastModified());
+                
+                // Nập dữ liệu vào bộ quản lý ảnh
+                _imageManager.insertImageData(dataHolder);
+                _imageManager.addImageData(f.getAbsolutePath(), dataHolder);
+                
+                // Nạp dữ liệu vào bộ quản lý album
+                String parentName = f.getParentFile().getName();
+                if (_albumManager.containsAlbum(parentName))
+                	_albumManager.insertImageDataToAlbum(parentName, dataHolder);
+            }
+
+            // Kiểm tra phải thư mục không
+            if (f.isDirectory())
+                dirFolder(f);
+        }
+
+    }
+        
+    // Gọi hàm này để chạy sự kiện mới: xem ảnh trong album
+    public void viewAllAlbumImages(String albumName)
+    {
+    	Intent intent = new Intent(this, ViewAlbumImagesActivity.class);
+    	
+    	// Đóng gói dữ liệu gửi sang activity mới
+    	Bundle bundle = new Bundle();
+    	bundle.putString("AlbumName", albumName);
+
+    	intent.putExtras(bundle);
+    	startActivity(intent);
+    	
+    	// Animation cho chuyển cảnh
+    	MainActivity.this.overridePendingTransition(R.animator.animator_slide_in_right, R.animator.animator_zoom_out);
+    }
+       
     // Tạo nút cho toolbar. Phải thay đổi giá trị _inSelectionMode trước khi gọi
     private void populateToolbar() {
         int currentTab = _mainTabHost.getCurrentTab();
@@ -621,7 +492,7 @@ public class MainActivity extends Activity {
                 holder.checkbox.setChecked(true);
                 
                 if (item.getTitle().equals("Delete"))
-                	_imageManager.deleteSelectedImage(_imageManager.getImageDataById(holder.id), _albumManager);
+                	_imageManager.deleteSelectedImage(_imageManager.getImageDataById(holder.id));
                 
                 if (item.getTitle().equals("Add to Favourite")) 
                     _imageManager.addImageToFavourite(_imageManager.getImageDataById(holder.id));
@@ -652,10 +523,39 @@ public class MainActivity extends Activity {
 
             case 2: // tab Favourite
                 ViewHolder holder2 = (ViewHolder) ImageSupporter.getViewByPosition(_contextPosition, _imageManager.getGridViewFavourite()).getTag();
-                _imageManager.removeImageFromFavourite(holder2.id);
+                _imageManager.removeImageFromFavourite(_imageManager.getFavouriteImageByID(holder2.id));
                 break;
         }
         return true;
+    }
+
+    // Nạp các tab cần thể hiện cho tabhost
+    public void loadTabs() {
+    	
+        // Lấy TabHost từ Id cho trước
+        _mainTabHost = (TabHost) findViewById(R.id.tabhost);
+        _mainTabHost.setup();
+
+        // Tạo cấu hình cho tab1 : tab chứa toàn bộ ảnh
+        TabSpec spec = _mainTabHost.newTabSpec("tab1");
+        spec.setContent(R.id.tab1);
+        spec.setIndicator("All");
+        _mainTabHost.addTab(spec);
+
+        // Tạo cấu hình cho tab2 : tab chứa toàn bộ album ảnh
+        spec = _mainTabHost.newTabSpec("tab2");
+        spec.setContent(R.id.tab2);
+        spec.setIndicator("Albums");
+        _mainTabHost.addTab(spec);
+
+        // Tạo cấu hình cho tab3 : tab chứa toàn bộ ảnh yêu thích
+        spec = _mainTabHost.newTabSpec("tab3");
+        spec.setContent(R.id.tab3);
+        spec.setIndicator("Favourite");
+        _mainTabHost.addTab(spec);
+
+        //Thiết lập tab mặc định được chọn ban đầu là tab 0
+        _mainTabHost.setCurrentTab(0);
     }
 
     // Sự kiện cho việc quẹt trái phải để chuyển tab 
@@ -694,16 +594,12 @@ public class MainActivity extends Activity {
 	    						int currentTabID =  _mainTabHost.getCurrentTab();
 	    						int nTabs = _mainTabHost.getTabWidget().getChildCount();
 	    						int nextTabID = -1;
+	    						Animation ani = null;
 	    						
 	    						if (_sXPoint - X > 50)
 	    						{
 	    							nextTabID = (currentTabID + 1) % nTabs;
-	    							_sXPoint = -1;
-	    							_gridViewList.get(nextTabID).setAnimation(ani2);
-	    							_gridViewList.get(nextTabID).getAnimation().start();
-		    						
-	    							_flag = false;
-		    						_mainTabHost.setCurrentTab(nextTabID);
+	    							ani = ani2;
 	    						}
 	    						else if (_sXPoint - X < -50)
 	    						{
@@ -711,9 +607,15 @@ public class MainActivity extends Activity {
 	    								nextTabID = nTabs - 1;
 	    							else 
 	    								nextTabID = currentTabID - 1;
-	    							
-	    							_sXPoint = -1;
-	    							_gridViewList.get(nextTabID).setAnimation(ani4);
+	    							   							
+	    							ani = ani4;
+
+	    						}
+	    						
+	    						if (ani != null)
+	    						{
+		    						_sXPoint = -1;
+	    							_gridViewList.get(nextTabID).setAnimation(ani);
 	    							_gridViewList.get(nextTabID).getAnimation().start();
 		    						
 	    							_flag = false;
@@ -728,8 +630,7 @@ public class MainActivity extends Activity {
     		});
         } 
 	}
-	
-    
+	   
     @Override
     protected void onResume() {
 
@@ -737,7 +638,166 @@ public class MainActivity extends Activity {
 
         //LoadImages();
     }
+  
+    public void setOnClickListener_GridViewAlbumItem()
+    {
+    	_albumManager.getGridViewAlbum().setOnItemClickListener(new OnItemClickListener() {
+			
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                
+            	ViewHolder holder = (ViewHolder) view.getTag();
+            	
+            	if (holder.checkbox.getVisibility() == View.VISIBLE)
+            		holder.checkbox.setChecked(!holder.checkbox.isChecked());
+            	
+            }
+        });
+    }
+    
+    public void setOnTabChangedListener_MainTabHost(){
+    	_mainTabHost.setOnTabChangedListener(new TabHost.OnTabChangeListener() {
+            @Override
+            public void onTabChanged(String tabId) {
+                if (_inSelectionMode) {
+                    switch (_lastTab) {
+                        case 0: // tab All
+                        	_imageManager.turnOffAllImagesSelectionMode();
+                            break;
+                        case 1: // tab Albums
+                        	_albumManager.turnOffSelectionAlbumMode();
+                            break;
+                        case 2: // tab Favourite
+                        	_imageManager.turnOffFavouriteSelectionMode();
+                            break;
+                    }
+                }
+                _lastTab = _mainTabHost.getCurrentTab();
+                _inSelectionMode = false;
 
+                populateToolbar();
+                
+                if (_flag == true)
+                {
+	                View nView = _gridViewList.get(ConvertIdToIndex(tabId));            
+	                
+					nView.setAnimation(ani4);
+					nView.getAnimation().start();
+                }
+                
+                _flag = true;
+            }
+        });
+    }
+    
+    public int ConvertIdToIndex(String tabID)
+	{
+		if (tabID == "tab1" || tabID == "0")
+			return 0;
+		else if (tabID == "tab2" || tabID == "1")
+			return 1;
+		else if (tabID == "tab3" || tabID == "2")
+			return 2;
+		
+		return -1;
+	}
+    
+    public void setOnClickListener_btnSelect(){
+    	btnSelect.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                int currentTab = _mainTabHost.getCurrentTab();
+                if (_inSelectionMode) {
+                    switch (currentTab) {
+                        case 0: // tab All
+                        	// Tắt chế độ chọn
+                        	_imageManager.turnOffAllImagesSelectionMode();
+                            break;
+                        case 1: // tab Albums
+                        	// Tắt chế độ chọn
+                        	_albumManager.turnOffSelectionAlbumMode();
+                            break;
+                        case 2: // tab Favourite
+                        	// Tắt chế độ chọn
+                        	_imageManager.turnOffFavouriteSelectionMode();
+                            break;
+                    }
+                    
+                    _inSelectionMode = false;
+                } else {
+                    switch (currentTab) {
+                        case 0: // tab All
+                        	// Bật chế độ chọn
+                        	_imageManager.turnOnAllImagesSelectionMode();
+                        	
+                            break;
+                        case 1: // tab Albums
+                        	// Bật chế độ chọn
+                        	_albumManager.turnOnSelectionAlbumMode();
+                            break;
+                        case 2: // tab Favourite
+                        	// Bật chế độ chọn
+                        	_imageManager.turnOnFavouriteSelectionMode();
+                            break;
+                    }
+                    
+                    _inSelectionMode = true;
+                }
+
+                populateToolbar();
+            }
+        });
+    }
+    
+    public void setOnClickListener_btnFavourite(){
+        btnFavourite.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                if (_mainTabHost.getCurrentTab() == 0)
+                	_imageManager.addToFavourite();	// thêm ảnh vào mục ưa thích
+                else
+                	_imageManager.removeFromFavourite(); // bỏ ảnh ra khỏi mục ưa thích
+            }
+        });
+    }
+    
+    public void setOnClickListener_btnDelete()
+    {
+    	 btnDelete.setOnClickListener(new View.OnClickListener() {
+
+             @Override
+             public void onClick(View v) {
+                 if (_mainTabHost.getCurrentTab() == 0)
+                 	_imageManager.deleteSelectedImages(); // Xóa ảnh
+                 else {
+                 	_albumManager.deleteSelectedAlbums(); // Xóa album
+                 }
+             }
+         });
+    }
+    
+    public void setOnClickListener_btnAdd()
+    {
+        btnAdd.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                if (!_inSelectionMode) {
+                	// Chuyển sang activity tạo album
+                    Intent albumIntent = new Intent(MainActivity.this, AlbumActivity.class);
+                    
+                    // Animation cho chuyện cảnh
+                    MainActivity.this.startActivityForResult(albumIntent, ADD_ALBUM);
+                    MainActivity.this.overridePendingTransition(R.animator.animator_slide_in_right, R.animator.animator_zoom_out);
+                }
+                else 
+                	chooseAlbum();	// Kích hoạt sự kiện chọn album 
+            }
+        });
+    }
+    
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -755,33 +815,5 @@ public class MainActivity extends Activity {
             return true;
         }
         return super.onOptionsItemSelected(item);
-    }
-}
-
-class LoadImagesTask extends AsyncTask<MainActivity, Void, Integer> {
-
-    protected Integer doInBackground(MainActivity... activity) {
-    	//Load dữ liệu ảnh ưa thích
-    	activity[0].loadImages();
-    	return 1;
-    }
-
-
-    protected void onPostExecute(Integer a) {
-        //mImageView.setImageBitmap(result);
-    }
-}
-
-class LoadFavouriteImageTask extends AsyncTask<ImageManager, Void, Integer> {
-
-    protected Integer doInBackground(ImageManager... imageManager) {
-    	//Load dữ liệu ảnh ưa thích
-    	imageManager[0].loadFavouriteImages();
-    	return 1;
-    }
-
-
-    protected void onPostExecute(Integer a) {
-        //mImageView.setImageBitmap(result);
     }
 }

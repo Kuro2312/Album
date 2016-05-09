@@ -12,28 +12,26 @@ import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-class AlbumViewHolder 
+class AlbumViewHolder extends ViewHolder
 {
-    public ImageView imageview;
     public TextView textview;
-    public CheckBox checkbox;
-    public int id;
 }
 
 public class AlbumAdapter extends ArrayAdapter  {
 
 	private ArrayList<String> _items;
-	Context _context;
+	private Context _context;
 	
 	public AlbumAdapter(Context context, ArrayList<String> data) 
 	{
 		 super(context, R.layout.album_item, data);
+		 
 		 // TODO Auto-generated constructor stub
 		 this._context = context;
 		 this._items = data;
 	}
 	
-	public Object getItem(int position) {	    	
+	public Object getItem(int position) {
 		return _items.get(position);
     }
 
@@ -41,7 +39,6 @@ public class AlbumAdapter extends ArrayAdapter  {
         return position;
     }
     
-
     @Override
 	public View getView(int position, View convertView, ViewGroup parent) 
     {
@@ -70,13 +67,11 @@ public class AlbumAdapter extends ArrayAdapter  {
 		        
 		        if (cb.getVisibility() == View.VISIBLE)
 		        	cb.setChecked(!cb.isChecked());
-		        else
-		        	if(_context instanceof MainActivity)
-		        		((MainActivity) _context).viewAllAlbumImages(_items.get(cb.getId()));  
+		        else if(_context instanceof MainActivity)
+		        	((MainActivity) _context).viewAllAlbumImages(_items.get(cb.getId()));  
 		    }
 		});
         
-	    //holder.checkbox.setTag(_items.get(position));
 	    holder.imageview.setTag(holder.checkbox); 
 	    
 	   	holder.textview.setId(position);

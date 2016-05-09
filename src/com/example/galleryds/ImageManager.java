@@ -1,5 +1,12 @@
 package com.example.galleryds;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -14,6 +21,8 @@ public class ImageManager {
 	
 	// Singleton
 	protected static ImageManager _instance = null;
+	public static int IMAGE_HEIGHT= 75;
+	public static int IMAGE_WIDTH = 75;
 	
 	// Cho việc thao tác trên mục toàn bô ảnh
     protected GridView _gridViewAll;
@@ -25,26 +34,25 @@ public class ImageManager {
     protected GridView _gridViewFavourite;
     protected ArrayList<DataHolder> _favouriteData;
     protected ImageAdapter _favouriteAdapter = null;
-    protected HashMap<String, String> _favouriteMap = null;
-    		
-    
-    public int foo()
-    {
-    	return _allImageData.size();
-    }
+    protected HashMap<String, String> _favouriteMap = null;  		
     
     // Khởi tạo
     protected ImageManager(Context context, GridView gridView, GridView gridViewFavourite)
     {
     	_gridViewAll = gridView;
     	_gridViewFavourite = gridViewFavourite;
+    	
     	_allImageData = new ArrayList<DataHolder>();
         _allMap = new HashMap<String, DataHolder>();
+        
         _allImageAdapter = new ImageAdapter(context, _allImageData);
-        _gridViewAll.setAdapter(_allImageAdapter);
+        _gridViewAll.setAdapter(_allImageAdapter);    	
+        
+        IMAGE_HEIGHT = (int) ImageSupporter.dipToPixels(context, IMAGE_HEIGHT);
+		IMAGE_WIDTH = (int) ImageSupporter.dipToPixels(context, IMAGE_WIDTH);
     }
     
-    public static ImageManager CreateInstance(Context context, GridView gridView, GridView gridViewFavourite)
+    public static ImageManager getInstance(Context context, GridView gridView, GridView gridViewFavourite)
     {
     	if (_instance == null)
     		_instance = new ImageManager(context, gridView, gridViewFavourite);
@@ -52,16 +60,22 @@ public class ImageManager {
     	return _instance;
     }
     
-    public Context getContext()
+    public static ImageManager getInstance()
+    {
+    	return _instance;
+    }
+    
+    public ArrayList<DataHolder> getAllImageData()
+    {
+    	return _allImageData;
+    }
+    
+    // Lấy context
+    protected Context getContext()
     {
     	return _allImageAdapter.getContext();
     }
     
-    public static ImageManager GetInstance()
-    {
-    	return _instance;
-    }
-
     // Lấy GridView của tất cả ảnh
     public GridView getGridViewAll() 
     {
@@ -73,27 +87,7 @@ public class ImageManager {
     {
 		return _gridViewFavourite;
 	}
-    
-    // Lấy dữ liệu của 1 ảnh
-    public DataHolder getImageDataByName(String imageName) 
-    {
-    	if (_allMap.containsKey(imageName))
-    		return _allMap.get(imageName);
-    	
-    	return null;
-	}
-
-    // Lấy danh sách các ảnh
-    public ArrayList<DataHolder> getImageList()
-    {
-    	return _allImageData; 
-    }
-    
-    public boolean containsImage(String imageName)
-    {
-    	return _allMap.containsKey(imageName);
-    }
-    
+   
     // Thêm dữ liệu của 1 ảnh
     public boolean addImageData(String filePath, DataHolder data)
     {
@@ -110,25 +104,41 @@ public class ImageManager {
     	}
     }
     
-    public ImageAdapter getAllImageAdapter()
-    {
-    	return _allImageAdapter;
-    }
-    
     // Lấy dữ liệu ảnh
     public DataHolder getImageDataById(int id)
     {
     	return (DataHolder) _allImageAdapter.getItem(id);
     }
     
+    // Lấy dữ liệu ảnh
+    protected DataHolder getImageDataByName(String name)
+    {
+    	if (_allMap.containsKey(name))
+    		return _allMap.get(name);
+    	
+    	return null;
+    }
+    
+    // Lấy dữ liệu ảnh ưu thích
+    public DataHolder getFavouriteImageByID(int id)
+    {
+    	return (DataHolder) _favouriteAdapter.getItem(id);
+    }
+    
     // Lấy số lượng ảnh
     public int getNumberOfImages()
     {
-    	return _allImageAdapter.getCount();
+    	return _allImageData.size();
+    }
+    
+    // Lấy số lượng ảnh ưa thích
+    public int getNumberOfFavouriteImages()
+    {
+    	return _favouriteData.size();
     }
 
     // Xóa các ảnh được chọn
-    public void deleteSelectedImages(AlbumManager albumManager)
+    public void deleteSelectedImages()
     {
         int count = _allImageAdapter.getCount();
 
@@ -139,68 +149,29 @@ public class ImageManager {
             ViewHolder holder = (ViewHolder) view.getTag();
 
             if (holder.checkbox.isChecked() == true)
-            {
-            	DataHolder data = (DataHolder) _allImageAdapter.getItem(holder.id);
-            	
-            	// Xóa trên adapter của mục All
-            	_allImageAdapter.remove(holder.id);
-                
-            	// Xóa trên dữ liệu lưu dạng map
-            	_allMap.remove(data._file.getAbsolutePath());
-            	
-            	// Xóa trên dữ liệu mục Favourite
-            	this.removeImageFromFavourite(data);
-            	
-            	// Xóa ảnh khỏi dữ liệu album
-            	String album = data._file.getParentFile().getName();
-            	albumManager.removeImageFromAlbum(data, album);
-            	
-            	// Xóa ảnh thực sự
-            	ImageSupporter.deleteFile(data._file);
-            }
+            	this.deleteSelectedImage((DataHolder) _allImageAdapter.getItem(holder.id));
         }
     }
     
-    public void deleteSelectedImage(DataHolder data, AlbumManager albumManager)
+    // Xóa 1 ảnh được chọn
+    public void deleteSelectedImage(DataHolder data)
     {
+    	File f = new File(data.getFilePath());
+    	
     	// Xóa trên adapter của mục All
     	_allImageAdapter.remove(data);
     	
     	// Xóa trên dữ liệu lưu dạng map
-    	_allMap.remove(data._file.getAbsolutePath());
+    	_allMap.remove(data.getFilePath());
     	
     	// Xóa trên dữ liệu mục Favourite
     	this.removeImageFromFavourite(data);
     	
     	// Xóa ảnh khỏi dữ liệu album
-    	String album = data._file.getParentFile().getName();
-    	albumManager.removeImageFromAlbum(data, album);
+    	AlbumManager.getInstance().removeImageFromAlbum(data,  f.getParentFile().getName());
     	
     	// Xóa ảnh thực sự
-    	ImageSupporter.deleteFile(data._file);
-    }
-    
-    public void deleteSelectedImages(Context context, GridView gridView, ImageAdapter adapter, AlbumManager albumManager)
-    {
-        int count = adapter.getCount();
-
-        for (int i = count - 1; i >= 0; i--) 
-        {
-            View view = ImageSupporter.getViewByPosition(i, gridView);
-
-            ViewHolder holder = (ViewHolder) view.getTag();
-
-            if (holder.checkbox.isChecked() == true)
-            {
-            	DataHolder data = (DataHolder) adapter.getItem(holder.id);
-            	adapter.remove(holder.id);
-            	
-            	this.deleteSelectedImage(data, albumManager);
-            	
-            	String album = data._file.getParentFile().getName();
-            	albumManager.removeImageFromAlbum(data, album);
-            }
-        }
+    	ImageSupporter.deleteFile(f);
     }
 
     // Bật chế độ chọn ảnh
@@ -243,20 +214,37 @@ public class ImageManager {
                 holder.checkbox.setChecked(false);
 
                 DataHolder data = (DataHolder) _allImageAdapter.getItem(holder.id);
-
-                if (_favouriteMap.containsKey(data._file.getAbsolutePath()) == false) {
-                    newFavourite.add(data._file.getAbsolutePath());
+                String path = data.getFilePath();
+                
+                if (_favouriteMap.containsKey(path) == false) {
+                    newFavourite.add(path);
                     _favouriteAdapter.add(data);
-                    _favouriteMap.put(data._file.getAbsolutePath(), data._file.getAbsolutePath());
+                    _favouriteMap.put(path, path);
                 }
 
                 holder.checkbox.setChecked(true);
             }
         }
 
-        ImageSupporter.addNewFavouriteImagePaths(getContext(), newFavourite);
+        ImageManager.addNewFavouriteImagePaths(getContext(), newFavourite);
     }
 
+    // Thêm ảnh vào mục ưa thích
+    public void addImageToFavourite(DataHolder data)
+    {
+    	 ArrayList<String> newFavourite = new ArrayList<String>();
+    	 String path = data.getFilePath();
+    	 
+    	 if (_favouriteMap.containsKey(path) == false) 
+    	 {
+             newFavourite.add(path);
+             _favouriteAdapter.add(data);
+             _favouriteMap.put(path, path);
+         }
+    	
+    	 ImageManager.addNewFavouriteImagePaths(getContext(), newFavourite);
+    }
+       
     // Xóa khỏi favourite
     // Luu lai vào file
     public void removeFromFavourite() 
@@ -270,21 +258,35 @@ public class ImageManager {
 
             if (holder.checkbox.isChecked() == true) {
                 DataHolder data = (DataHolder) _favouriteAdapter.getItem(holder.id);
-
-                if (_favouriteMap.containsKey(data._file.getAbsolutePath()) == true) {
+                String path = data.getFilePath();
+                
+                if (_favouriteMap.containsKey(path) == true) {
                     _favouriteAdapter.remove(data);
-                    _favouriteMap.remove(data._file.getAbsolutePath());
+                    _favouriteMap.remove(path);
                 }
             }
         }
 
-        ImageSupporter.saveFavouriteImagePaths(getContext(), new ArrayList<String>(_favouriteMap.values()));
+        ImageManager.saveFavouriteImagePaths(getContext(), new ArrayList<String>(_favouriteMap.values()));
     }
+ 
+    // Bỏ ảnh khỏi mục ưa thích
+    public void removeImageFromFavourite(DataHolder data)
+    {
+        if (_favouriteMap.containsKey(data.getFilePath()) == true)
+        {
+            _favouriteAdapter.remove(data);
+            _favouriteMap.remove(data.getFilePath());
+        }
 
+        // Lưu dữ liệu
+        ImageManager.saveFavouriteImagePaths(getContext(), new ArrayList<String>(_favouriteMap.values()));
+    }
+    
     // Nạp các ảnh ưa thích lên
     public void loadFavouriteImages() 
     {
-        ArrayList<String> data = ImageSupporter.getFavouriteImagePaths(getContext());
+        ArrayList<String> data = ImageManager.getFavouriteImagePaths(getContext());
         _favouriteData = new ArrayList<DataHolder>();
         _favouriteMap = new HashMap<String, String>();
 
@@ -296,54 +298,13 @@ public class ImageManager {
             for (int i = 0; i < data.size(); i++) 
             {
                 DataHolder d = this.getImageDataByName(data.get(i));
-
+             
                 if (d != null) {
                     _favouriteData.add(d);
-                    _favouriteMap.put(d._file.getAbsolutePath(), d._file.getAbsolutePath());
+                    _favouriteMap.put(d.getFilePath(), d.getFilePath());
                 }
             }
         }
-    }
-
-    // Thêm ảnh vào mục ưa thích
-    public void addImageToFavourite(DataHolder imageData)
-    {
-    	 ArrayList<String> newFavourite = new ArrayList<String>();
-    	 
-    	if (_favouriteMap.containsKey(imageData._file.getAbsolutePath()) == false) 
-    	{
-            newFavourite.add(imageData._file.getAbsolutePath());
-            _favouriteAdapter.add(imageData);
-            _favouriteMap.put(imageData._file.getAbsolutePath(), imageData._file.getAbsolutePath());
-        }
-    	
-    	ImageSupporter.addNewFavouriteImagePaths(getContext(), newFavourite);
-    }
-    
-    // Bỏ ảnh khỏi mục ưa thích
-    public void removeImageFromFavourite(int imageId)
-    {
-    	DataHolder data = (DataHolder) _favouriteAdapter.getItem(imageId);
-
-        if (_favouriteMap.containsKey(data._file.getAbsolutePath()) == true)
-        {
-            _favouriteAdapter.remove(data);
-            _favouriteMap.remove(data._file.getAbsolutePath());
-        }
-
-        ImageSupporter.saveFavouriteImagePaths(getContext(), new ArrayList<String>(_favouriteMap.values()));
-    }
-
-    // Bỏ ảnh khỏi mục ưa thích
-    public void removeImageFromFavourite(DataHolder data)
-    {
-        if (_favouriteMap.containsKey(data._file.getAbsolutePath()) == true)
-        {
-            _favouriteAdapter.remove(data);
-            _favouriteMap.remove(data._file.getAbsolutePath());
-        }
-
-        ImageSupporter.saveFavouriteImagePaths(getContext(), new ArrayList<String>(_favouriteMap.values()));
     }
     
     // Áp dụng insert sort với độ phức tạp O(n)
@@ -351,7 +312,81 @@ public class ImageManager {
     public void insertImageData(DataHolder data)
     { 	
     	ImageSupporter.binaryInsertByLastModifiedDate(_allImageData, data);
-    	//_allImageData.add(data);
     }
 
+	// Lấy thông tin ảnh ưa thích
+	protected static ArrayList<String> getFavouriteImagePaths(Context context)
+	{
+		ArrayList<String> result = null;
+		
+	    try 
+	    {
+	        InputStream inputStream = context.openFileInput("GalleryDS_Favourite.txt");
+	        result = new ArrayList<String>();
+	        
+	        if ( inputStream != null )
+	        {
+	            InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+	            BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+	            String receiveString = "";
+
+	            while ((receiveString = bufferedReader.readLine()) != null) 
+	                result.add(receiveString);
+
+	            inputStream.close();
+	        }
+	        return result;
+	    }
+	    catch (FileNotFoundException e) 
+	    {
+	    	Log.e("GalleryDS_Favourite", "File not found: " + e.toString());
+	        return null;
+	    } catch (IOException e) 
+	    {
+	    	Log.e("GalleryDS_Favourite", "Can not read file: " + e.toString());
+	        return null;
+	    }
+	}
+
+	// Lưu thông tin ảnh ưa thích
+	protected static boolean saveFavouriteImagePaths(Context context, ArrayList<String> data)
+	{
+		try
+		{
+			FileOutputStream fos = context.openFileOutput("GalleryDS_Favourite.txt", Context.MODE_PRIVATE);
+			
+			if (data != null)
+				for (int i = 0; i < data.size(); i++) 
+					fos.write((data.get(i) + "\n").getBytes());
+			
+			fos.close();	
+			return true;
+		}
+		catch (Exception e)
+		{
+			Log.e("GalleryDS_Favourite", e.getMessage());
+	        return false;
+		}
+	}
+	
+	// Lưu thêm thông tin ảnh ưa thích
+	protected static boolean addNewFavouriteImagePaths(Context context, ArrayList<String> data)
+	{
+		try
+		{
+			FileOutputStream fos = context.openFileOutput("GalleryDS_Favourite.txt", Context.MODE_PRIVATE | Context.MODE_APPEND);
+			
+			if (data != null)
+				for (int i = 0; i < data.size(); i++) 
+					fos.write((data.get(i) + "\n").getBytes());
+			
+			fos.close();	
+			return true;
+		}
+		catch (Exception e)
+		{
+			Log.e("GalleryDS_Favourite", e.getMessage());
+	        return false;
+		}
+	}	
 }

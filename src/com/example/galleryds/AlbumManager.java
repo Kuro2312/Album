@@ -1,12 +1,19 @@
 package com.example.galleryds;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 
 import android.content.Context;
 import android.os.Environment;
+import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.GridView;
@@ -75,36 +82,48 @@ public class AlbumManager {
     	return _albumList; 
     }
     
+    // Kiểm tra có tồn tại album đó không 
     public boolean containsAlbum(String albumName)
     {
     	return _albumData.containsKey(albumName);
     }
     
-    public Context getContext()
+    // Lấy context
+    protected Context getContext()
     {
     	return _selectedAlbumImagesAdapter.getContext();
     }
 
-    public void removeImageDataIfExistInOtherAlbum(DataHolder data)
+    // Nạp các album lên
+    public void loadAlbums()
     {
-    	int n = _albumList.size();
-    	
-    	for (int i = 0; i < n; i++)
-    	{
-    		String oldAlbumName = _albumList.get(i);
-    		
-    		if (oldAlbumName.equals(data._file.getParentFile().getName()))
-    		{
-    			ArrayList<DataHolder> albumImages = this.getAlbumData(oldAlbumName);
-    	    	
-    	    	if (albumImages != null)  	    	
-	    	    	for (int j = 0; j < albumImages.size(); j++)
-	    	    		if (albumImages.get(j).equals(data))
-	    	    			albumImages.remove(j);
-    		}
-    	}
+        _albumList = AlbumManager.getAlbumPaths(getContext());
+
+        if (_albumList == null)
+        	_albumList = new ArrayList<String>();
+        
+        // Gắn adapter vào gridview
+        _albumAdapter = new AlbumAdapter(getContext(), _albumList);
+        getGridViewAlbum().setAdapter(_albumAdapter);
+        
+        // Tạo dữ liệu cho các album
+        _albumData = new HashMap<String, ArrayList<DataHolder>>();
+        
+        for (int i = 0; i < _albumList.size(); i++)
+        	_albumData.put(_albumList.get(i), new ArrayList<DataHolder>());
     }
     
+    // Xóa dữ liệu ảnh trong album cũ
+    public void removeImageDataFromAlbum(DataHolder data)
+    {
+    	File f = new File(data.getFilePath());
+    	String parent = f.getParentFile().getName();
+
+		if (this.containsAlbum(parent))
+			this.getAlbumData(parent).remove(data);
+    }
+    
+    // Bỏ ảnh khỏi album
     public void removeImageFromAlbum(DataHolder data, String album)
     {   
     	ArrayList<DataHolder> albumImages = this.getAlbumData(album);
@@ -112,50 +131,42 @@ public class AlbumManager {
     	if (albumImages == null)
     		return;
     	
-    	for (int i = 0; i < albumImages.size(); i++)
-    	{
-    		if (albumImages.get(i).equals(data))
-    			albumImages.remove(i);
-    	}
+    	// Xóa dữ liệu khỏi album
+    	albumImages.remove(data);
     	
         // Di chuyển file
-        String path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).getAbsolutePath();
-        String fName = data._file.getName();
+    	File f = new File(data.getFilePath());
+        String fName = f.getName();       
+        ImageSupporter.moveFile(f.getParentFile().getAbsolutePath(), fName, ImageSupporter.DEFAULT_PICTUREPATH);
         
-        ImageSupporter.moveFile(data._file.getParentFile().getAbsolutePath(), fName, path);
-        
-        // Cập nhật thông tin file mới
-        data.setFile(new File(path + File.separator + fName));
+        // Cập nhật thông tin file mới cho dữ liệu
+        data.setFilePath(ImageSupporter.DEFAULT_PICTUREPATH + File.separator + fName);
     }
     
     // Thêm ảnh vào album
     public void addImageToAlbum(DataHolder data, String albumName)
-    {
-    	ArrayList<DataHolder> albumData = this.getAlbumData(albumName);
+    {	
+    	File f = new File(data.getFilePath());
+    	File parent = f.getParentFile();
     	
-    	if (albumData.contains(data))
+    	// Kiểm tra xem ảnh có trong album chưa
+    	if (albumName.equals(parent.getName()))
     		return;
-    	
-		albumData.add(data);
+		
+		// Xóa dữ liệu khỏi album cũ nếu có
+		this.removeImageDataFromAlbum(data);
+		
+		// Di chuyển file
+		ImageSupporter.moveFile(parent.getAbsolutePath(), f.getName(), ImageSupporter.DEFAULT_PICTUREPATH + File.separator + albumName);
+		
+		// Cập nhật thông tin file
+		String newPath = ImageSupporter.DEFAULT_PICTUREPATH + File.separator + albumName + File.separator + f.getName();
+		data.setFilePath(newPath);
+		
+		// Thêm vào album
+    	this.getAlbumData(albumName).add(data);
     }
     
-    // Nạp các album lên
-    public void loadAlbums()
-    {
-        _albumList = ImageSupporter.getAlbumPaths(getContext());
-
-        if (_albumList == null)
-        	_albumList = new ArrayList<String>();
-        
-        _albumAdapter = new AlbumAdapter(getContext(), _albumList);
-        getGridViewAlbum().setAdapter(_albumAdapter);
-        
-        _albumData = new HashMap<String, ArrayList<DataHolder>>();
-        
-        for (int i = 0; i < _albumList.size(); i++)
-        	_albumData.put(_albumList.get(i), new ArrayList<DataHolder>());
-    }
-
     // Tạo mới Album
     public boolean createAlbum(String name) 
     {   	
@@ -172,7 +183,7 @@ public class AlbumManager {
 	            data.add(name);
 	            
 	            // Cập nhật dữ liệu tập tin 
-	            ImageSupporter.addNewAlbumPaths(getContext(), data);
+	            AlbumManager.addNewAlbumPaths(getContext(), data);
 	            
 	            // Cập nhật adapter và giao diện
 	            _albumAdapter.add(name);
@@ -280,7 +291,7 @@ public class AlbumManager {
     protected void removeAlbumDataOnFileByName(String name)
     {
     	// Lấy đường dẫn các album
-    	ArrayList<String> data = ImageSupporter.getAlbumPaths(getContext());
+    	ArrayList<String> data = AlbumManager.getAlbumPaths(getContext());
     	
     	// Tìm và xóa album
     	int i =0;
@@ -291,14 +302,14 @@ public class AlbumManager {
         data.remove(i);
       
         // Tìm kiếm và đổi tên mới
-        ImageSupporter.saveAlbumPaths(getContext(), data);
+        AlbumManager.saveAlbumPaths(getContext(), data);
     }
     
     // Cập nhật trên cơ sở dữ liệu
     protected void renameAlbumDataOnFileByName(String oldName, String newName)
     {
 	    // Lấy đường dẫn các album
-	    ArrayList<String> data = ImageSupporter.getAlbumPaths(getContext());
+	    ArrayList<String> data = AlbumManager.getAlbumPaths(getContext());
 	    
 	    // Tìm kiếm và đổi tên mới
 	    int i =0;
@@ -309,7 +320,7 @@ public class AlbumManager {
 	    data.set(i, newName);
 	    
 	    // Lưu dữ liệu trên tập tin dữ liệu
-	    ImageSupporter.saveAlbumPaths(getContext(), data);
+	    AlbumManager.saveAlbumPaths(getContext(), data);
     }
  
     // Bật chế độ chọn hình ảnh
@@ -360,9 +371,86 @@ public class AlbumManager {
     // Áp dụng insert sort với độ phức tạp O(n)
     // Tiện cho việc tìm kiếm nhị phân
     public void insertImageDataToAlbum(String albumName, DataHolder data)
-    {
-    	ArrayList<DataHolder> array = this.getAlbumData(albumName);
-    	
-    	ImageSupporter.binaryInsertByLastModifiedDate(array, data);
+    {    	
+    	ImageSupporter.binaryInsertByLastModifiedDate(this.getAlbumData(albumName), data);
     }
+    
+	// Lấy thông tin ảnh ưa thích
+    protected static ArrayList<String> getAlbumPaths(Context context)
+	{
+		ArrayList<String> result = null;
+		
+	    try 
+	    {
+	        InputStream inputStream = context.openFileInput("GalleryDS_Album.txt");
+	        result = new ArrayList<String>();
+	        
+	        if ( inputStream != null )
+	        {
+	            InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+	            BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+	            String receiveString = "";
+
+	            while ((receiveString = bufferedReader.readLine()) != null) 
+	                result.add(receiveString);
+
+	            inputStream.close();
+	        }
+	        
+		    return result;
+	    }
+	    catch (FileNotFoundException e) 
+	    {
+	    	Log.e("GalleryDS_Album", "File not found: " + e.toString());
+	        return null;
+	    } catch (IOException e) 
+	    {
+	    	Log.e("GalleryDS_Album", "Can not read file: " + e.toString());
+	        return null;
+	    }
+	}
+
+	// Lưu thông tin ảnh ưa thích
+	protected static boolean saveAlbumPaths(Context context, ArrayList<String> data)
+	{
+		try
+		{
+			FileOutputStream fos = context.openFileOutput("GalleryDS_Album.txt", Context.MODE_PRIVATE);
+			
+			if (data != null)
+				for (int i = 0; i < data.size(); i++) 
+					fos.write((data.get(i) + "\n").getBytes());
+			
+			fos.close();
+			
+			return true;
+		}
+		catch (Exception e)
+		{
+			Log.e("GalleryDS_Album", e.getMessage());
+	        return false;
+		}
+	}
+		
+	// Lưu thêm thông tin ảnh ưa thích
+	protected static boolean addNewAlbumPaths(Context context, ArrayList<String> data)
+	{
+		try
+		{
+			FileOutputStream fos = context.openFileOutput("GalleryDS_Album.txt", Context.MODE_PRIVATE | Context.MODE_APPEND);
+			
+			if (data != null)
+				for (int i = 0; i < data.size(); i++) 
+					fos.write((data.get(i) + "\n").getBytes());
+			
+			fos.close();
+			
+			return true;
+		}
+		catch (Exception e)
+		{
+			Log.e("GalleryDS_Album", e.getMessage());
+	        return false;
+		}
+	}
 }
