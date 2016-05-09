@@ -130,16 +130,15 @@ public class ImageAdapter extends ArrayAdapter
 		        	 cb.setChecked(!cb.isChecked());
 		        else {
 		        
-		        	// Có thể truyền String thôi được không
-		        	ArrayList<File> files = new ArrayList<File>();		        	
+		        	ArrayList<String> filePaths = new ArrayList<String>();		        	
 		        	for (DataHolder d : _items) {
-		        		files.add(new File(d.getFilePath()));
+		        		filePaths.add(d.getFilePath());
 		        	}
 		        	
-		        	// Đóng góp dữ liệu truyền đi
+		        	// Đóng gói dữ liệu truyền đi
 		        	Intent intent = new Intent(_context, ViewImageActivity.class);
 		        	
-		        	intent.putExtra("files", files);
+		        	intent.putExtra("filePaths", filePaths);
 		        	intent.putExtra("position", cb.getId());
 		        	
 		        	_context.startActivity(intent);

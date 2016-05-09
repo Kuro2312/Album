@@ -21,20 +21,22 @@ import android.widget.RelativeLayout;
 public class FullScreenImageAdapter extends PagerAdapter{
 
 	private Activity _activity;
-	private ArrayList<File> _files;
+	private ArrayList<String> _filePaths;
+	private ArrayList<View> _pages;
 	private LayoutInflater _inflater;
 
 	// constructor
 	public FullScreenImageAdapter(Activity activity,
-			ArrayList<File> files) {
+			ArrayList<String> filePaths) {
 		_activity = activity;
-		_files = files;
+		_filePaths = filePaths;
+		_pages = new ArrayList<View>();
 		_inflater = (LayoutInflater) _activity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 	}
 	
 	@Override
 	public int getCount() {
-		return _files.size();
+		return _filePaths.size();
 	}
 
 	@Override
@@ -52,7 +54,7 @@ public class FullScreenImageAdapter extends PagerAdapter{
         Point size = new Point();
         display.getSize(size);
         
-        Bitmap bitmap = ImageSupporter.decodeSampledBitmapFromFile(_files.get(position), size.x, size.x);        
+        Bitmap bitmap = ImageSupporter.decodeSampledBitmapFromFile(new File( _filePaths.get(position)), size.x, size.x);        
         image.setImageBitmap(bitmap);
         
         image.setOnClickListener(new View.OnClickListener() {
@@ -64,16 +66,34 @@ public class FullScreenImageAdapter extends PagerAdapter{
 			}
 		});
         
-        
         ((ViewPager) container).addView(viewLayout);
- 
+        
+        
         return viewLayout;
 	}
 	
 	@Override
     public void destroyItem(ViewGroup container, int position, Object object) {
         ((ViewPager) container).removeView((RelativeLayout) object);
-
     }
+	
+	public boolean removeImage(int position) {
+		_filePaths.remove(position);
+		notifyDataSetChanged();
+		if  (_filePaths.size() == 0)
+			return false;
+		return true;
+	}
 
+	@Override
+	public int getItemPosition(Object object) {
+		if (_pages.contains(object)) {
+			return _pages.indexOf(object);
+		}
+		return POSITION_NONE;
+	}
+	
+	
+	
+	
 }

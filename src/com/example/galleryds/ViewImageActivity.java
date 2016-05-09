@@ -8,6 +8,8 @@ import com.example.galleryds.util.SystemUiHider;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Build;
@@ -16,6 +18,8 @@ import android.os.Handler;
 import android.support.v4.view.ViewPager;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.ArrayAdapter;
+import android.widget.ImageButton;
 
 /**
  * An example full-screen activity that shows and hides the system UI (i.e.
@@ -93,9 +97,15 @@ public class ViewImageActivity extends Activity {
     
     
 
-	private ArrayList<File> _files;
+	private ArrayList<String> _filePaths;
 	private FullScreenImageAdapter _adapter;
+	
+	private ImageButton btnFavourite;
+	private ImageButton btnAdd;
+	private ImageButton btnDelete;
     
+	private ImageManager _imageManager;
+	private AlbumManager _albumManager;
 
     @SuppressWarnings("deprecation")
 	@Override
@@ -113,31 +123,120 @@ public class ViewImageActivity extends Activity {
 		
 		Intent i = getIntent();
 		int position = i.getIntExtra("position", 0);
-		_files = (ArrayList<File>) i.getSerializableExtra("files");
+		_filePaths = (ArrayList<String>) i.getSerializableExtra("filePaths");
 
 		
-		_adapter = new FullScreenImageAdapter(this, _files);
+		_adapter = new FullScreenImageAdapter(this, _filePaths);
 		_viewPager.setAdapter(_adapter);		
 		_viewPager.setCurrentItem(position);
-        
-        
-        ////////////////////////////////////////////////////////////
 		
+		_imageManager = ImageManager.getInstance();
+		_albumManager = AlbumManager.getInstance();
 		
-
-        // Set up the user interaction to manually show or hide the system UI.
-        /*_viewPager.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-            	toggle();
-            }
-        });*/
-
-        // Upon interacting with UI controls, delay any scheduled hide()
-        // operations to prevent the jarring behavior of controls going away
-        // while interacting with the UI.
-        findViewById(R.id.dummy_button).setOnTouchListener(mDelayHideTouchListener);
+		btnFavourite = (ImageButton) findViewById(R.id.btnFavourite3);
+		btnFavourite.setOnClickListener(new View.OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				int pos = _viewPager.getCurrentItem();
+				
+				ArrayList<DataHolder> allImageData = _imageManager.getAllImageData();
+				for (DataHolder data : allImageData) {
+					if (data.getFilePath().equals(_filePaths.get(pos))) {
+						_imageManager.addImageToFavourite(data);
+						break;
+					}
+				}
+			}
+		});
+		
+		btnAdd = (ImageButton) findViewById(R.id.btnAdd3);
+		btnAdd.setOnClickListener(new View.OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {	
+				chooseAlbum();
+			}
+		});
+		
+		btnDelete = (ImageButton) findViewById(R.id.btnDelete3);
+		btnDelete.setOnClickListener(new View.OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				int pos = _viewPager.getCurrentItem();
+				
+				ArrayList<DataHolder> allImageData = _imageManager.getAllImageData();
+				for (DataHolder data : allImageData) {
+					if (data.getFilePath().equals(_filePaths.get(pos))) {
+						_imageManager.deleteSelectedImage(data);
+						int newPos;
+						if (pos == _filePaths.size() - 1)
+							newPos = pos - 1;
+						else
+							newPos = pos + 1;
+						if (!_adapter.removeImage(pos)) // nếu đã xoá hết ảnh
+							finish();					
+						break;
+					}
+				}				
+			}
+		});		
     }
+    
+ // Thêm ảnh đã chọn vào album
+    public void addSelectedImagesToAlbum(String albumName) {
+    	
+    	int pos = _viewPager.getCurrentItem();
+		
+		ArrayList<DataHolder> allImageData = _imageManager.getAllImageData();
+		for (DataHolder data : allImageData) {
+			if (data.getFilePath().equals(_filePaths.get(pos))) {
+				_albumManager.addImageToAlbum(data, albumName);
+				break;
+			}
+		} 
+    }   
+    
+    // Hiện dialog dể chọn album 
+    public void chooseAlbum()
+    {
+    	// Tạo 1 alert (thông báo)
+    	AlertDialog.Builder builderSingle = new AlertDialog.Builder(this);
+    	builderSingle.setIcon(R.drawable.ic_launcher);
+    	builderSingle.setTitle("Select an Album: ");
+
+    	final ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(this, android.R.layout.select_dialog_singlechoice);
+    	
+    	// Nạp dữ liệu cho thông báo qua adapter 
+    	arrayAdapter.addAll(_albumManager.getAlbumList());
+
+    	// Tạo sự kiện cho nút hủy thông báo
+    	builderSingle.setNegativeButton("Cancel", new DialogInterface.OnClickListener() 
+    	{
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+    	});
+
+    	// Tạo sự kiện cho nút chọn album
+    	builderSingle.setAdapter(arrayAdapter, new DialogInterface.OnClickListener() 
+    	{
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                String strName = arrayAdapter.getItem(which);
+                ViewImageActivity context = (ViewImageActivity) arrayAdapter.getContext();
+                
+                // Thực hiện thêm ảnh vào album
+                context.addSelectedImagesToAlbum(strName);
+            }
+        });
+    	
+    	builderSingle.show();
+    }
+    
+    /////////////////////////////////////////////////////////////////////////////////
 
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
@@ -187,4 +286,5 @@ public class ViewImageActivity extends Activity {
         mHideHandler.removeCallbacks(mHideRunnable);
         mHideHandler.postDelayed(mHideRunnable, delayMillis);
     }
+
 }

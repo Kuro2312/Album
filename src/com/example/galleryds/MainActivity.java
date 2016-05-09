@@ -214,7 +214,7 @@ public class MainActivity extends Activity {
     	// Tạo 1 alert (thông báo)
     	AlertDialog.Builder builderSingle = new AlertDialog.Builder(this);
     	builderSingle.setIcon(R.drawable.ic_launcher);
-    	builderSingle.setTitle("Select a Album: ");
+    	builderSingle.setTitle("Select an Album: ");
 
     	final ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(this, android.R.layout.select_dialog_singlechoice);
     	
@@ -500,7 +500,7 @@ public class MainActivity extends Activity {
                 if (item.getTitle().equals("Add to Album"))
                 	chooseAlbum();
         		
-                holder.checkbox.setChecked(true);
+                holder.checkbox.setChecked(false);
                 
                 break;
 

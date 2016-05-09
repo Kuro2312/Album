@@ -5,161 +5,157 @@
     android:layout_height="match_parent"
     tools:context="com.example.galleryds.MainActivity">
 
-    <android.support.v7.widget.Toolbar
+
+    <LinearLayout
         android:id="@+id/toolbar"
-        android:layout_width="match_parent"
-        android:layout_height="50dip"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentBottom="true"
-        android:background="@android:color/black">
+    	android:layout_width="match_parent"
+    	android:layout_height="50dip"
+    	android:layout_alignParentLeft="true"
+   		android:layout_alignParentBottom="true"
+    	android:background="@android:color/black"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:padding="2dp">
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_weight="1" />
 
         <LinearLayout
-            android:layout_width="match_parent"
+            android:id="@+id/llSelect"
+            android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:orientation="horizontal"
-            android:gravity="center"
-            android:padding="2dp">
+            android:orientation="vertical">
 
-            <View
-                android:layout_width="0dp"
-                android:layout_height="1dp"
-                android:layout_weight="1" />
-
-            <LinearLayout
-                android:id="@+id/llSelect"
+            <ImageButton
+                android:id="@+id/btnSelect"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:clickable="true"
+                android:scaleType="fitCenter"
+                android:layout_gravity="center"
+                android:src = "@drawable/select"
+                android:background="@android:color/transparent"/>
+            <TextView
+                android:id="@+id/tvSelect"
                 android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:orientation="vertical">
-
-                <ImageButton
-                    android:id="@+id/btnSelect"
-                    android:layout_width="30dp"
-                    android:layout_height="30dp"
-                    android:clickable="true"
-                    android:scaleType="fitCenter"
-                    android:layout_gravity="center"
-                    android:src = "@drawable/select"
-                    android:background="@android:color/transparent"/>
-                <TextView
-                    android:id="@+id/tvSelect"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textAlignment="center"
-                    android:textColor="@android:color/white"
-                    android:textSize="12dp"
-                    android:text="Select"
-                    />
-            </LinearLayout>
-
-            <View
-                android:id="@+id/vwFavourite"
-                android:layout_width="0dp"
-                android:layout_height="1dp"
-                android:layout_weight="1"
-                android:visibility="gone" />
-
-            <LinearLayout
-                android:id="@+id/llFavourite"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:orientation="vertical"
-                android:visibility="gone">
-
-                <ImageButton
-                    android:id="@+id/btnFavourite"
-                    android:layout_width="30dp"
-                    android:layout_height="30dp"
-                    android:clickable="true"
-                    android:scaleType="fitCenter"
-                    android:layout_gravity="center"
-                    android:src = "@drawable/favourite"
-                    android:background="@android:color/transparent"/>
-                <TextView
-                    android:id="@+id/tvFavourite"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textAlignment="center"
-                    android:textColor="@android:color/white"
-                    android:textSize="12dp"
-                    android:text="Favourite"
-                    />
-            </LinearLayout>
-
-            <View
-                android:id="@+id/vwDelete"
-                android:layout_width="0dp"
-                android:layout_height="1dp"
-                android:layout_weight="1"
-                android:visibility="gone" />
-
-            <LinearLayout
-                android:id="@+id/llDelete"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:orientation="vertical"
-                android:visibility="gone">
-
-                <ImageButton
-                    android:id="@+id/btnDelete"
-                    android:layout_width="30dp"
-                    android:layout_height="30dp"
-                    android:clickable="true"
-                    android:scaleType="fitCenter"
-                    android:layout_gravity="center"
-                    android:src = "@drawable/delete"
-                    android:background="@android:color/transparent"/>
-                <TextView
-                    android:id="@+id/tvDelete"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textAlignment="center"
-                    android:textColor="@android:color/white"
-                    android:textSize="12dp"
-                    android:text="Delete"
-                    />
-            </LinearLayout>
-
-            <View
-                android:id="@+id/vwAdd"
-                android:layout_width="0dp"
-                android:layout_height="1dp"
-                android:layout_weight="1" />
-
-            <LinearLayout
-                android:id="@+id/llAdd"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:orientation="vertical">
-
-                <ImageButton
-                    android:id="@+id/btnAdd"
-                    android:layout_width="30dp"
-                    android:layout_height="30dp"
-                    android:clickable="true"
-                    android:scaleType="fitCenter"
-                    android:layout_gravity="center"
-                    android:src = "@drawable/add"
-                    android:background="@android:color/transparent"/>
-
-                <TextView
-                    android:id="@+id/tvAdd"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textAlignment="center"
-                    android:textColor="@android:color/white"
-                    android:textSize="12dp"
-                    android:text="Add Album"
-                    />
-            </LinearLayout>
-
-            <View
-                android:layout_width="0dp"
-                android:layout_height="1dp"
-                android:layout_weight="1" />
-
+                android:layout_height="wrap_content"
+                android:textAlignment="center"
+                android:textColor="@android:color/white"
+                android:textSize="12dp"
+                android:text="Select"
+                />
         </LinearLayout>
 
-    </android.support.v7.widget.Toolbar>
+        <View
+            android:id="@+id/vwFavourite"
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_weight="1"
+            android:visibility="gone" />
+
+        <LinearLayout
+            android:id="@+id/llFavourite"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <ImageButton
+                android:id="@+id/btnFavourite"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:clickable="true"
+                android:scaleType="fitCenter"
+                android:layout_gravity="center"
+                android:src = "@drawable/favourite"
+                android:background="@android:color/transparent"/>
+            <TextView
+                android:id="@+id/tvFavourite"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAlignment="center"
+                android:textColor="@android:color/white"
+                android:textSize="12dp"
+                android:text="Favourite"
+                />
+        </LinearLayout>
+
+        <View
+            android:id="@+id/vwDelete"
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_weight="1"
+            android:visibility="gone" />
+
+        <LinearLayout
+            android:id="@+id/llDelete"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <ImageButton
+                android:id="@+id/btnDelete"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:clickable="true"
+                android:scaleType="fitCenter"
+                android:layout_gravity="center"
+                android:src = "@drawable/delete"
+                android:background="@android:color/transparent"/>
+            <TextView
+                android:id="@+id/tvDelete"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAlignment="center"
+                android:textColor="@android:color/white"
+                android:textSize="12dp"
+                android:text="Delete"
+                />
+        </LinearLayout>
+
+        <View
+            android:id="@+id/vwAdd"
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_weight="1" />
+
+        <LinearLayout
+            android:id="@+id/llAdd"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <ImageButton
+                android:id="@+id/btnAdd"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:clickable="true"
+                android:scaleType="fitCenter"
+                android:layout_gravity="center"
+                android:src = "@drawable/add"
+                android:background="@android:color/transparent"/>
+
+            <TextView
+                android:id="@+id/tvAdd"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAlignment="center"
+                android:textColor="@android:color/white"
+                android:textSize="12dp"
+                android:text="Add Album"
+                />
+        </LinearLayout>
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_weight="1" />
+
+    </LinearLayout>
+
 
     <TabHost
         android:id="@+id/tabhost"
