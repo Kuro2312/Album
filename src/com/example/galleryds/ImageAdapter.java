@@ -150,7 +150,8 @@ public class ImageAdapter extends ArrayAdapter
 		});
         
 	    holder.filePath = _items.get(position).getFilePath();
-        holder.imageview.setImageBitmap(_items.get(position).getBitmap());
+       // holder.imageview.setImageBitmap(_items.get(position).getBitmap());
+	    ImageSupporter.loadBitmap(_context, _items.get(position), holder.imageview);
 		holder.checkbox.setChecked(false);
         holder.id = position;
         

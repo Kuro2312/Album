@@ -4,23 +4,26 @@ import java.util.ArrayList;
 
 import android.os.AsyncTask;
 
-public class DecodeImagesTask extends AsyncTask<ImageManager, Void, Boolean>{
+public class DecodeImagesTask extends AsyncTask<ImageManager, Void, ImageManager>{
 
-	protected Boolean doInBackground(ImageManager... imageManager) {
+	protected ImageManager doInBackground(ImageManager... imageManager) {
     	
 		// Giải mã ảnh cho phù hợp
 		ArrayList<DataHolder> data = imageManager[0].getAllImageData();
 		int n = data.size();
 		
 		for (int i = n - 1; i >=0; i--)
-			data.get(i).loadBitmap();
+		{
+			data.get(i).loadBitmap();			
+		}
     	
-    	return true;
+		
+    	return imageManager[0];
     }
 	
-	protected void onPostExecute(Boolean flag)
+	protected void onPostExecute(ImageManager imageManager)
 	{
-		
+		imageManager.refresh();
     }
 }
 

@@ -48,8 +48,8 @@ public class ImageManager {
         _allImageAdapter = new ImageAdapter(context, _allImageData);
         _gridViewAll.setAdapter(_allImageAdapter);    	
         
-        IMAGE_HEIGHT = (int) ImageSupporter.dipToPixels(context, IMAGE_HEIGHT);
-		IMAGE_WIDTH = (int) ImageSupporter.dipToPixels(context, IMAGE_WIDTH);
+        IMAGE_HEIGHT = (int) ImageSupporter.convertDipToPixels(context, IMAGE_HEIGHT);
+		IMAGE_WIDTH = (int) ImageSupporter.convertDipToPixels(context, IMAGE_WIDTH);
     }
     
     public static ImageManager getInstance(Context context, GridView gridView, GridView gridViewFavourite)
@@ -388,5 +388,10 @@ public class ImageManager {
 			Log.e("GalleryDS_Favourite", e.getMessage());
 	        return false;
 		}
+	}
+
+	public void refresh() {
+		// TODO Auto-generated method stub
+		this._allImageAdapter.notifyDataSetChanged();
 	}	
 }

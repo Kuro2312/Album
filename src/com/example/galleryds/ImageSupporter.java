@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.lang.ref.WeakReference;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -19,8 +20,11 @@ import java.util.Locale;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Environment;
 import android.provider.MediaStore.Files;
 import android.util.DisplayMetrics;
@@ -29,6 +33,7 @@ import android.util.TypedValue;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.GridView;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 public class ImageSupporter 
@@ -78,7 +83,7 @@ public class ImageSupporter
         }
     }
    
-    public static float dipToPixels(Context context, float dipValue) 
+    public static float convertDipToPixels(Context context, float dipValue) 
     {
         DisplayMetrics metrics = context.getResources().getDisplayMetrics();
         return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dipValue, metrics);
@@ -280,5 +285,70 @@ public class ImageSupporter
     	}
     	
     	array.add(left , data);
+    }
+	
+	// Hỗ trợ load bitmap
+	public static void loadBitmap(Context context, DataHolder data, ImageView imageView)
+	{
+		if (ImageSupporter.cancelPotentialWork(data, imageView))
+		{
+	        final BitmapLoadingTask task = new BitmapLoadingTask(imageView);
+	        final AsyncDrawable asyncDrawable = new AsyncDrawable(context.getResources(), data.getBitmap(), task);
+	        imageView.setImageDrawable(asyncDrawable);
+	        task.execute(data);
+	    }
+	}
+	
+	public static boolean cancelPotentialWork(DataHolder data, ImageView imageView) 
+	{
+	    final BitmapLoadingTask bitmapWorkerTask = getBitmapWorkerTask(imageView);
+
+	    if (bitmapWorkerTask != null) {
+	        final DataHolder bitmapData = bitmapWorkerTask.getData();
+	        // If bitmapData is not yet set or it differs from the new data
+	        if (bitmapData == null || bitmapData != data) {
+	            // Cancel previous task
+	            bitmapWorkerTask.cancel(true);
+	        } else {
+	        	
+	            // The same work is already in progress
+	            return false;
+	        }
+	    }
+	    
+	    // No task associated with the ImageView, or an existing task was cancelled
+	    return true;
+	}
+	
+	private static BitmapLoadingTask getBitmapWorkerTask(ImageView imageView) 
+	{
+		if (imageView != null) 
+	   	{
+	       final Drawable drawable = imageView.getDrawable();
+	       
+	       if (drawable instanceof AsyncDrawable) 
+	       {
+	           final AsyncDrawable asyncDrawable = (AsyncDrawable) drawable;
+	           return asyncDrawable.getBitmapWorkerTask();
+	       }
+	    }
+	   
+	    return null;
+	}
+}
+
+class AsyncDrawable extends BitmapDrawable
+{
+    private final WeakReference<BitmapLoadingTask> bitmapWorkerTaskReference;
+
+    public AsyncDrawable(Resources data, Bitmap bitmap, BitmapLoadingTask bitmapWorkerTask) 
+    {
+        super(data, bitmap);
+        bitmapWorkerTaskReference = new WeakReference<BitmapLoadingTask>(bitmapWorkerTask);
+    }
+
+    public BitmapLoadingTask getBitmapWorkerTask() 
+    {
+        return bitmapWorkerTaskReference.get();
     }
 }

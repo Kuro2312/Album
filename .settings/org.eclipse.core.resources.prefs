@@ -1,5 +1,6 @@
 eclipse.preferences.version=1
 encoding//src/com/example/galleryds/AlbumManager.java=UTF-8
+encoding//src/com/example/galleryds/BitmapLoadingTask.java=UTF-8
 encoding//src/com/example/galleryds/DecodeImagesTask.java=UTF-8
 encoding//src/com/example/galleryds/ImageAdapter.java=UTF-8
 encoding//src/com/example/galleryds/ImageManager.java=UTF-8

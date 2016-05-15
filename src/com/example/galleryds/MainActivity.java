@@ -16,6 +16,7 @@ import android.media.Image;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
+import android.util.Log;
 import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -97,7 +98,9 @@ public class MainActivity extends Activity {
         // doStrategyLoading_V1();
         
         // Sử dụng load dữ liệu hướng bất đồng bộ
-        doStrategyLoading_V2();
+        //doStrategyLoading_V2();
+        
+        doStrategyLoading_V3();
         
         int a = _imageManager.getNumberOfImages();
         Toast.makeText(this, String.valueOf(a), Toast.LENGTH_SHORT).show();
@@ -114,7 +117,7 @@ public class MainActivity extends Activity {
         setOnClickListener_btnDelete();
         setOnClickListener_btnAdd();   
         setOnClickListener_GridViewAlbumItem();      
-        setTouchEventForTabHost();
+        //setTouchEventForTabHost();
         
         
         // Tự động xuất hiện dưới cùng danh sách
@@ -148,6 +151,21 @@ public class MainActivity extends Activity {
     	 
     	// Load ảnh ưa thích
     	 new LoadFavouriteImageTask().execute(_imageManager);
+    }
+    
+    // Chiến lược
+    // B1: Tải thông tin tất cả ảnh lên, không giải mã, cho vào adapter (giữ chỗ)
+    // B2: Dùng bất đồng bộ để giải mã trong getView của Adapter
+    protected void doStrategyLoading_V3()
+    {
+    	// Load thông tin ảnh
+    	loadImages_V2();
+    	
+    	// Giải mã và cập nhật
+    	//new DecodeImagesTask().execute(_imageManager);
+    	 
+    	// Load ảnh ưa thích
+    	//new LoadFavouriteImageTask().execute(_imageManager);
     }
     
     protected void initializeSystem()
@@ -558,6 +576,19 @@ public class MainActivity extends Activity {
         _mainTabHost.setCurrentTab(0);
     }
 
+    @Override
+    public boolean onTouchEvent(MotionEvent event) 
+    {
+        if (event.getAction() == MotionEvent.ACTION_DOWN)
+        {
+            //Log.d("Touch", "Touch");
+            //sendBroadcast(new Intent("touch_event_has_occured"));
+        	Toast.makeText(this, "Kuro", Toast.LENGTH_SHORT).show();
+        }
+
+        return super.onTouchEvent(event);
+    }
+    
     // Sự kiện cho việc quẹt trái phải để chuyển tab 
     public void setTouchEventForTabHost()
 	{
