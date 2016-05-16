@@ -12,15 +12,16 @@ public class DecodeImagesTask extends AsyncTask<ImageManager, Void, Boolean>{
 		ArrayList<DataHolder> data = imageManager[0].getAllImageData();
 		int n = data.size();
 		
-		for (int i = n - 1; i >=0; i--)
-			data.get(i).loadBitmap();
+		for (int i = n - 1; i >=0; i--) {
+			data.get(i).loadBitmap();			
+		}
     	
     	return true;
     }
 	
 	protected void onPostExecute(Boolean flag)
 	{
-		
+		ImageManager.getInstance()._allImageAdapter.notifyDataSetChanged();
     }
 }
 
