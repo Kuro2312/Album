@@ -47,6 +47,8 @@ public class MainActivity extends Activity {
     private int _lastTab;
     private int _contextPosition;
     
+    private boolean _addToAlbumViaContext;
+    
     private Context _this;
 
     private static final int ADD_ALBUM = 0;
@@ -155,6 +157,7 @@ public class MainActivity extends Activity {
     protected void initializeSystem()
     {
     	_this = this;
+    	_addToAlbumViaContext = false;
     	
     	_albumManager = AlbumManager.getInstance(this, (GridView) findViewById(R.id.gridView3));
     	_imageManager = ImageManager.getInstance(this, (GridView) findViewById(R.id.gridView1), (GridView) findViewById(R.id.gridView2));
@@ -207,8 +210,14 @@ public class MainActivity extends Activity {
             ViewHolder holder = (ViewHolder) view.getTag();
 
             // Kiểm tra cái nào được chọn
-            if (holder.checkbox.isChecked() == true)
+            if (holder.checkbox.isChecked() == true) {
         		_albumManager.addImageToAlbum(_imageManager.getImageDataById(holder.id), albumName);
+        		if (_addToAlbumViaContext) {
+        			_addToAlbumViaContext = false;
+        			holder.checkbox.setChecked(false);
+        			return;
+        		}
+            }
         }
     }   
     
@@ -523,10 +532,10 @@ public class MainActivity extends Activity {
                 if (item.getTitle().equals("Add to Favourite")) 
                     _imageManager.addImageToFavourite(_imageManager.getImageDataById(holder.id));
                 
-                if (item.getTitle().equals("Add to Album"))
-                	chooseAlbum();
-        		
-                holder.checkbox.setChecked(false);
+                if (item.getTitle().equals("Add to Album")) {
+                	_addToAlbumViaContext = true;
+                	chooseAlbum();        		
+                }
                 
                 break;
 

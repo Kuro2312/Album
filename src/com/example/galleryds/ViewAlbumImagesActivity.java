@@ -166,9 +166,9 @@ public class ViewAlbumImagesActivity extends Activity {
 
              if (holder.checkbox.isChecked() == true) 
              {
-                 // Xóa khỏi adapter + cập nhật giao diện
-                 _albumImagesAdapter.remove(holder.id);
+                 // Xóa khỏi adapter + cập nhật giao diện               
                  _albumManager.removeImageFromAlbum((DataHolder) _albumImagesAdapter.getItem(holder.id), _albumName);
+                 _albumImagesAdapter.remove(holder.id);
              }
          }
      }
