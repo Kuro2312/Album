@@ -83,10 +83,15 @@ public class MainActivity extends Activity {
     private float _sXPoint = -1;
     private boolean _flag = true;
     
+    private boolean rotated;
+    
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        
+        rotated = ImageManager.hasInstance();
 
         // Khởi tạo dữ liệu cho hệ thống
         initializeSystem();
@@ -145,10 +150,14 @@ public class MainActivity extends Activity {
     protected void doStrategyLoading_V2()
     {
     	// Load thông tin ảnh
-    	loadImages_V2();
+    	if (!rotated) {
+    		loadImages_V2();
     	
     	// Giải mã và cập nhật
     	 new DecodeImagesTask().execute(_imageManager);
+    	}
+    	else
+    		_imageManager._allImageAdapter.notifyDataSetChanged();
     	 
     	// Load ảnh ưa thích
     	 new LoadFavouriteImageTask().execute(_imageManager);
@@ -162,6 +171,10 @@ public class MainActivity extends Activity {
     	_albumManager = AlbumManager.getInstance(this, (GridView) findViewById(R.id.gridView3));
     	_imageManager = ImageManager.getInstance(this, (GridView) findViewById(R.id.gridView1), (GridView) findViewById(R.id.gridView2));
     	
+    	if (rotated) {
+    		_imageManager.onRotateScreen(this, (GridView) findViewById(R.id.gridView1), (GridView) findViewById(R.id.gridView2));
+    		_albumManager.onRotateScreen(this, (GridView) findViewById(R.id.gridView3));
+    	}
         llSelect = (LinearLayout) findViewById(R.id.llSelect);
         tvSelect = (TextView) findViewById(R.id.tvSelect);
         btnSelect = (ImageButton) findViewById(R.id.btnSelect);
@@ -612,7 +625,7 @@ public class MainActivity extends Activity {
         _mainTabHost.addTab(spec);
 
         //Thiết lập tab mặc định được chọn ban đầu là tab 0
-        _mainTabHost.setCurrentTab(0);
+        //_mainTabHost.setCurrentTab(0);
     }
 
     // Sự kiện cho việc quẹt trái phải để chuyển tab 
@@ -894,4 +907,26 @@ public class MainActivity extends Activity {
         }
         return super.onOptionsItemSelected(item);
     }
+
+	@Override
+	protected void onRestoreInstanceState(Bundle savedInstanceState) {
+		
+		if (savedInstanceState != null) {
+			_mainTabHost.setCurrentTab(savedInstanceState.getInt("currentTab"));
+		}
+		
+		// TODO Auto-generated method stub
+		super.onRestoreInstanceState(savedInstanceState);
+	}
+
+	@Override
+	protected void onSaveInstanceState(Bundle outState) {
+		
+		outState.putInt("currentTab", _mainTabHost.getCurrentTab());
+		
+		// TODO Auto-generated method stub
+		super.onSaveInstanceState(outState);
+	}
+    
+    
 }

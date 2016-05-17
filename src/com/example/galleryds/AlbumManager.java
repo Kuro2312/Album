@@ -38,6 +38,11 @@ public class AlbumManager {
     	_selectedAlbumImagesAdapter = new ImageAdapter(context, new ArrayList<DataHolder>());
     }
     
+    public void onRotateScreen(Context context, GridView gridViewAlbum) {
+    	_gridViewAlbum = gridViewAlbum;
+    	_selectedAlbumImagesAdapter = new ImageAdapter(context, new ArrayList<DataHolder>());
+    }
+    
     // Khởi tạo với tham số
     public static AlbumManager getInstance(Context context, GridView gridView)
     {
