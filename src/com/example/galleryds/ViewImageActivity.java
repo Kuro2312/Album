@@ -2,13 +2,11 @@ package com.example.galleryds;
 
 import java.io.File;
 import java.util.ArrayList;
-
-import com.example.galleryds.util.SystemUiHider;
-
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -106,6 +104,8 @@ public class ViewImageActivity extends Activity {
     
 	private ImageManager _imageManager;
 	private AlbumManager _albumManager;
+	
+	private Context _this;
 
     @SuppressWarnings("deprecation")
 	@Override
@@ -118,6 +118,8 @@ public class ViewImageActivity extends Activity {
         _viewPager = (ViewPager) findViewById(R.id.pager);
         
         /////////////////////////////////////////////////////////////
+        
+        _this = this;
         
 		_viewPager.setPageMargin(10);
 		
@@ -164,22 +166,43 @@ public class ViewImageActivity extends Activity {
 			
 			@Override
 			public void onClick(View v) {
-				int pos = _viewPager.getCurrentItem();
 				
-				ArrayList<DataHolder> allImageData = _imageManager.getAllImageData();
-				for (DataHolder data : allImageData) {
-					if (data.getFilePath().equals(_filePaths.get(pos))) {
-						_imageManager.deleteSelectedImage(data);
-						int newPos;
-						if (pos == _filePaths.size() - 1)
-							newPos = pos - 1;
-						else
-							newPos = pos + 1;
-						if (!_adapter.removeImage(pos)) // nếu đã xoá hết ảnh
-							finish();					
-						break;
+				AlertDialog.Builder builder = new AlertDialog.Builder(_this);
+				builder.setMessage("Are you sure you want to delete?")
+					   .setTitle("Delete");
+				
+				builder.setPositiveButton("Delete", new DialogInterface.OnClickListener() {
+					
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						int pos = _viewPager.getCurrentItem();
+						
+						ArrayList<DataHolder> allImageData = _imageManager.getAllImageData();
+						for (DataHolder data : allImageData) {
+							if (data.getFilePath().equals(_filePaths.get(pos))) {
+								_imageManager.deleteSelectedImage(data);
+								int newPos;
+								if (pos == _filePaths.size() - 1)
+									newPos = pos - 1;
+								else
+									newPos = pos + 1;
+								if (!_adapter.removeImage(pos)) // nếu đã xoá hết ảnh
+									finish();					
+								break;
+							}
+						}								
 					}
-				}				
+				});
+				
+				builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+					
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						dialog.dismiss();				
+					}
+				});
+				
+				builder.show();
 			}
 		});		
     }

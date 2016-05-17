@@ -47,6 +47,10 @@ public class MainActivity extends Activity {
     private boolean _inSelectionMode;
     private int _lastTab;
     private int _contextPosition;
+    
+    private boolean _addToAlbumViaContext;
+    
+    private Context _this;
 
     private static final int ADD_ALBUM = 0;
     private static final int EDIT_ALBUM = 1;
@@ -170,6 +174,9 @@ public class MainActivity extends Activity {
     
     protected void initializeSystem()
     {
+    	_this = this;
+    	_addToAlbumViaContext = false;
+    	
     	_albumManager = AlbumManager.getInstance(this, (GridView) findViewById(R.id.gridView3));
     	_imageManager = ImageManager.getInstance(this, (GridView) findViewById(R.id.gridView1), (GridView) findViewById(R.id.gridView2));
     	
@@ -221,8 +228,14 @@ public class MainActivity extends Activity {
             ViewHolder holder = (ViewHolder) view.getTag();
 
             // Kiểm tra cái nào được chọn
-            if (holder.checkbox.isChecked() == true)
+            if (holder.checkbox.isChecked() == true) {
         		_albumManager.addImageToAlbum(_imageManager.getImageDataById(holder.id), albumName);
+        		if (_addToAlbumViaContext) {
+        			_addToAlbumViaContext = false;
+        			holder.checkbox.setChecked(false);
+        			return;
+        		}
+            }
         }
     }   
     
@@ -278,7 +291,8 @@ public class MainActivity extends Activity {
     public void dirFolder(File file) {
     	
     	// Kiểm tra tên có hợp lệ không
-        if (file.getName().startsWith(".") || file.getName().startsWith("com."))
+        if (file.getName().startsWith(".") || file.getName().startsWith("com.")
+        		|| file.getName().equals("thumbnails"))
             return;
 
         File[] files = file.listFiles();
@@ -505,29 +519,72 @@ public class MainActivity extends Activity {
     	{
             case 0: // tab All
             	gridView = _imageManager.getGridViewAll(); 
-                ViewHolder holder = (ViewHolder) ImageSupporter.getViewByPosition(_contextPosition, gridView).getTag();
+                final ViewHolder holder = (ViewHolder) ImageSupporter.getViewByPosition(_contextPosition, gridView).getTag();
                 
                 holder.checkbox.setChecked(true);
                 
-                if (item.getTitle().equals("Delete"))
-                	_imageManager.deleteSelectedImage(_imageManager.getImageDataById(holder.id));
+                if (item.getTitle().equals("Delete")) {
+                	AlertDialog.Builder builder = new AlertDialog.Builder(_this);
+     				builder.setMessage("Are you sure you want to delete?")
+     					   .setTitle("Delete");
+     				
+     				builder.setPositiveButton("Delete", new DialogInterface.OnClickListener() {
+     					
+     					@Override
+     					public void onClick(DialogInterface dialog, int which) {
+     						_imageManager.deleteSelectedImage(_imageManager.getImageDataById(holder.id));							
+     					}
+     				});
+     				
+     				builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+     					
+     					@Override
+     					public void onClick(DialogInterface dialog, int which) {
+     						dialog.dismiss();				
+     					}
+     				});
+     				
+     				builder.show();        
+                }
                 
                 if (item.getTitle().equals("Add to Favourite")) 
                     _imageManager.addImageToFavourite(_imageManager.getImageDataById(holder.id));
                 
-                if (item.getTitle().equals("Add to Album"))
-                	chooseAlbum();
-        		
-                holder.checkbox.setChecked(false);
+                if (item.getTitle().equals("Add to Album")) {
+                	_addToAlbumViaContext = true;
+                	chooseAlbum();        		
+                }
                 
                 break;
 
             case 1: // tab Albums
             	gridView = _albumManager.getGridViewAlbum();
-                AlbumViewHolder holder1 = (AlbumViewHolder) ImageSupporter.getViewByPosition(_contextPosition, gridView).getTag();
+                final AlbumViewHolder holder1 = (AlbumViewHolder) ImageSupporter.getViewByPosition(_contextPosition, gridView).getTag();
 
-                if (item.getTitle().equals("Delete Album"))
-                    _albumManager.deleteAlbum(holder1.textview.getText().toString());
+                if (item.getTitle().equals("Delete Album")) {
+                	AlertDialog.Builder builder = new AlertDialog.Builder(_this);
+     				builder.setMessage("Are you sure you want to delete?")
+     					   .setTitle("Delete");
+     				
+     				builder.setPositiveButton("Delete", new DialogInterface.OnClickListener() {
+     					
+     					@Override
+     					public void onClick(DialogInterface dialog, int which) {
+     						_albumManager.deleteAlbum(holder1.textview.getText().toString());							
+     					}
+     				});
+     				
+     				builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+     					
+     					@Override
+     					public void onClick(DialogInterface dialog, int which) {
+     						dialog.dismiss();				
+     					}
+     				});
+     				
+     				builder.show(); 
+                    
+                }
                 
                 if (item.getTitle().equals("Edit")) 
                 {
@@ -800,11 +857,32 @@ public class MainActivity extends Activity {
 
              @Override
              public void onClick(View v) {
-                 if (_mainTabHost.getCurrentTab() == 0)
-                 	_imageManager.deleteSelectedImages(); // Xóa ảnh
-                 else {
-                 	_albumManager.deleteSelectedAlbums(); // Xóa album
-                 }
+            	 
+            	AlertDialog.Builder builder = new AlertDialog.Builder(_this);
+ 				builder.setMessage("Are you sure you want to delete?")
+ 					   .setTitle("Delete");
+ 				
+ 				builder.setPositiveButton("Delete", new DialogInterface.OnClickListener() {
+ 					
+ 					@Override
+ 					public void onClick(DialogInterface dialog, int which) {
+ 						if (_mainTabHost.getCurrentTab() == 0)
+ 		                 	_imageManager.deleteSelectedImages(); // Xóa ảnh
+ 		                 else {
+ 		                 	_albumManager.deleteSelectedAlbums(); // Xóa album
+ 		                 }								
+ 					}
+ 				});
+ 				
+ 				builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+ 					
+ 					@Override
+ 					public void onClick(DialogInterface dialog, int which) {
+ 						dialog.dismiss();				
+ 					}
+ 				});
+ 				
+ 				builder.show();               
              }
          });
     }

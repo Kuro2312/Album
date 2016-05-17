@@ -12,8 +12,7 @@ public class DecodeImagesTask extends AsyncTask<ImageManager, Void, ImageManager
 		ArrayList<DataHolder> data = imageManager[0].getAllImageData();
 		int n = data.size();
 		
-		for (int i = n - 1; i >=0; i--)
-		{
+		for (int i = n - 1; i >=0; i--) {
 			data.get(i).loadBitmap();			
 		}
     	
@@ -23,7 +22,9 @@ public class DecodeImagesTask extends AsyncTask<ImageManager, Void, ImageManager
 	
 	protected void onPostExecute(ImageManager imageManager)
 	{
+
 		imageManager.refresh();
+
     }
 }
 

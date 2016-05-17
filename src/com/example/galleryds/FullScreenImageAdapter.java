@@ -1,13 +1,21 @@
 package com.example.galleryds;
 
+import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.Bitmap.CompressFormat;
 import android.graphics.BitmapFactory;
 import android.graphics.Point;
+import android.os.AsyncTask;
+import android.os.Build;
+import android.os.Environment;
+import android.support.v4.util.LruCache;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.view.Display;
@@ -24,7 +32,9 @@ public class FullScreenImageAdapter extends PagerAdapter{
 	private ArrayList<String> _filePaths;
 	private ArrayList<View> _pages;
 	private LayoutInflater _inflater;
-
+	
+	private LruCache<String, Bitmap> mMemoryCache;
+	
 	// constructor
 	public FullScreenImageAdapter(Activity activity,
 			ArrayList<String> filePaths) {
@@ -32,7 +42,27 @@ public class FullScreenImageAdapter extends PagerAdapter{
 		_filePaths = filePaths;
 		_pages = new ArrayList<View>();
 		_inflater = (LayoutInflater) _activity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		
+		final int maxMemory = (int) (Runtime.getRuntime().maxMemory() / 1024);
+		final int cacheSize = maxMemory / 2;
+		mMemoryCache = new LruCache<String, Bitmap>(cacheSize) {
+	        @Override
+	        protected int sizeOf(String key, Bitmap bitmap) {
+	            return bitmap.getByteCount() / 1024;
+	        }
+	    };
 	}
+	
+	public void addBitmapToMemCache(String key, Bitmap bitmap) {
+	    if (getBitmapFromMemCache(key) == null) {
+	        mMemoryCache.put(key, bitmap);
+	    }
+	}
+
+	public Bitmap getBitmapFromMemCache(String key) {
+	    return mMemoryCache.get(key);
+	}
+	
 	
 	@Override
 	public int getCount() {
@@ -54,8 +84,13 @@ public class FullScreenImageAdapter extends PagerAdapter{
         Point size = new Point();
         display.getSize(size);
         
-        Bitmap bitmap = ImageSupporter.decodeSampledBitmapFromFile(new File( _filePaths.get(position)), size.x, size.x);        
-        image.setImageBitmap(bitmap);
+        Bitmap bitmap = getBitmapFromMemCache(_filePaths.get(position));
+        
+        if (bitmap == null) {       	
+        	new BitmapWorkerTask(image, size.x).execute(_filePaths.get(position));
+        }
+        else
+        	image.setImageBitmap(bitmap);
         
         image.setOnClickListener(new View.OnClickListener() {
 			
@@ -67,8 +102,7 @@ public class FullScreenImageAdapter extends PagerAdapter{
 		});
         
         ((ViewPager) container).addView(viewLayout);
-        
-        
+      
         return viewLayout;
 	}
 	
@@ -93,7 +127,29 @@ public class FullScreenImageAdapter extends PagerAdapter{
 		return POSITION_NONE;
 	}
 	
-	
-	
-	
+	class BitmapWorkerTask extends AsyncTask<String, Void, Bitmap> {
+		
+		ImageView _view;
+		int _size;
+		String _filePath;
+		
+		public BitmapWorkerTask(ImageView view, int size) {
+			_view = view;
+			_size = size;
+		}
+
+		@Override
+		protected Bitmap doInBackground(String... params) {
+			_filePath = params[0];
+			Bitmap bitmap = ImageSupporter.decodeSampledBitmapFromFile(new File(_filePath), _size, _size);
+			return bitmap;
+		}
+		
+		@Override
+		protected void onPostExecute(Bitmap result) {
+			_view.setImageBitmap(result);
+			addBitmapToMemCache(_filePath, result);
+		}
+		
+	}
 }

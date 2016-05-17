@@ -5,7 +5,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Environment;
@@ -33,6 +35,7 @@ public class ViewAlbumImagesActivity extends Activity {
     
     private boolean _inSelectionMode;
     private int _contextPosition;
+    private Context _this;
     
     // Các thành phần trên toolbar
     private LinearLayout llSelect;
@@ -56,7 +59,8 @@ public class ViewAlbumImagesActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_view_album_images);
 		
-		_gridViewAlbumImages = (GridView) findViewById(R.id.gridView4);
+		initializeSystem();
+
 		
 		// Lấy dữ liệu đóng góp
 		Intent intent = getIntent();
@@ -90,14 +94,35 @@ public class ViewAlbumImagesActivity extends Activity {
 	 @Override
     public boolean onContextItemSelected(MenuItem item) 
 	 {
-        ViewHolder holder = (ViewHolder) ImageSupporter.getViewByPosition(_contextPosition, _gridViewAlbumImages).getTag();
-        DataHolder data = (DataHolder) _albumImagesAdapter.getItem(holder.id);
+        final ViewHolder holder = (ViewHolder) ImageSupporter.getViewByPosition(_contextPosition, _gridViewAlbumImages).getTag();
+        final DataHolder data = (DataHolder) _albumImagesAdapter.getItem(holder.id);
         
         if (item.getTitle().equals("Delete"))
         {
-        	// Xóa khỏi adapter + cập nhật giao diện
-            _albumImagesAdapter.remove(holder.id);
-            _imageManager.deleteSelectedImage(data);
+        	AlertDialog.Builder builder = new AlertDialog.Builder(_this);
+			builder.setMessage("Are you sure you want to delete?")
+				   .setTitle("Delete");
+			
+			builder.setPositiveButton("Delete", new DialogInterface.OnClickListener() {
+				
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+		        	// Xóa khỏi adapter + cập nhật giao diện
+		            _albumImagesAdapter.remove(holder.id);
+		            _imageManager.deleteSelectedImage(data);						
+				}
+			});
+			
+			builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+				
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					dialog.dismiss();				
+				}
+			});
+			
+			builder.show();
+        	
         }      
         else if (item.getTitle().equals("Add to Favourite"))      
             _imageManager.addImageToFavourite(data);      
@@ -141,9 +166,9 @@ public class ViewAlbumImagesActivity extends Activity {
 
              if (holder.checkbox.isChecked() == true) 
              {
-                 // Xóa khỏi adapter + cập nhật giao diện
-                 _albumImagesAdapter.remove(holder.id);
+                 // Xóa khỏi adapter + cập nhật giao diện               
                  _albumManager.removeImageFromAlbum((DataHolder) _albumImagesAdapter.getItem(holder.id), _albumName);
+                 _albumImagesAdapter.remove(holder.id);
              }
          }
      }
@@ -202,7 +227,9 @@ public class ViewAlbumImagesActivity extends Activity {
     }
 	   	   
 	 public void initializeSystem()
-	 {
+	 {			
+		 _this = this;			
+		 _gridViewAlbumImages = (GridView) findViewById(R.id.gridView4);
 		 _inSelectionMode = false;
 			
 		llSelect = (LinearLayout) findViewById(R.id.llSelect2);
@@ -250,7 +277,27 @@ public class ViewAlbumImagesActivity extends Activity {
 
             @Override
             public void onClick(View v) {
-            	deleteSelectedImages();
+            	AlertDialog.Builder builder = new AlertDialog.Builder(_this);
+				builder.setMessage("Are you sure you want to delete?")
+					   .setTitle("Delete");
+				
+				builder.setPositiveButton("Delete", new DialogInterface.OnClickListener() {
+					
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						deleteSelectedImages();							
+					}
+				});
+				
+				builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+					
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						dialog.dismiss();				
+					}
+				});
+				
+				builder.show();
             }
         });
 
