@@ -52,6 +52,16 @@ public class ImageManager {
 		IMAGE_WIDTH = (int) ImageSupporter.convertDipToPixels(context, IMAGE_WIDTH);
     }
     
+    public static boolean hasInstance() {
+    	return !(_instance == null);
+    }
+    
+    public void onRotateScreen(Context context, GridView gridView, GridView gridViewFavourite) {
+    	_gridViewAll = gridView;
+    	_gridViewFavourite = gridViewFavourite;
+    	_gridViewAll.setAdapter(_allImageAdapter);
+    }
+    
     public static ImageManager getInstance(Context context, GridView gridView, GridView gridViewFavourite)
     {
     	if (_instance == null)

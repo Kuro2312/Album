@@ -320,7 +320,7 @@ public class ImageSupporter
 	    return true;
 	}
 	
-	private static BitmapLoadingTask getBitmapWorkerTask(ImageView imageView) 
+	public static BitmapLoadingTask getBitmapWorkerTask(ImageView imageView) 
 	{
 		if (imageView != null) 
 	   	{

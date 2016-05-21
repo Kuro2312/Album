@@ -10,6 +10,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcel;
@@ -65,7 +66,29 @@ class DataHolder
 	
 	public Bitmap getBitmap()
 	{
+		if (_bitmap == null)
+		{
+			File infile = new File(_filePath);
+			
+			String name = infile.getParentFile().getName() + infile.getName();
+			
+			int pos = name.lastIndexOf(".");
+			if (pos > 0)
+			    name = name.substring(0, pos) + ".png";
+			
+			String path = ImageSupporter.DEFAULT_PICTUREPATH + File.separator + "nova" + File.separator + name;
+			 
+			BitmapFactory.Options bmOptions = new BitmapFactory.Options();
+			//bmOptions.inJustDecodeBounds = true;
+			_bitmap = BitmapFactory.decodeFile(path, bmOptions);	
+		}
+		
 		return _bitmap;
+	}
+	
+	public void setBitmap(Bitmap bitmap)
+	{
+		_bitmap = bitmap;
 	}
 	
 	public long getLastModified()
@@ -149,9 +172,14 @@ public class ImageAdapter extends ArrayAdapter
 		    }
 		});
         
+    	if (_items.get(position).getBitmap() == null)
+    	{
+    		((MainActivity) _context).RefreshData();
+    	}
+    	 
 	    holder.filePath = _items.get(position).getFilePath();
-       // holder.imageview.setImageBitmap(_items.get(position).getBitmap());
-	    ImageSupporter.loadBitmap(_context, _items.get(position), holder.imageview);
+	    holder.imageview.setImageBitmap(_items.get(position).getBitmap());
+	    //ImageSupporter.loadBitmap(_context, _items.get(position), holder.imageview);
 		holder.checkbox.setChecked(false);
         holder.id = position;
         

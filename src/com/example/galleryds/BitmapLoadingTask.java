@@ -5,6 +5,7 @@ import java.lang.ref.WeakReference;
 
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
+import android.util.Log;
 import android.widget.ImageView;
 
 public class BitmapLoadingTask extends AsyncTask<DataHolder, Void, Bitmap> 
@@ -21,26 +22,47 @@ public class BitmapLoadingTask extends AsyncTask<DataHolder, Void, Bitmap>
     @Override
     protected Bitmap doInBackground(DataHolder... params) 
     {	
-    	// Lấy đường dẫn tới tập tin ảnh
-    	_data = params[0];
-        
-    	// Giải mã ảnh cho phù hợp
-    	_data.loadBitmap();
-        return _data.getBitmap();
+    	try
+    	{
+	    	// Lấy đường dẫn tới tập tin ảnh
+	    	_data = params[0];
+	        
+	    	// Giải mã ảnh cho phù hợp
+	    	_data.loadBitmap();
+	        return _data.getBitmap();
+    	}
+    	catch (Exception e)
+    	{
+    		Log.e("GalleryDS", e.getMessage());
+    		return null;
+    	}
     }
 
     // Once complete, see if ImageView is still around and set bitmap.
     @Override
     protected void onPostExecute(Bitmap bitmap) 
     {
+    	try
+    	{
     	// Khi hoàn thành kiểm tra xem ImageView còn tồn tại và ảnh Bitmap có tồn tại không
     	// Nếu không cài đặt bitmap
-        if (_imageViewReference != null && bitmap != null)
-        {
-            final ImageView imageView = _imageViewReference.get();
-            if (imageView != null)
-                imageView.setImageBitmap(bitmap);
+    	if (isCancelled()) {
+            bitmap = null;
         }
+
+        if (_imageViewReference != null && bitmap != null) {
+            final ImageView imageView = _imageViewReference.get();
+            final BitmapLoadingTask bitmapWorkerTask = ImageSupporter.getBitmapWorkerTask(imageView);
+            if (this == bitmapWorkerTask && imageView != null) {
+                imageView.setImageBitmap(bitmap);
+            }
+        }
+    	}
+        catch (Exception e)
+    	{
+    		Log.e("GalleryDS", e.getMessage());
+    		
+    	}
     }
     
     public DataHolder getData()
