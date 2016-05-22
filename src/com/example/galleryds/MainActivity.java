@@ -183,7 +183,7 @@ public class MainActivity extends Activity {
 		int pos = _imageManager.getGridViewAll().getFirstVisiblePosition();
 		  	
     	new ReleaseDataTask(pos, this._isScrollUp).execute(_imageManager);
-    	new Decode512ImagesTask(pos, !this._isScrollUp).execute(_imageManager);
+    	new Decode512ImagesTask(pos, this._isScrollUp).execute(_imageManager);
     }
     
     protected void doStrategyLoading_V1()
@@ -356,8 +356,7 @@ public class MainActivity extends Activity {
     public void dirFolder(File file) {
     	
     	// Kiểm tra tên có hợp lệ không
-        if (file.getName().startsWith(".") || file.getName().startsWith("com.")
-        		|| file.getName().equals("thumbnails") || file.getName().equals("nova"))
+        if (file.getName().startsWith(".") || file.getName().startsWith("com."))
             return;
 
         File[] files = file.listFiles();

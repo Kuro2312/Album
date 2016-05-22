@@ -76,7 +76,7 @@ class DataHolder
 			if (pos > 0)
 			    name = name.substring(0, pos) + ".png";
 			
-			String path = ImageSupporter.DEFAULT_PICTUREPATH + File.separator + "nova" + File.separator + name;
+			String path = ImageManager.IMAGE_THUMBNAIL_PATH + File.separator + name;
 			 
 			BitmapFactory.Options bmOptions = new BitmapFactory.Options();
 			//bmOptions.inJustDecodeBounds = true;

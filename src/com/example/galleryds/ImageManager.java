@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -23,6 +24,7 @@ public class ImageManager {
 	protected static ImageManager _instance = null;
 	public static int IMAGE_HEIGHT= 75;
 	public static int IMAGE_WIDTH = 75;
+	public static String IMAGE_THUMBNAIL_PATH = ImageSupporter.DEFAULT_PICTUREPATH + File.separator + ".GalleryDS_Thumbnail";
 	
 	// Cho việc thao tác trên mục toàn bô ảnh
     protected GridView _gridViewAll;
@@ -396,6 +398,52 @@ public class ImageManager {
 		catch (Exception e)
 		{
 			Log.e("GalleryDS_Favourite", e.getMessage());
+	        return false;
+		}
+	}
+	
+	protected static boolean saveThumbNail(DataHolder data)
+	{
+		try
+		{			
+			Bitmap b = data.getBitmap();
+			
+			if (b != null)
+			{
+				try 
+				{	
+					 File folder = new File(IMAGE_THUMBNAIL_PATH);
+					 if (!folder.exists())
+						  folder.mkdir();
+					 
+					 File infile = new File(data.getFilePath());
+					 String name = infile.getParentFile().getName() + infile.getName();
+					 
+					 // Tạo mã cho ảnh thumbnail = tên folder cha + tên ảnh + .png
+					 int pos = name.lastIndexOf(".");
+					 if (pos > 0)
+						 name = name.substring(0, pos) + ".png";
+						
+					 File f = new File(IMAGE_THUMBNAIL_PATH + File.separator + name);
+					 f.createNewFile();
+
+					 FileOutputStream out = new FileOutputStream(f);
+					 b.compress(Bitmap.CompressFormat.PNG, 100, out);
+					 out.flush();
+					 out.close();
+					 
+					 data.setBitmap(null);
+				} 
+				catch (Exception e) {
+				     e.printStackTrace();
+				}	
+			}
+			
+			return true;
+		}
+		catch (Exception e)
+		{
+			Log.e("GalleryDS_Thumbnail", e.getMessage());
 	        return false;
 		}
 	}

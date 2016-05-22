@@ -102,7 +102,7 @@ class Decode1024ImagesTask extends AsyncTask<ImageManager, Void, ImageManager>{
 			data.get(i).loadBitmap();	
 				
 			// Save ảnh
-			ImageSupporter.saveThumbNail(data.get(i));
+			ImageManager.saveThumbNail(data.get(i));
 		}
 		
     	return imageManager[0];
@@ -141,13 +141,13 @@ class Decode512ImagesTask extends AsyncTask<ImageManager, Void, ImageManager>{
 				if (m < 0)
 					m = 0;
 				
-				for (int i = _pos - 100; i >= m; i--) 
+				for (int i = _pos; i >= m; i--) 
 				{	
 					// Tải ảnh
 					data.get(i).loadBitmap();	
 						
 					// Save ảnh
-					ImageSupporter.saveThumbNail(data.get(i));
+					ImageManager.saveThumbNail(data.get(i));
 				}
 				
 				int m1 = (_pos + 1000 < n) ? _pos + 1000 : n;
@@ -161,13 +161,13 @@ class Decode512ImagesTask extends AsyncTask<ImageManager, Void, ImageManager>{
 				if (m >= n)
 					m = n;
 				
-				for (int i = _pos + 100; i < m; i++) 
+				for (int i = _pos; i < m; i++) 
 				{	
 					// Tải ảnh
 					data.get(i).loadBitmap();	
 						
 					// Save ảnh
-					ImageSupporter.saveThumbNail(data.get(i));
+					ImageManager.saveThumbNail(data.get(i));
 				}
 				
 				int m1 = (_pos - 1000 > 0) ? _pos - 1000 : 0;
