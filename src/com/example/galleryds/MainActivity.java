@@ -111,6 +111,7 @@ public class MainActivity extends Activity {
         // Sử dụng load dữ liệu hướng bất đồng bộ
         //doStrategyLoading_V2();
         
+        // Chiến lược mới nhất
         doStrategyLoading_V3();
         
         int a = _imageManager.getNumberOfImages();
@@ -146,6 +147,7 @@ public class MainActivity extends Activity {
     protected int _myLastVisiblePos; 
     protected boolean _isScrollUp = true;
 
+    // Dùng để xác định đang cuộn lên hay cuộn xuống
     public void setOnScrollListener_gridView()
     {
     	_myLastVisiblePos = _imageManager.getGridViewAll().getFirstVisiblePosition();
@@ -175,18 +177,13 @@ public class MainActivity extends Activity {
     	});
     }
     
-    public void RefreshData()
+    // Loại bỏ bớt dữ liệu không cần thiết
+    public void refreshData()
     {
 		int pos = _imageManager.getGridViewAll().getFirstVisiblePosition();
-		
-    	if (this._isScrollUp == false)
-    	{
-    		new ReleaseDataTask(pos, true).execute(_imageManager);
-    	}
-    	else
-    	{
-    		new ReleaseDataTask(pos, false).execute(_imageManager);
-    	}
+		  	
+    	new ReleaseDataTask(pos, this._isScrollUp).execute(_imageManager);
+    	new Decode512ImagesTask(pos, !this._isScrollUp).execute(_imageManager);
     }
     
     protected void doStrategyLoading_V1()
@@ -208,14 +205,13 @@ public class MainActivity extends Activity {
     	if (!rotated) {
     		loadImages_V2();
     	
-    	// Giải mã và cập nhật
-    	 new DecodeImagesTask().execute(_imageManager);
+	    	// Giải mã và cập nhật
+	    	new DecodeImagesTask().execute(_imageManager);
+	     	// Load ảnh ưa thích
+	    	new LoadFavouriteImageTask().execute(_imageManager);
     	}
     	else
     		_imageManager._allImageAdapter.notifyDataSetChanged();
-    	 
-    	// Load ảnh ưa thích
-    	 new LoadFavouriteImageTask().execute(_imageManager);
     }
     
     // Chiến lược
@@ -1017,5 +1013,10 @@ public class MainActivity extends Activity {
 		super.onSaveInstanceState(outState);
 	}
     
-    
+	 public void onDestroy() {
+
+		 super.onDestroy();
+		 
+		 //ImageSupporter.clearData();
+	 }
 }

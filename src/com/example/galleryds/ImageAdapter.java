@@ -174,7 +174,7 @@ public class ImageAdapter extends ArrayAdapter
         
     	if (_items.get(position).getBitmap() == null)
     	{
-    		((MainActivity) _context).RefreshData();
+    		((MainActivity) _context).refreshData();
     	}
     	 
 	    holder.filePath = _items.get(position).getFilePath();

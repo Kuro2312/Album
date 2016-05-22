@@ -335,6 +335,58 @@ public class ImageSupporter
 	   
 	    return null;
 	}
+	
+	public static void saveThumbNail(DataHolder data)
+	{
+		Bitmap b = data.getBitmap();
+		
+		if (b != null)
+		{
+			try 
+			{				
+				 File infile = new File(data.getFilePath());
+				 String name = infile.getParentFile().getName() + infile.getName();
+				 
+				 // Tạo mã cho ảnh thumbnail = tên folder cha + tên ảnh + .png
+				 int pos = name.lastIndexOf(".");
+				 if (pos > 0)
+					 name = name.substring(0, pos) + ".png";
+					
+				 File f = new File(ImageSupporter.DEFAULT_PICTUREPATH + File.separator + "nova" + File.separator + name);
+				 f.createNewFile();
+
+				 FileOutputStream out = new FileOutputStream(f);
+				 b.compress(Bitmap.CompressFormat.PNG, 100, out);
+				 out.flush();
+				 out.close();
+				 
+				 data.setBitmap(null);
+			} 
+			catch (Exception e) {
+			     e.printStackTrace();
+			}	
+		}
+	}
+
+	public static void deleteThumbNail(DataHolder data) {
+		
+		File infile = new File(data.getFilePath());
+		String name = infile.getParentFile().getName() + infile.getName();
+		 
+		// Tạo mã cho ảnh thumbnail = tên folder cha + tên ảnh + .png
+		int pos = name.lastIndexOf(".");
+		if (pos > 0)
+			name = name.substring(0, pos) + ".png";
+			
+		File f = new File(ImageSupporter.DEFAULT_PICTUREPATH + File.separator + "nova" + File.separator + name);
+		 
+		ImageSupporter.deleteFile(f); 
+	}
+
+	public static void clearData() {
+		
+		ImageSupporter.deleteWholeFolder(ImageSupporter.DEFAULT_PICTUREPATH, "nova");
+	}
 }
 
 class AsyncDrawable extends BitmapDrawable

@@ -11,6 +11,7 @@ import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.Toast;
 
+// Dùng cho chiến lược tải ảnh V2
 public class DecodeImagesTask extends AsyncTask<ImageManager, Void, ImageManager>{
 
 	protected ImageManager doInBackground(ImageManager... imageManager) {
@@ -29,14 +30,12 @@ public class DecodeImagesTask extends AsyncTask<ImageManager, Void, ImageManager
 	
 	protected void onPostExecute(ImageManager imageManager)
 	{
-
 		imageManager.refresh();
-
     }
 }
 
 
-
+// Dùng cho việc xử lý ảnh Favourite
 class LoadFavouriteImageTask extends AsyncTask<ImageManager, Void, Integer> {
 
     protected Integer doInBackground(ImageManager... imageManager) {
@@ -53,7 +52,7 @@ class LoadFavouriteImageTask extends AsyncTask<ImageManager, Void, Integer> {
     }
 }
 
-
+// Tải và xữ lý 300 ảnh gần nhất
 class Decode300ImagesTask extends AsyncTask<ImageManager, Void, ImageManager>{
 
 	protected ImageManager doInBackground(ImageManager... imageManager) {
@@ -83,56 +82,27 @@ class Decode300ImagesTask extends AsyncTask<ImageManager, Void, ImageManager>{
     }
 }
 
+// Xử lý ảnh bitmap và chuyển thành thumbnail cho 1024 ảnh đầu tiên
 class Decode1024ImagesTask extends AsyncTask<ImageManager, Void, ImageManager>{
-
+	
 	protected ImageManager doInBackground(ImageManager... imageManager) {
     	
 		// Giải mã ảnh cho phù hợp
 		ArrayList<DataHolder> data = imageManager[0].getAllImageData();
 		int n = data.size();
 		
-		if (n - 300 > 0)
-		{
-			int m = n - 1024;
-			
-			if (m < 0)
-				m = 0;
-			
-			for (int i = n - 1; i >= m; i--) {
+		int m = n - 1024;
+		
+		if (m < 0)
+			m = 0;
+		
+		for (int i = n - 1; i >= m; i--) 
+		{	
+			// Tải ảnh
+			data.get(i).loadBitmap();	
 				
-
-				
-				data.get(i).loadBitmap();	
-				Bitmap b = data.get(i).getBitmap();
-				data.get(i).setBitmap(null);
-					
-				if (b != null)
-				{
-					try {
-						
-						 File infile = new File(data.get(i).getFilePath());
-						 
-						 String name = infile.getParentFile().getName() + infile.getName();
-						 
-							int pos = name.lastIndexOf(".");
-							if (pos > 0)
-							    name = name.substring(0, pos) + ".png";
-							
-						 File f = new File(ImageSupporter.DEFAULT_PICTUREPATH + File.separator + "nova" + File.separator + name);
-						 //File f1 = new File(ImageSupporter.DEFAULT_PICTUREPATH + File.separator + "nova");
-						 
-						 f.createNewFile();
-	 
-							 FileOutputStream out = new FileOutputStream(f);
-							 b.compress(Bitmap.CompressFormat.PNG, 100, out);
-							 out.flush();
-							 out.close();
-
-					} catch (Exception e) {
-					     e.printStackTrace();
-					}	
-				}
-			}
+			// Save ảnh
+			ImageSupporter.saveThumbNail(data.get(i));
 		}
 		
     	return imageManager[0];
@@ -144,7 +114,78 @@ class Decode1024ImagesTask extends AsyncTask<ImageManager, Void, ImageManager>{
     }
 }
 
+//Xử lý ảnh bitmap và chuyển thành thumbnail cho 1024 ảnh đầu tiên
+class Decode512ImagesTask extends AsyncTask<ImageManager, Void, ImageManager>{
+	
+	protected int _pos;
+	protected boolean _isScrollUp;
+	
+	public Decode512ImagesTask(int pos, boolean isScrollUp)
+	{
+		_pos = pos;
+		_isScrollUp = isScrollUp;
+	}
+	
+	protected ImageManager doInBackground(ImageManager... imageManager) {
+ 	
+		// Giải mã ảnh cho phù hợp
+		ArrayList<DataHolder> data = imageManager[0].getAllImageData();
+		int n = data.size();
+		
+		if (n > 1024 &&  n - 900 > _pos)
+		{	
+			if (_isScrollUp == true)
+			{
+				int m = _pos - 512;
+				
+				if (m < 0)
+					m = 0;
+				
+				for (int i = _pos - 100; i >= m; i--) 
+				{	
+					// Tải ảnh
+					data.get(i).loadBitmap();	
+						
+					// Save ảnh
+					ImageSupporter.saveThumbNail(data.get(i));
+				}
+				
+				int m1 = (_pos + 1000 < n) ? _pos + 1000 : n;
+				for (int i = _pos + 500; i < m1; i++)
+					ImageSupporter.deleteThumbNail(data.get(i));
+			}
+			else if (_isScrollUp == true && _pos - 500 > 0)
+			{
+				int m = _pos + 512;
+				
+				if (m >= n)
+					m = n;
+				
+				for (int i = _pos + 100; i < m; i++) 
+				{	
+					// Tải ảnh
+					data.get(i).loadBitmap();	
+						
+					// Save ảnh
+					ImageSupporter.saveThumbNail(data.get(i));
+				}
+				
+				int m1 = (_pos - 1000 > 0) ? _pos - 1000 : 0;
+				for (int i = _pos - 500; i >= m1; i--)
+					ImageSupporter.deleteThumbNail(data.get(i));
+			}
+		}
+		
+		return imageManager[0];
+	}
+	
+	protected void onPostExecute(ImageManager imageManager)
+	{
+		imageManager.refresh();
+	}
+}
 
+// Dùng để dọn dẹp bớt dữ liệu chưa cần tới hay đã dùng qua
 class ReleaseDataTask extends AsyncTask<ImageManager, Void, ImageManager>{
 
 	protected int _pos;
@@ -162,10 +203,10 @@ class ReleaseDataTask extends AsyncTask<ImageManager, Void, ImageManager>{
 		ArrayList<DataHolder> data = imageManager[0].getAllImageData();
 		int n = data.size();
 		
-		if (_isScrollUp == false)
+		if (_isScrollUp == true)
 		{
 			if (n - _pos > 300)
-				for (int i = _pos + 100; i < _pos + 300; i++)
+				for (int i = _pos + 100; i < n; i++)
 					data.get(i).setBitmap(null);
 		}
 		else
@@ -183,3 +224,4 @@ class ReleaseDataTask extends AsyncTask<ImageManager, Void, ImageManager>{
 		imageManager.refresh();
     }
 }
+
