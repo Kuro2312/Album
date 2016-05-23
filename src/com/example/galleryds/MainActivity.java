@@ -94,6 +94,9 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         
+        Intent i = new Intent(this, ExitListenerService.class);
+        startService(i);
+        
         rotated = ImageManager.hasInstance();
 
         // Khởi tạo dữ liệu cho hệ thống
@@ -221,15 +224,15 @@ public class MainActivity extends Activity {
     {
     	if (!rotated)
     	{
+    		// Load ảnh ưa thích
+	    	new LoadFavouriteImageTask().execute(_imageManager);
+	    	
 	    	// Load thông tin ảnh
 	    	loadImages_V2();
 	    	
 	    	// Giải mã và cập nhật
 	    	new Decode300ImagesTask().execute(_imageManager);
-	    	new Decode1024ImagesTask().execute(_imageManager);
-	    	
-	    	// Load ảnh ưa thích
-	    	new LoadFavouriteImageTask().execute(_imageManager);
+	    	new Decode1024ImagesTask().execute(_imageManager);	    	
     	}
     }
     

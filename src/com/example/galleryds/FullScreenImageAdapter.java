@@ -149,7 +149,6 @@ public class FullScreenImageAdapter extends PagerAdapter{
 		protected void onPostExecute(Bitmap result) {
 			_view.setImageBitmap(result);
 			addBitmapToMemCache(_filePath, result);
-		}
-		
+		}		
 	}
 }

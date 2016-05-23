@@ -12,6 +12,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -80,7 +81,19 @@ class DataHolder
 			 
 			BitmapFactory.Options bmOptions = new BitmapFactory.Options();
 			//bmOptions.inJustDecodeBounds = true;
-			_bitmap = BitmapFactory.decodeFile(path, bmOptions);	
+			_bitmap = BitmapFactory.decodeFile(path, bmOptions);
+			
+			/*File infile = new File(_filePath);
+			
+			String name = infile.getParentFile().getName() + infile.getName();
+			
+			int pos = name.lastIndexOf(".");
+			if (pos > 0)
+			    name = name.substring(0, pos) + ".png";
+			
+			String path = ImageManager.IMAGE_THUMBNAIL_PATH + File.separator + name;
+			
+			new LoadThumbnailTask(this).execute(path);*/
 		}
 		
 		return _bitmap;
@@ -95,6 +108,30 @@ class DataHolder
 	{
 		return _modifiedTime;
 	}
+	
+    class LoadThumbnailTask extends AsyncTask<String, Void, Bitmap> {
+    	
+    	DataHolder _data;
+    	
+    	public LoadThumbnailTask(DataHolder data) {
+    		_data = data;
+    	}
+    	
+		@Override
+		protected Bitmap doInBackground(String... params) {
+			
+			String path = params[0];
+			 
+			BitmapFactory.Options bmOptions = new BitmapFactory.Options();
+			//bmOptions.inJustDecodeBounds = true;
+			return BitmapFactory.decodeFile(path, bmOptions);
+		}
+
+    	@Override
+		protected void onPostExecute(Bitmap result) {
+			_data._bitmap = result;
+		}
+    }
 }
 
 public class ImageAdapter extends ArrayAdapter 
@@ -204,4 +241,7 @@ public class ImageAdapter extends ArrayAdapter
     	_items.addAll(data);
     	super.notifyDataSetChanged();
     }
+    
+
+    
 }
