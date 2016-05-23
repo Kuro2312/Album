@@ -547,14 +547,22 @@ public class MainActivity extends Activity {
 
             switch (requestCode) {
                 case ADD_ALBUM:
-                    _albumManager.createAlbum(name);	// Tạo album mới
+                	// Tạo album mới
+                    if (_albumManager.createAlbum(name))
+                    	Toast.makeText(this, "Create Album Successfilly", Toast.LENGTH_SHORT).show();
+                    else
+                    	Toast.makeText(this, "Fail To Create Album", Toast.LENGTH_SHORT).show();
                     break;
 
                 case EDIT_ALBUM:
                 	// Cập nhật thông tin album
                 	GridView gridView = _albumManager.getGridViewAlbum();
                     AlbumViewHolder holder = (AlbumViewHolder) ImageSupporter.getViewByPosition(_contextPosition, gridView).getTag();
-                    _albumManager.renameAlbum(holder.textview.getText().toString(), name);
+                    
+                    if (_albumManager.renameAlbum(holder.textview.getText().toString(), name))
+	                	Toast.makeText(this, "Update Album Successfilly", Toast.LENGTH_SHORT).show();
+	                else
+	                	Toast.makeText(this, "Fail To Update Album", Toast.LENGTH_SHORT).show();
             }
         }
     }
