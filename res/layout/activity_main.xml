@@ -1,218 +1,124 @@
-<?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.example.galleryds.MainActivity">
-
-
-    <LinearLayout
-        android:id="@+id/toolbar"
-    	android:layout_width="match_parent"
-    	android:layout_height="50dip"
-    	android:layout_alignParentLeft="true"
-   		android:layout_alignParentBottom="true"
-    	android:background="@android:color/black"
-        android:orientation="horizontal"
+    tools:context="com.example.neogalleryds.MainActivity" >
+     
+    <HorizontalScrollView
+        android:id="@+id/horizontalScrollView1"
+        android:layout_width="match_parent"
+        android:layout_height="70dip"
         android:gravity="center"
-        android:padding="2dp">
-
-        <View
-            android:layout_width="0dp"
-            android:layout_height="1dp"
-            android:layout_weight="1" />
+        android:layout_alignParentBottom="true"
+        android:background="@color/AliceBlue">
 
         <LinearLayout
-            android:id="@+id/llSelect"
+            android:id="@+id/groupView1"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:orientation="vertical">
-
-            <ImageButton
-                android:id="@+id/btnSelect"
-                android:layout_width="30dp"
-                android:layout_height="30dp"
-                android:clickable="true"
-                android:scaleType="fitCenter"
-                android:layout_gravity="center"
-                android:src = "@drawable/select"
-                android:background="@drawable/selector_circle_button"/>
-            <TextView
-                android:id="@+id/tvSelect"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textAlignment="center"
-                android:textColor="@android:color/white"
-                android:textSize="12dp"
-                android:text="Select"
-                />
+			android:layout_gravity="center"
+			android:gravity="center"
+            android:orientation="horizontal" >     
         </LinearLayout>
-
-        <View
-            android:id="@+id/vwFavourite"
-            android:layout_width="0dp"
-            android:layout_height="1dp"
-            android:layout_weight="1"
-            android:visibility="gone" />
-
-        <LinearLayout
-            android:id="@+id/llFavourite"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:orientation="vertical"
-            android:visibility="gone">
-
-            <ImageButton
-                android:id="@+id/btnFavourite"
-                android:layout_width="30dp"
-                android:layout_height="30dp"
-                android:clickable="true"
-                android:scaleType="fitCenter"
-                android:layout_gravity="center"
-                android:src = "@drawable/favourite"
-                android:background="@drawable/selector_heart_button"/>
-            <TextView
-                android:id="@+id/tvFavourite"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textAlignment="center"
-                android:textColor="@android:color/white"
-                android:textSize="12dp"
-                android:text="Favourite"
-                />
-        </LinearLayout>
-
-        <View
-            android:id="@+id/vwDelete"
-            android:layout_width="0dp"
-            android:layout_height="1dp"
-            android:layout_weight="1"
-            android:visibility="gone" />
-
-        <LinearLayout
-            android:id="@+id/llDelete"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:orientation="vertical"
-            android:visibility="gone">
-
-            <ImageButton
-                android:id="@+id/btnDelete"
-                android:layout_width="30dp"
-                android:layout_height="30dp"
-                android:clickable="true"
-                android:scaleType="fitCenter"
-                android:layout_gravity="center"
-                android:src = "@drawable/delete"
-                android:background="@drawable/selector_trash_button"/>
-            <TextView
-                android:id="@+id/tvDelete"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textAlignment="center"
-                android:textColor="@android:color/white"
-                android:textSize="12dp"
-                android:text="Delete"
-                />
-        </LinearLayout>
-
-        <View
-            android:id="@+id/vwAdd"
-            android:layout_width="0dp"
-            android:layout_height="1dp"
-            android:layout_weight="1" />
-
-        <LinearLayout
-            android:id="@+id/llAdd"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:orientation="vertical">
-
-            <ImageButton
-                android:id="@+id/btnAdd"
-                android:layout_width="30dp"
-                android:layout_height="30dp"
-                android:clickable="true"
-                android:scaleType="fitCenter"
-                android:layout_gravity="center"
-                android:src = "@drawable/add"
-                android:background="@drawable/selector_circle_button"/>
-
-            <TextView
-                android:id="@+id/tvAdd"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textAlignment="center"
-                android:textColor="@android:color/white"
-                android:textSize="12dp"
-                android:text="Add Album"
-                />
-        </LinearLayout>
-
-        <View
-            android:layout_width="0dp"
-            android:layout_height="1dp"
-            android:layout_weight="1" />
-
+    </HorizontalScrollView>
+    
+    <LinearLayout
+        android:id="@+id/groupView2"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:layout_gravity="center"
+		android:gravity="center"
+		android:orientation="horizontal"
+		android:background="@color/LimeGreen" >    
+		
+         <RadioGroup
+		    android:id="@+id/rdogrp"
+		    android:layout_width="match_parent"
+		    android:layout_height="match_parent"
+		    android:gravity="center"
+		    android:orientation="horizontal" >
+		
+		    <RadioButton
+	            android:id="@+id/radioAll"
+	            android:layout_width="match_parent"
+	            android:layout_height="wrap_content"
+	            android:layout_weight="1"
+	            android:background="@drawable/radiotab_selector"
+	            android:button="@null"
+	            android:checked="true"
+	            android:gravity="center"
+	            android:padding="10dp"
+	            android:text="All"
+	            android:textColor="@drawable/radiotab_textcolor_selector" 
+	            android:textSize="15sp"
+	            android:textStyle="bold"/>
+	 
+	        <RadioButton
+	            android:id="@+id/radioAlbum"
+	            android:layout_width="match_parent"
+	            android:layout_height="wrap_content"
+	            android:layout_weight="1"
+	            android:background="@drawable/radiotab_selector"
+	            android:button="@null"
+	            android:gravity="center"
+	            android:padding="10dp"
+	            android:text="Album"
+	            android:textColor="@drawable/radiotab_textcolor_selector" 
+	            android:textSize="15sp"
+	            android:textStyle="bold"/>
+	 
+	        <RadioButton
+	            android:id="@+id/radioFavourite"
+	            android:layout_width="match_parent"
+	            android:layout_height="wrap_content"
+	            android:layout_weight="1"
+	            android:background="@drawable/radiotab_selector"
+	            android:button="@null"
+	            android:gravity="center"
+	            android:padding="10dp"
+	            android:text="Favourite"
+	            android:textColor="@drawable/radiotab_textcolor_selector"
+	            android:textSize="15sp"
+	            android:textStyle="bold"/>
+				
+	        <RadioButton
+	            android:id="@+id/radioLocked"
+	            android:layout_width="match_parent"
+	            android:layout_height="wrap_content"
+	            android:layout_weight="1"
+	            android:background="@drawable/radiotab_selector"
+	            android:button="@null"
+	            android:gravity="center"
+	            android:padding="10dp"
+	            android:text="Locked"
+	            android:textColor="@drawable/radiotab_textcolor_selector"
+	            android:textSize="15sp"
+	            android:textStyle="bold"/>
+	        
+		</RadioGroup>
+        
     </LinearLayout>
-
-
-    <TabHost
-        android:id="@+id/tabhost"
+        
+    <ListView
+        android:id="@+id/listView1"
+        android:layout_width="100dip"
+        android:layout_height="match_parent"
+        android:layout_above="@+id/horizontalScrollView1"
+        android:layout_below="@+id/groupView2"
+        android:background="@color/White">
+    </ListView>
+    
+  	 <GridView
+        android:id="@+id/gridView1"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_above="@+id/toolbar"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentTop="true" >
+        android:numColumns="3" 
+        android:layout_toRightOf="@+id/listView1"
+        android:layout_below="@+id/groupView2"
+        android:layout_above="@+id/horizontalScrollView1"
+        android:background="@color/LightSteelBlue">
+    </GridView>
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical" >
-
-            <TabWidget
-                android:id="@android:id/tabs"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:tabStripEnabled="true" >
-
-            </TabWidget>
-
-            <FrameLayout
-                android:id="@android:id/tabcontent"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent" >
-
-                <LinearLayout
-                    android:id="@+id/tab1"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:orientation="vertical" >
-                    <include layout="@layout/allimages_layout" />
-
-                </LinearLayout>
-
-                <LinearLayout
-                    android:id="@+id/tab2"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:orientation="vertical" >
-                    <include layout="@layout/albums_layout"/>
-
-                </LinearLayout>
-
-                <LinearLayout
-                    android:id="@+id/tab3"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:orientation="vertical" >
-                    <include layout="@layout/favourite_layout"/>
-
-                </LinearLayout>
-            </FrameLayout>
-        </LinearLayout>
-    </TabHost>
-
-
+  	 
 
 </RelativeLayout>

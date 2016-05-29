@@ -1,11 +1,3 @@
 eclipse.preferences.version=1
-encoding//src/com/example/galleryds/AlbumManager.java=UTF-8
-encoding//src/com/example/galleryds/BitmapLoadingTask.java=UTF-8
-encoding//src/com/example/galleryds/DecodeImagesTask.java=UTF-8
-encoding//src/com/example/galleryds/ImageAdapter.java=UTF-8
-encoding//src/com/example/galleryds/ImageManager.java=UTF-8
-encoding//src/com/example/galleryds/ImageSupporter.java=UTF-8
-encoding//src/com/example/galleryds/MainActivity.java=UTF-8
-encoding//src/com/example/galleryds/TouchImageView.java=UTF-8
-encoding//src/com/example/galleryds/ViewAlbumImagesActivity.java=UTF-8
-encoding//src/com/example/galleryds/ViewImageActivity.java=UTF-8
+encoding//src/com/example/neogalleryds/ImageSupporter.java=UTF-8
+encoding//src/com/example/neogalleryds/MainActivity.java=UTF-8

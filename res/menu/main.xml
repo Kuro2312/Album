@@ -1,11 +1,25 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context="com.example.galleryds.MainActivity" >
+    tools:context="com.example.neogalleryds.MainActivity" >
 
-	<item
+    <item
         android:id="@+id/action_settings"
         android:orderInCategory="100"
         android:showAsAction="never"
         android:title="@string/action_settings"/>
+    
+    <item
+        android:id="@+id/addNewAlbum" 
+        android:orderInCategory="120"
+        android:showAsAction="ifRoom"
+        android:title="@string/addNewAlbum"
+        android:icon="@drawable/add_album"/>
+
+    <item
+        android:id="@+id/selectMode" 
+        android:orderInCategory="140"
+        android:showAsAction="ifRoom"
+        android:title="@string/selectMode"
+        android:icon="@drawable/select"/>
     
 </menu>
