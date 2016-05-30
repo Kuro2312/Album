@@ -8,9 +8,10 @@
     <ImageView
         android:id="@+id/imageViewFolder"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent" 
+        android:clickable="false" />
         
-	    <TextView
+	<TextView
         android:id="@+id/textViewFolder"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

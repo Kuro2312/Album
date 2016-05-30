@@ -29,7 +29,7 @@ public class FolderAdapter extends ArrayAdapter  {
 	
 	protected int _reqWidth;
 	protected int _reqHeight;
-	private static int[] _folderIcon = { R.drawable.blue_folder, R.drawable.brown_folder, R.drawable.yellow_folder, R.drawable.green_folder, R.drawable.orange_folder}; 
+	public static int[] _folderIcon = { R.drawable.blue_folder, R.drawable.brown_folder, R.drawable.yellow_folder, R.drawable.green_folder, R.drawable.orange_folder}; 
 	
 	public FolderAdapter(Context context, ArrayList<String> data) 
 	{
@@ -70,19 +70,6 @@ public class FolderAdapter extends ArrayAdapter  {
 		else
 	        holder = (FolderDataHolder) convertView.getTag();
 		
-		
-		/*holder.imageView.setOnClickListener(new View.OnClickListener() {
-			
-		    public void onClick(View v) {
-
-		        CheckBox cb = (CheckBox) v.getTag();
-		        
-		        if (cb.getVisibility() == View.VISIBLE)
-		        	cb.setChecked(!cb.isChecked());
-		        else if(_context instanceof MainActivity)
-		        	((MainActivity) _context).viewAllAlbumImages(_items.get(cb.getId()));  
-		    }
-		});*/
         
 	    holder.imageView.setTag(holder.textView); 	    
 	   	holder.textView.setId(position);
@@ -99,4 +86,13 @@ public class FolderAdapter extends ArrayAdapter  {
         
         return convertView;
     }
+
+	public void setChecked(View view) {
+		
+		 FolderDataHolder dataHolder = (FolderDataHolder) view.getTag();
+		 
+		 int num = _folderIcon[0];
+		 Bitmap bitmap = ImageSupporter.decodeSampledBitmapFromResource(_context.getResources(), num, _reqWidth, _reqHeight);
+	     dataHolder.imageView.setImageBitmap(bitmap);
+	}
 }

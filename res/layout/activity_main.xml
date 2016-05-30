@@ -106,7 +106,8 @@
         android:layout_height="match_parent"
         android:layout_above="@+id/horizontalScrollView1"
         android:layout_below="@+id/groupView2"
-        android:background="@color/White">
+       
+        android:listSelector="@drawable/folder_listview_selector">
     </ListView>
     
   	 <GridView

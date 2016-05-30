@@ -173,20 +173,21 @@ public final class R {
         public static final int delete_album=0x7f020006;
         public static final int delete_image=0x7f020007;
         public static final int edit=0x7f020008;
-        public static final int green_folder=0x7f020009;
-        public static final int ic_launcher=0x7f02000a;
-        public static final int icon=0x7f02000b;
-        public static final int lock_image=0x7f02000c;
-        public static final int mark_image=0x7f02000d;
-        public static final int orange_folder=0x7f02000e;
-        public static final int radiotab_selector=0x7f02000f;
-        public static final int radiotab_textcolor_selector=0x7f020010;
-        public static final int remove_image_album=0x7f020011;
-        public static final int select=0x7f020012;
-        public static final int share=0x7f020013;
-        public static final int unlock_image=0x7f020014;
-        public static final int unmark_image=0x7f020015;
-        public static final int yellow_folder=0x7f020016;
+        public static final int folder_listview_selector=0x7f020009;
+        public static final int green_folder=0x7f02000a;
+        public static final int ic_launcher=0x7f02000b;
+        public static final int icon=0x7f02000c;
+        public static final int lock_image=0x7f02000d;
+        public static final int mark_image=0x7f02000e;
+        public static final int orange_folder=0x7f02000f;
+        public static final int radiotab_selector=0x7f020010;
+        public static final int radiotab_textcolor_selector=0x7f020011;
+        public static final int remove_image_album=0x7f020012;
+        public static final int select=0x7f020013;
+        public static final int share=0x7f020014;
+        public static final int unlock_image=0x7f020015;
+        public static final int unmark_image=0x7f020016;
+        public static final int yellow_folder=0x7f020017;
     }
     public static final class id {
         public static final int LinearLayout1=0x7f09000a;

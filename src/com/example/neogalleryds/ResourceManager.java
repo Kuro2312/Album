@@ -15,7 +15,8 @@ public class ResourceManager
 		R.drawable.delete_image, R.drawable.delete_album,
 		R.drawable.mark_image, R.drawable.unmark_image, 
 		R.drawable.add_image_album, R.drawable.remove_image_album,
-		R.drawable.lock_image, R.drawable.unlock_image			 
+		R.drawable.lock_image, R.drawable.unlock_image,
+		R.drawable.compress, R.drawable.share, R.drawable.convert_video
 	};	
 	
 	protected static int _reqWidth;

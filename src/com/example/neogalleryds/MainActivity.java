@@ -10,13 +10,15 @@ import android.os.Environment;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.ListView;
-import android.widget.RelativeLayout.LayoutParams;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.AdapterView.OnItemClickListener;
 
 public class MainActivity extends Activity {
 
@@ -45,7 +47,19 @@ public class MainActivity extends Activity {
 	private View btnEditImage;
 	
 	private View btnConvertToVideo;
+	private OnClickListener onClickConvertToVideo;
+	private OnClickListener onClickCompressImage;
+	private OnClickListener onClickShareImage;
+	private OnClickListener onClickRemoveFromAlbum;
+	private OnClickListener onClickAddToAlbum;
+	private OnClickListener onClickUnlockImage;
+	private OnClickListener onClickLockImage;
+	private OnClickListener onClickUnmarkImage;
+	private OnClickListener onClickMarkImage;
+	private OnClickListener onClickDeleteAlbum;
+	private OnClickListener onClickDeleteImage;
 	
+	protected int _lastIndex = -1;
 	
 		
 	@Override
@@ -67,7 +81,25 @@ public class MainActivity extends Activity {
         
 		_folderAdapter = new FolderAdapter(this, _data);
 		_listViewFolder.setAdapter(_folderAdapter);
+		_listViewFolder.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
 		
+		_listViewFolder.setOnItemClickListener(new OnItemClickListener() {
+			
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                
+            	if (_lastIndex != -1)
+            		_listViewFolder.setItemChecked(_lastIndex, false);
+            	
+            	_listViewFolder.setItemChecked(position, true);
+            	_lastIndex = position;
+            	
+                _folderAdapter.setChecked(view);
+                
+                Toast.makeText(MainActivity.this, "kuro", Toast.LENGTH_SHORT).show();
+            }
+        });
+
 		populateFunctionBar();
 	}
 	
@@ -112,40 +144,40 @@ public class MainActivity extends Activity {
 		int id = 0;
 		
 		// Delete Image
-		setUpFunctionButton(_scrollViewgroup, id++, R.drawable.delete_image, "Delete Image", onClickDelete);
+		btnDeleteImage = setUpFunctionButton(_scrollViewgroup, id++, R.drawable.delete_image, "Delete Image", onClickDeleteImage);
 		
 		// Delete Album
-		//setUpFunctionButton(_scrollViewgroup, id++, R.drawable.delete_album, "Delete Album", onClickDelete);
+		btnDeleteAlbum = setUpFunctionButton(_scrollViewgroup, id++, R.drawable.delete_album, "Delete Album", onClickDeleteAlbum);
 		
 		// Mark Image
-		setUpFunctionButton(_scrollViewgroup, id++, R.drawable.mark_image, "Mark Image", onClickDelete);
+		btnMarkImage = setUpFunctionButton(_scrollViewgroup, id++, R.drawable.mark_image, "Mark Image", onClickMarkImage);
 		
 		// Unmark Image
-		//setUpFunctionButton(_scrollViewgroup, id++, R.drawable.unmark_image, "Unmark Image", onClickDelete);
+		btnUnmarkImage = setUpFunctionButton(_scrollViewgroup, id++, R.drawable.unmark_image, "Unmark Image", onClickUnmarkImage);
 		
 		// Lock Image
-		setUpFunctionButton(_scrollViewgroup, id++, R.drawable.lock_image, "Lock Image", onClickDelete);
+		btnLockImage = setUpFunctionButton(_scrollViewgroup, id++, R.drawable.lock_image, "Lock Image", onClickLockImage);
 		
 		// Unlock Image
-		//setUpFunctionButton(_scrollViewgroup, id++, R.drawable.unlock_image, "Unlock Image", onClickDelete);
+		btnUnlockImage = setUpFunctionButton(_scrollViewgroup, id++, R.drawable.unlock_image, "Unlock Image", onClickUnlockImage);
 		
 		// Add To Album
-		setUpFunctionButton(_scrollViewgroup, id++, R.drawable.add_image_album, "Add To Album", onClickDelete);
+		btnAddToAlbum = setUpFunctionButton(_scrollViewgroup, id++, R.drawable.add_image_album, "Add To Album", onClickAddToAlbum);
 		
 		// Remove From Album
-		//setUpFunctionButton(_scrollViewgroup, id++, R.drawable.remove_image_album, "Remove", onClickDelete);
+		btnRemoveFromAlbum = setUpFunctionButton(_scrollViewgroup, id++, R.drawable.remove_image_album, "Remove", onClickRemoveFromAlbum);
 		
 		// Share
-		setUpFunctionButton(_scrollViewgroup, id++, R.drawable.share, "Share", onClickDelete);
+		btnShareImage = setUpFunctionButton(_scrollViewgroup, id++, R.drawable.share, "Share", onClickShareImage);
 		
-		// Zip
-		setUpFunctionButton(_scrollViewgroup, id++, R.drawable.compress, "Compress", onClickDelete);
+		// Compress
+		btnCompressImage = setUpFunctionButton(_scrollViewgroup, id++, R.drawable.compress, "Compress", onClickCompressImage);
 		
 		// Convert To Video
-		setUpFunctionButton(_scrollViewgroup, id++, R.drawable.convert_video, "Convert", onClickDelete);
+		btnConvertToVideo = setUpFunctionButton(_scrollViewgroup, id++, R.drawable.convert_video, "Convert", onClickConvertToVideo);
 	}
 	
-	public void setUpFunctionButton(ViewGroup parent, int id, int resourceID, String name, View.OnClickListener onClickEvent)
+	public View setUpFunctionButton(ViewGroup parent, int id, int resourceID, String name, View.OnClickListener onClickEvent)
 	{
 		// Khởi tạo với layout cho trước
 		View btn = getLayoutInflater().inflate(R.layout.function_item, null);	
@@ -169,6 +201,8 @@ public class MainActivity extends Activity {
 		btn.setOnClickListener(onClickEvent);
 		
 		parent.addView(btn);
+		
+		return btn;
 	}
 	
 	View.OnClickListener onClickDelete = new View.OnClickListener() {
