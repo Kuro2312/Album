@@ -165,43 +165,48 @@ public final class R {
     }
     public static final class drawable {
         public static final int add_album=0x7f020000;
-        public static final int add_favourite=0x7f020001;
-        public static final int add_image_album=0x7f020002;
-        public static final int blue_folder=0x7f020003;
-        public static final int brown_folder=0x7f020004;
-        public static final int delete=0x7f020005;
+        public static final int add_image_album=0x7f020001;
+        public static final int blue_folder=0x7f020002;
+        public static final int brown_folder=0x7f020003;
+        public static final int compress=0x7f020004;
+        public static final int convert_video=0x7f020005;
         public static final int delete_album=0x7f020006;
-        public static final int edit=0x7f020007;
-        public static final int green_folder=0x7f020008;
-        public static final int ic_launcher=0x7f020009;
-        public static final int icon=0x7f02000a;
-        public static final int lock_image=0x7f02000b;
-        public static final int orange_folder=0x7f02000c;
-        public static final int radiotab_selector=0x7f02000d;
-        public static final int radiotab_textcolor_selector=0x7f02000e;
-        public static final int remove_favourite=0x7f02000f;
-        public static final int remove_image_album=0x7f020010;
-        public static final int select=0x7f020011;
-        public static final int yellow_folder=0x7f020012;
+        public static final int delete_image=0x7f020007;
+        public static final int edit=0x7f020008;
+        public static final int green_folder=0x7f020009;
+        public static final int ic_launcher=0x7f02000a;
+        public static final int icon=0x7f02000b;
+        public static final int lock_image=0x7f02000c;
+        public static final int mark_image=0x7f02000d;
+        public static final int orange_folder=0x7f02000e;
+        public static final int radiotab_selector=0x7f02000f;
+        public static final int radiotab_textcolor_selector=0x7f020010;
+        public static final int remove_image_album=0x7f020011;
+        public static final int select=0x7f020012;
+        public static final int share=0x7f020013;
+        public static final int unlock_image=0x7f020014;
+        public static final int unmark_image=0x7f020015;
+        public static final int yellow_folder=0x7f020016;
     }
     public static final class id {
-        public static final int action_settings=0x7f09000e;
-        public static final int addNewAlbum=0x7f09000f;
+        public static final int LinearLayout1=0x7f09000a;
+        public static final int action_settings=0x7f09000f;
+        public static final int addNewAlbum=0x7f090010;
         public static final int gridView1=0x7f090009;
         public static final int groupView1=0x7f090001;
         public static final int groupView2=0x7f090002;
         public static final int horizontalScrollView1=0x7f090000;
-        public static final int imageView1=0x7f09000d;
         public static final int imageViewFolder=0x7f09000b;
+        public static final int imageViewFunction=0x7f09000d;
         public static final int listView1=0x7f090008;
         public static final int radioAlbum=0x7f090005;
         public static final int radioAll=0x7f090004;
         public static final int radioFavourite=0x7f090006;
         public static final int radioLocked=0x7f090007;
         public static final int rdogrp=0x7f090003;
-        public static final int selectMode=0x7f090010;
-        public static final int textView1=0x7f09000c;
-        public static final int textViewFolder=0x7f09000a;
+        public static final int selectMode=0x7f090011;
+        public static final int textViewFolder=0x7f09000c;
+        public static final int textViewFunction=0x7f09000e;
     }
     public static final class layout {
         public static final int activity_main=0x7f030000;

@@ -88,7 +88,7 @@ public class FolderAdapter extends ArrayAdapter  {
 	   	holder.textView.setId(position);
 	   	holder.imageView.setId(position); 
    	 
-	   	int num = _folderIcon[0];
+	   	int num = _folderIcon[2];
 	   	Bitmap bitmap = ImageSupporter.decodeSampledBitmapFromResource(_context.getResources(), num, _reqWidth, _reqHeight);
         holder.imageView.setImageBitmap(bitmap);
 	   	

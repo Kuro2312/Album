@@ -6,108 +6,56 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 
-class IconData
-{
-	public String _function;
-	public Bitmap _bitmap;
-	
-	public IconData(String function, Bitmap bitmap)
-	{
-		this._bitmap = bitmap;
-		this._function = function;
-	}
-}
+// Hỗ trợ việc lấy ảnh từ tài nguyên
 public class ResourceManager 
-{
-	protected int[] _actionbarIcon = { R.drawable.add_album, R.drawable.select };
-	protected int[] _imageIcon = { R.drawable.delete, R.drawable.add_favourite, R.drawable.add_image_album, R.drawable.lock_image };
-	protected int[] _albumIcon = { R.drawable.delete_album };
-	protected int[] _favouriteIcon = { R.drawable.delete, R.drawable.remove_favourite, R.drawable.lock_image};
-	protected int[] _albumImageIcon = { R.drawable.delete, R.drawable.add_favourite, R.drawable.lock_image, 
-			 R.drawable.remove_image_album };				
-	protected int _reqWidth;
-	protected int _reqHeight;
+{	
+	// Các chức năng có nút bấm (trong thanh toolbar dưới cùng)
+	protected static int[] _imageIcon = 
+	{ 
+		R.drawable.delete_image, R.drawable.delete_album,
+		R.drawable.mark_image, R.drawable.unmark_image, 
+		R.drawable.add_image_album, R.drawable.remove_image_album,
+		R.drawable.lock_image, R.drawable.unlock_image			 
+	};	
+	
+	protected static int _reqWidth;
+	protected static int _reqHeight;
 	
 	public ResourceManager(Context context)
 	{
+		// Khởi tạo kích thước mặc định sang pixel
 		_reqWidth = (int) ImageSupporter.convertDipToPixels(context, 50);
 		_reqHeight = (int) ImageSupporter.convertDipToPixels(context, 50);		
 	}
-	
-	public ArrayList<IconData> getActionBarIcon(Resources resource)
-	{
-		ArrayList<IconData> data = new ArrayList<IconData>();
-		
-		Bitmap bitmap = ImageSupporter.decodeSampledBitmapFromResource(resource, _actionbarIcon[0], _reqWidth, _reqHeight);
-		data.add(new IconData("Add Album", bitmap));
-		
-		bitmap = ImageSupporter.decodeSampledBitmapFromResource(resource, _actionbarIcon[1], _reqWidth, _reqHeight);
-		data.add(new IconData("Select", bitmap));
-		
-		return data;
-	}
 
-	public ArrayList<IconData> getImageFunctionIcon(Resources resource)
+	// Lấy ảnh Bitmap theo mã tài nguyên 
+	public static Bitmap getImageFunctionIcon(Resources resource, int resourceID)
 	{
-		ArrayList<IconData> data = new ArrayList<IconData>();
+		int size = _imageIcon.length;
 		
-		Bitmap bitmap = ImageSupporter.decodeSampledBitmapFromResource(resource, _imageIcon[0], _reqWidth, _reqHeight);
-		data.add(new IconData("Delete Images", bitmap));
+		// Tìm kiếm theo mã ID của resource
+		// Trả về ảnh Bitmap
+		for (int i = 0; i < size; i++)
+			if (_imageIcon[i] == resourceID)
+				return ImageSupporter.decodeSampledBitmapFromResource(resource, _imageIcon[i], _reqWidth, _reqHeight);
 		
-		bitmap = ImageSupporter.decodeSampledBitmapFromResource(resource, _imageIcon[1], _reqWidth, _reqHeight);
-		data.add(new IconData("Add To Favourite", bitmap));
-		
-		bitmap = ImageSupporter.decodeSampledBitmapFromResource(resource, _imageIcon[2], _reqWidth, _reqHeight);
-		data.add(new IconData("Add To Album", bitmap));
-		
-		bitmap = ImageSupporter.decodeSampledBitmapFromResource(resource, _imageIcon[3], _reqWidth, _reqHeight);
-		data.add(new IconData("Hide Images", bitmap));
-		
-		return data;
-	}
-
-	public ArrayList<IconData> getAlbumFunctionIcon(Resources resource)
-	{
-		ArrayList<IconData> data = new ArrayList<IconData>();
-		
-		Bitmap bitmap = ImageSupporter.decodeSampledBitmapFromResource(resource, _albumIcon[0], _reqWidth, _reqHeight);
-		data.add(new IconData("Delete Album", bitmap));
-		
-		return data;
+		return null;
 	}
 	
-	public ArrayList<IconData> getFavouriteFunctionIcon(Resources resource)
+	// Lấy ảnh Bitmap theo mã tài nguyên 
+	public static Bitmap getImageFunctionIcon(Resources resource, int resourceID, int reqWidth, int reqHeight)
 	{
-		ArrayList<IconData> data = new ArrayList<IconData>();
+		if (reqWidth <= 0 || reqHeight <=0 )
+			return null;	
 		
-		Bitmap bitmap = ImageSupporter.decodeSampledBitmapFromResource(resource, _favouriteIcon[0], _reqWidth, _reqHeight);
-		data.add(new IconData("Delete Images", bitmap));
+		int size = _imageIcon.length;
 		
-		bitmap = ImageSupporter.decodeSampledBitmapFromResource(resource, _favouriteIcon[1], _reqWidth, _reqHeight);
-		data.add(new IconData("Remove From Favourite", bitmap));;
+		// Tìm kiếm theo mã ID của resource
+		// Trả về ảnh Bitmap
+		for (int i = 0; i < size; i++)
+			if (_imageIcon[i] == resourceID)
+				return ImageSupporter.decodeSampledBitmapFromResource(resource, _imageIcon[0], reqWidth, reqHeight);
 		
-		bitmap = ImageSupporter.decodeSampledBitmapFromResource(resource, _favouriteIcon[2], _reqWidth, _reqHeight);
-		data.add(new IconData("Hide Images", bitmap));
-		
-		return data;
-	}
-
-	public ArrayList<IconData> getAlbumImageFunctionIcon(Resources resource)
-	{
-		ArrayList<IconData> data = new ArrayList<IconData>();
-		
-		Bitmap bitmap = ImageSupporter.decodeSampledBitmapFromResource(resource, _albumImageIcon[0], _reqWidth, _reqHeight);
-		data.add(new IconData("Delete Images", bitmap));
-		
-		bitmap = ImageSupporter.decodeSampledBitmapFromResource(resource, _albumImageIcon[1], _reqWidth, _reqHeight);
-		data.add(new IconData("Add To Favourite", bitmap));;
-		
-		bitmap = ImageSupporter.decodeSampledBitmapFromResource(resource, _albumImageIcon[2], _reqWidth, _reqHeight);
-		data.add(new IconData("Hide Images", bitmap));
-		
-		bitmap = ImageSupporter.decodeSampledBitmapFromResource(resource, _albumImageIcon[2], _reqWidth, _reqHeight);
-		data.add(new IconData("Remove From Album", bitmap));
-		
-		return data;
+		return null;
 	}
 }
