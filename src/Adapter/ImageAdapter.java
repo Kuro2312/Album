@@ -6,6 +6,7 @@ import com.example.neogalleryds.R;
 import com.example.neogalleryds.R.drawable;
 import com.example.neogalleryds.R.id;
 import com.example.neogalleryds.R.layout;
+import com.example.neogalleryds.ViewImageActivity;
 
 import AsyncTask.AsyncTaskSupporter;
 import BusinessLayer.ImageSupporter;
@@ -37,6 +38,17 @@ public class ImageAdapter extends ArrayAdapter
 		 
 		 REQ_HEIGHT = (int) ImageSupporter.convertDipToPixels(context, 75);
 		 REQ_WIDTH = (int) ImageSupporter.convertDipToPixels(context, 75);
+	}
+	
+	public void removeImages(ArrayList<String> imagePaths) {
+		for (String path : imagePaths) {
+			_items.remove(path);
+		}
+		notifyDataSetChanged();
+	}
+	
+	public ArrayList<String> getItems() {
+		return _items;
 	}
 
     public Object getItem(int position) 
@@ -81,9 +93,16 @@ public class ImageAdapter extends ArrayAdapter
 		        // Khi nhấn vào 1 ảnh
 		        if (cb.getVisibility() == View.VISIBLE) 
 		        	 cb.setChecked(!cb.isChecked());
-		        else {	        
-		        	// Thêm animation chuyển cảnh
-		        	//((Activity) _context).overridePendingTransition(R.animator.animator_slide_in_right, R.animator.animator_zoom_out);
+		        else {	    
+		        	// Đóng gói dữ liệu truyền đi
+		        	Intent intent = new Intent(_context, ViewImageActivity.class);
+		        	
+		        	intent.putExtra("filePaths", _items);
+		        	intent.putExtra("position", cb.getId());
+		        	intent.putExtra("slideshow", false);
+		        	_context.startActivity(intent);
+					
+					((Activity) _context).overridePendingTransition(R.animator.animator_slide_in_right, R.animator.animator_zoom_out);
 		        }
 		    }
 		});
