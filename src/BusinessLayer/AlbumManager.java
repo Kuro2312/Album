@@ -268,7 +268,7 @@ public class AlbumManager {
 		ImageSupporter.copyFile(parent.getAbsolutePath(), f.getName(), albumPath, null);
 		
 		// Thêm vào album
-    	this.getsAlbumImages(albumName).add(imagePath);
+    	this.getsAlbumImages(albumName).add(albumPath + File.separator + f.getName());
     }
     
     // Kiểm tra xem 1 ảnh có nằm trong album 2 yếu tố

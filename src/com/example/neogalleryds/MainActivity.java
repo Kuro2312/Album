@@ -72,7 +72,6 @@ public class MainActivity extends Activity {
 	private RadioButton _radioAlbum;
 	
 	private View btnDeleteImage;
-	private View btnDeleteAlbum;
 	
 	private View btnMarkImage;
 	private View btnUnmarkImage;
@@ -84,15 +83,15 @@ public class MainActivity extends Activity {
 	private View btnRemoveFromAlbum;
 	
 	private View btnShareImage;
-	private View btnCompressImage;
+	private View btnZipAndShare;
 	
 	private View btnEditImage;
 	
-	private View btnConvertToVideo;
+	private View btnSlideshow;
 	
 	// Các xữ lý chức năng cho sự kiện nhấn nút.
 	private OnClickListener onClickSlideshow;
-	private OnClickListener onClickCompressImage;
+	private OnClickListener onClickZipAndShare;
 	private OnClickListener onClickShareImage;
 	private OnClickListener onClickRemoveFromAlbum;
 	private OnClickListener onClickAddToAlbum;
@@ -107,6 +106,7 @@ public class MainActivity extends Activity {
 	private Activity _this = this;
 	private int _lastIndex = -1;
 	private int _contextPosition;
+	private int _albumContextPosition;
 	
 	// Adapter
 	private FolderAdapter _folderAdapter;
@@ -221,7 +221,6 @@ public class MainActivity extends Activity {
     	btnMarkImage.setVisibility(View.VISIBLE);
     	btnLockImage.setVisibility(View.VISIBLE);
     	
-    	btnDeleteAlbum.setVisibility(View.GONE);
     	btnUnmarkImage.setVisibility(View.GONE);
     	btnUnlockImage.setVisibility(View.GONE);
     	btnRemoveFromAlbum.setVisibility(View.GONE);
@@ -242,7 +241,6 @@ public class MainActivity extends Activity {
 	            	btnMarkImage.setVisibility(View.VISIBLE);
 	            	btnLockImage.setVisibility(View.VISIBLE);
 	            	
-	            	btnDeleteAlbum.setVisibility(View.GONE);
 	            	btnUnmarkImage.setVisibility(View.GONE);
 	            	btnUnlockImage.setVisibility(View.GONE);
 	            	btnRemoveFromAlbum.setVisibility(View.GONE);
@@ -261,7 +259,6 @@ public class MainActivity extends Activity {
 	            	btnLockImage.setVisibility(View.VISIBLE);
 	            	btnRemoveFromAlbum.setVisibility(View.VISIBLE);
 	            	
-	            	btnDeleteAlbum.setVisibility(View.GONE);
 	            	btnUnmarkImage.setVisibility(View.GONE);
 	            	btnUnlockImage.setVisibility(View.GONE);
 	            	btnAddToAlbum.setVisibility(View.GONE);
@@ -276,7 +273,6 @@ public class MainActivity extends Activity {
 	            	
 	            	btnLockImage.setVisibility(View.GONE);
 	            	btnRemoveFromAlbum.setVisibility(View.GONE);            	
-	            	btnDeleteAlbum.setVisibility(View.GONE);
 	            	btnMarkImage.setVisibility(View.GONE);
 	            	btnUnlockImage.setVisibility(View.GONE);
 	            	btnAddToAlbum.setVisibility(View.GONE);
@@ -291,7 +287,6 @@ public class MainActivity extends Activity {
 	            	
 	            	btnLockImage.setVisibility(View.GONE);
 	            	btnRemoveFromAlbum.setVisibility(View.GONE);            	
-	            	btnDeleteAlbum.setVisibility(View.GONE);
 	            	btnUnmarkImage.setVisibility(View.GONE);
 	            	btnLockImage.setVisibility(View.GONE);
 	            	btnAddToAlbum.setVisibility(View.GONE);
@@ -336,10 +331,14 @@ public class MainActivity extends Activity {
 			 // Kiểm tra xem có phải ảnh không
 			 if (ImageSupporter.isImage(f))       
 			 {
-				 String parent = file.getAbsolutePath();
-				 
+				 String filePath = file.getAbsolutePath();
+				 String parent = file.getParent();
+
 				 // Chưa có thư mục này, thêm vào dữ liệu
-				 if (!_folderManager.containsFolder(parent))
+				 if ((parent.equals(ImageSupporter.DEFAULT_PICTUREPATH) 
+						 && !_albumManager.containsAlbum(file.getName())) 
+					|| (!parent.equals(ImageSupporter.DEFAULT_PICTUREPATH) 
+						 &&!_folderManager.containsFolder(filePath)))
 					 _folderManager.addsFolder(file.getAbsolutePath());
 
 				 // Thêm ảnh vào dữ liệu
@@ -397,9 +396,6 @@ public class MainActivity extends Activity {
 		// Delete Image
 		btnDeleteImage = setUpFunctionButton(_scrollViewgroup, id++, R.drawable.delete_image, "Delete Image", onClickDeleteImage);
 		
-		// Delete Album
-		btnDeleteAlbum = setUpFunctionButton(_scrollViewgroup, id++, R.drawable.delete_album, "Delete Album", onClickDeleteAlbum);
-		
 		// Mark Image
 		btnMarkImage = setUpFunctionButton(_scrollViewgroup, id++, R.drawable.mark_image, "Mark Image", onClickMarkImage);
 		
@@ -422,10 +418,10 @@ public class MainActivity extends Activity {
 		btnShareImage = setUpFunctionButton(_scrollViewgroup, id++, R.drawable.share, "Share", onClickShareImage);
 		
 		// Compress
-		btnCompressImage = setUpFunctionButton(_scrollViewgroup, id++, R.drawable.compress, "Compress", onClickCompressImage);
+		btnZipAndShare = setUpFunctionButton(_scrollViewgroup, id++, R.drawable.compress, "Zip and Share", onClickZipAndShare);
 		
 		// Convert To Video
-		btnConvertToVideo = setUpFunctionButton(_scrollViewgroup, id++, R.drawable.convert_video, "Convert", onClickSlideshow);
+		btnSlideshow = setUpFunctionButton(_scrollViewgroup, id++, R.drawable.convert_video, "Slideshow", onClickSlideshow);
 	}
 	
 	// Xây dựng 1 nút chức năng
@@ -507,7 +503,16 @@ public class MainActivity extends Activity {
 			
 			@Override
 			public void onClick(View v) {
-				chooseAlbum();				
+				chooseAlbum(getSelectedPaths());				
+			}
+		};
+		
+		onClickRemoveFromAlbum = new View.OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				ArrayList<String> paths = getSelectedPaths();
+				removeFromAlbum(paths);				
 			}
 		};
 		
@@ -515,83 +520,15 @@ public class MainActivity extends Activity {
 			
 			@Override
 			public void onClick(View v) {
-				if (_radioAll.isChecked()) {
-					ArrayList<String> paths = getSelectedPaths();
-					if (paths.size() == 0)
-						return;
-					
-					ArrayList<Uri> files = new ArrayList<Uri>();		
-					for (String path : paths) {
-						files.add(Uri.fromFile(new File(path)));
-					}
-					
-					Intent intent;
-			        
-			        if (files.size() == 1) {
-			        	intent = new Intent(Intent.ACTION_SEND);
-			        	intent.putExtra(Intent.EXTRA_STREAM, files.get(0));
-			        }
-			        else {
-			        	intent = new Intent(Intent.ACTION_SEND_MULTIPLE);
-			        	intent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, files);
-			        }
-			        
-			        intent.setType("image/*");
-			        _this.startActivity(intent);
-				}				
-			}
+				shareImages(getSelectedPaths());
+			}				
 		};
 		
-		onClickCompressImage = new View.OnClickListener() {
+		onClickZipAndShare = new View.OnClickListener() {
 			
 			@Override
 			public void onClick(View v) {
-				ArrayList<String> paths = getSelectedPaths();
-				if (paths.size() == 0)
-					return;
-				
-				final int BUFFER = 2048; 
-				String zipFile = getZipFileName();
-				File zipped = new File(zipFile);		
-						
-				try {
-					zipped.createNewFile();
-					
-					BufferedInputStream origin = null; 
-					FileOutputStream dest = new FileOutputStream(zipFile);
-					ZipOutputStream out = new ZipOutputStream(new BufferedOutputStream(dest));
-					
-					byte data[] = new byte[BUFFER];
-					
-					for(int i=0; i < paths.size(); i++) { 
-						FileInputStream fi = new FileInputStream(paths.get(i)); 
-						origin = new BufferedInputStream(fi, BUFFER); 
-						
-						ZipEntry entry = new ZipEntry(paths.get(i).substring(paths.get(i).lastIndexOf("/") + 1)); 
-						out.putNextEntry(entry); 
-						
-			        	int count; 
-			        	while ((count = origin.read(data, 0, BUFFER)) != -1) { 
-			        		out.write(data, 0, count); 
-			        	} 
-			        	origin.close(); 
-					} 
-			 
-					out.close(); 
-					
-				} catch (FileNotFoundException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				
-				Intent intent = new Intent(Intent.ACTION_SEND);
-		        intent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(zipped));        
-		        intent.setType("application/zip");
-		        
-		        _this.startActivity(intent);				
+				zipAndShareImages(getSelectedPaths());							
 			}
 		};
 	
@@ -601,13 +538,14 @@ public class MainActivity extends Activity {
 			public void onClick(View v) {
 				ArrayList<String> paths = getSelectedPaths();
 				
-				if (paths.size() == 0)
-					return;
 				
 	        	// Đóng gói dữ liệu truyền đi
 	        	Intent intent = new Intent(_this, ViewImageActivity.class);
 	        	
-	        	intent.putExtra("filePaths", paths);
+	        	if (paths.size() == 0)
+	        		intent.putExtra("filePaths", _imageAdapter.getItems());
+	        	else
+	        		intent.putExtra("filePaths", paths);
 	        	intent.putExtra("position", 0);
 	        	intent.putExtra("slideshow", true);
 	        	_this.startActivity(intent);
@@ -618,20 +556,7 @@ public class MainActivity extends Activity {
 			
 			@Override
 			public void onClick(View v) {
-
-				ArrayList<String> paths = getSelectedPaths();
-				
-				if (paths.size() == 0)
-					return;
-				
-				_lockManager.locksImages(paths);
-				
-				if (_radioAll.isChecked())
-					_folderManager.deletesImages(paths);
-				else
-					_albumManager.deletesImages(paths);
-				
-				_markManager.unmarksImages(paths);
+				lockImages(getSelectedPaths());			
 			}
 		};
 		
@@ -639,24 +564,7 @@ public class MainActivity extends Activity {
 			
 			@Override
 			public void onClick(View v) {
-
-				ArrayList<String> paths = getSelectedPaths();
-				
-				if (paths.size() == 0)
-					return;
-				
-				_lockManager.unlocksImages(paths);
-				
-				// Xóa sạch dữ liệu 
-				_folderManager.getsFolderImages(ImageSupporter.DEFAULT_PICTUREPATH).clear();
-				
-				// Duyệt lại dữ liệu
-				File file = new File(ImageSupporter.DEFAULT_PICTUREPATH);
-				File[] files = file.listFiles();
-				
-				for (File f : files)
-					if (ImageSupporter.isImage(f))
-						_folderManager.addsImage(ImageSupporter.DEFAULT_PICTUREPATH, f.getAbsolutePath());							
+				unlockImages(getSelectedPaths());									
 			}
 		};
 	}
@@ -690,7 +598,7 @@ public class MainActivity extends Activity {
 	}
 
  	// Hiện dialog dể chọn album 
-    private void chooseAlbum()
+    private void chooseAlbum(final ArrayList<String> images)
     {
     	AlertDialog.Builder builderSingle = new AlertDialog.Builder(this);
     	builderSingle.setIcon(R.drawable.icon);
@@ -717,8 +625,7 @@ public class MainActivity extends Activity {
             public void onClick(DialogInterface dialog, int which) {
                 String strName = arrayAdapter.getItem(which);
                 
-                ArrayList<String> paths = getSelectedPaths();
-                for (String path: paths) {
+                for (String path: images) {
                 	_albumManager.addsImageToAlbum(strName, path);
                 }
                 
@@ -775,42 +682,264 @@ public class MainActivity extends Activity {
 		builder.show();
 	}
     
+    private void shareImages(ArrayList<String> images) {
+    	if (images.size() == 0)
+			return;
+		
+		ArrayList<Uri> files = new ArrayList<Uri>();		
+		for (String path : images) {
+			files.add(Uri.fromFile(new File(path)));
+		}
+		
+		Intent intent;
+        
+        if (files.size() == 1) {
+        	intent = new Intent(Intent.ACTION_SEND);
+        	intent.putExtra(Intent.EXTRA_STREAM, files.get(0));
+        }
+        else {
+        	intent = new Intent(Intent.ACTION_SEND_MULTIPLE);
+        	intent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, files);
+        }
+        
+        intent.setType("image/*");
+        _this.startActivity(intent);
+    }
+    
+    private void zipAndShareImages(ArrayList<String> images) {
+    	if (images.size() == 0)
+			return;
+		
+		final int BUFFER = 2048; 
+		String zipFile = getZipFileName();
+		File zipped = new File(zipFile);		
+				
+		try {
+			zipped.createNewFile();
+			
+			BufferedInputStream origin = null; 
+			FileOutputStream dest = new FileOutputStream(zipFile);
+			ZipOutputStream out = new ZipOutputStream(new BufferedOutputStream(dest));
+			
+			byte data[] = new byte[BUFFER];
+			
+			for(int i=0; i < images.size(); i++) { 
+				FileInputStream fi = new FileInputStream(images.get(i)); 
+				origin = new BufferedInputStream(fi, BUFFER); 
+				
+				ZipEntry entry = new ZipEntry(images.get(i).substring(images.get(i).lastIndexOf("/") + 1)); 
+				out.putNextEntry(entry); 
+				
+	        	int count; 
+	        	while ((count = origin.read(data, 0, BUFFER)) != -1) { 
+	        		out.write(data, 0, count); 
+	        	} 
+	        	origin.close(); 
+			} 
+	 
+			out.close(); 
+			
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		Intent intent = new Intent(Intent.ACTION_SEND);
+        intent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(zipped));        
+        intent.setType("application/zip");
+        
+        _this.startActivity(intent);	
+    }
+    
+    private void lockImages(ArrayList<String> images) {
+    	if (images.size() == 0)
+			return;
+		
+		_lockManager.locksImages(images);
+		
+		if (_radioAll.isChecked())
+			_folderManager.deletesImages(images);
+		else
+			_albumManager.deletesImages(images);
+		
+		_markManager.unmarksImages(images);
+    }
+    
+    private void unlockImages(ArrayList<String> images) {
+    	if (images.size() == 0)
+			return;
+		
+		_lockManager.unlocksImages(images);
+		
+		// Xóa sạch dữ liệu 
+		_folderManager.getsFolderImages(ImageSupporter.DEFAULT_PICTUREPATH).clear();
+		
+		// Duyệt lại dữ liệu
+		File file = new File(ImageSupporter.DEFAULT_PICTUREPATH);
+		File[] files = file.listFiles();
+		
+		for (File f : files)
+			if (ImageSupporter.isImage(f))
+				_folderManager.addsImage(ImageSupporter.DEFAULT_PICTUREPATH, f.getAbsolutePath());
+    }
+    
+    private void removeFromAlbum(ArrayList<String> images) {
+    	for (String path : images) {
+    		_albumManager.removesImageFromAlbum(path);
+    	}
+    	int pos = _listViewAlbum.getCheckedItemPosition();
+    	_imageAdapter.updateData(_albumManager.getsAlbumImages(_albumManager.getsAlbumList().get(pos)));
+    }
+    
     @Override
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
         
     	super.onCreateContextMenu(menu, v, menuInfo);
         MenuInflater inflater = getMenuInflater();
         
+        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) menuInfo;
+        _contextPosition = info.position;
+        
         if (_radioAll.isChecked())
             inflater.inflate(R.menu.context_menu_all, menu);
-        if (_radioAlbum.isChecked())
-            inflater.inflate(R.menu.context_menu_albums, menu);
+        if (_radioAlbum.isChecked()) {
+        	if (v instanceof ListView) {
+        		inflater.inflate(R.menu.context_menu_album_item, menu);
+        		_contextPosition = -1;
+        		_albumContextPosition = info.position;
+        	}
+        	else
+        		inflater.inflate(R.menu.context_menu_albums, menu);
+        }
         if (_radioMarks.isChecked())
             inflater.inflate(R.menu.context_menu_marks, menu);
         if (_radioLocks.isChecked())
             inflater.inflate(R.menu.context_menu_locks, menu);            
         
-        menu.setHeaderTitle("Choose an action");
-
-        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) menuInfo;
-        _contextPosition = info.position;
+        menu.setHeaderTitle("Choose an action");    
     }
 
     @Override
     public boolean onContextItemSelected(MenuItem item) {
-        
-    	String path = (String) _imageAdapter.getItem(_contextPosition);
-    	
-    	if (item.getTitle().equals("Delete")) {
-			ArrayList<String> paths = new ArrayList<String>();
-			paths.add(path);
+    	ArrayList<String> paths = new ArrayList<String>();
+    	String path = null;
+    	if (_contextPosition != -1) {
+    		path = (String) _imageAdapter.getItem(_contextPosition);   
+    		paths.add(path);
+    	}		
+		
+    	if (item.getTitle().equals("Delete")) {			
 			deleteImages(paths);
 		}
 
-    	
-    	if (_radioAll.isChecked()) {
+    	if (item.getTitle().equals("Mark")) {
+    		_markManager.marksImage(path);
     	}
-         
+    	
+    	if (item.getTitle().equals("Unmark")) {
+    		_markManager.unmarksImage(path);
+    		_imageAdapter.updateData(_markManager.getsMarkedImages());
+    	}
+    	
+    	if (item.getTitle().equals("Share")) {
+    		shareImages(paths);
+    	}
+    	
+    	if (item.getTitle().equals("Zip and share")) {
+    		zipAndShareImages(paths);
+    	}
+    	
+    	if (item.getTitle().equals("Lock")) {
+    		lockImages(paths);
+    	}
+    	
+    	if (item.getTitle().equals("Unlock")) {
+    		unlockImages(paths);
+    	}
+    	
+    	if (item.getTitle().equals("Add to album")) {
+    		chooseAlbum(paths);
+    	}
+    	
+    	if (item.getTitle().equals("Remove from album")) {
+    		removeFromAlbum(paths);
+    	}
+    	
+    	
+    	if (item.getTitle().equals("Rename")) {
+    		
+    		final String oldName = _albumManager.getsAlbumList().get(_albumContextPosition);
+    		
+    		AlertDialog.Builder alertDialog = new AlertDialog.Builder(MainActivity.this);
+            alertDialog.setTitle("Rename album");
+            alertDialog.setMessage("Enter new name");
+            
+            final EditText input = new EditText(MainActivity.this);  
+            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                                  LinearLayout.LayoutParams.MATCH_PARENT,
+                                  LinearLayout.LayoutParams.MATCH_PARENT);
+            input.setLayoutParams(lp);
+            alertDialog.setView(input);
+
+            alertDialog.setPositiveButton("OK",
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog,int which) {
+                            String newName = input.getText().toString();
+                            if (_albumManager.renamesAlbum(oldName, newName)) {
+                            	_albumAdapter.updateData(_albumManager.getsAlbumList());
+                            	Toast.makeText(_this, "Album renamed", Toast.LENGTH_SHORT).show();
+                            }
+                            else
+                            	Toast.makeText(_this, "Failed to rename album", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+            
+            alertDialog.setNegativeButton("Cancel",
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                        }
+                    });
+
+            alertDialog.show();
+    	}
+    	
+    	if (item.getTitle().equals("Delete album")) {
+    		AlertDialog.Builder builder = new AlertDialog.Builder(_this);
+    		builder.setMessage("Are you sure you want to delete?")
+    			   .setTitle("Delete");
+    		
+    		builder.setPositiveButton("Delete", new DialogInterface.OnClickListener() {
+    			
+    			@Override
+    			public void onClick(DialogInterface dialog, int which) 
+    			{
+    				String name = _albumManager.getsAlbumList().get(_albumContextPosition);
+    				if (_albumManager.deletesAlbum(name)) {
+    					_listViewAlbum.setItemChecked(_albumContextPosition, false);
+    					_albumAdapter.updateData(_albumManager.getsAlbumList());
+    					_imageAdapter.updateData(new ArrayList<String>());
+    					
+                    	Toast.makeText(_this, "Album deleted", Toast.LENGTH_SHORT).show();
+    				} else
+    					Toast.makeText(_this, "Failed to delete album", Toast.LENGTH_SHORT).show();
+    			}
+    		});
+    		
+    		builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+    			
+    			@Override
+    			public void onClick(DialogInterface dialog, int which) {
+    				dialog.dismiss();				
+    			}
+    		});
+    		
+    		builder.show();
+    	}
+    	
         return true;
     }
     

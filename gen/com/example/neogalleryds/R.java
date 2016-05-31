@@ -244,11 +244,12 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
         public static final int image_item=0x7f030005;
     }
     public static final class menu {
-        public static final int context_menu_albums=0x7f090000;
-        public static final int context_menu_all=0x7f090001;
-        public static final int context_menu_locks=0x7f090002;
-        public static final int context_menu_marks=0x7f090003;
-        public static final int main=0x7f090004;
+        public static final int context_menu_album_item=0x7f090000;
+        public static final int context_menu_albums=0x7f090001;
+        public static final int context_menu_all=0x7f090002;
+        public static final int context_menu_locks=0x7f090003;
+        public static final int context_menu_marks=0x7f090004;
+        public static final int main=0x7f090005;
     }
     public static final class string {
         public static final int action_settings=0x7f070002;
