@@ -3,6 +3,7 @@ package AsyncTask;
 import java.io.File;
 import java.lang.ref.WeakReference;
 
+import Adapter.ImageAdapter;
 import BusinessLayer.ImageSupporter;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
@@ -28,7 +29,7 @@ public class BitmapLoadingTask extends AsyncTask<String, Void, Bitmap>
     	_data = params[0];
         
     	// Giải mã ảnh cho phù hợp
-        return ImageSupporter.decodeSampledBitmapFromFile(new File(_data), 75, 75);
+        return ImageSupporter.decodeSampledBitmapFromFile(new File(_data), ImageAdapter.REQ_WIDTH, ImageAdapter.REQ_HEIGHT);
     }
     
     protected void onPostExecute(Bitmap bitmap) 

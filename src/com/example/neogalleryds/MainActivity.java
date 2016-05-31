@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import Adapter.AlbumAdapter;
 import Adapter.FolderAdapter;
 import Adapter.ImageAdapter;
 import Adapter.ViewHolder;
@@ -27,6 +28,7 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
+import android.widget.RadioGroup.OnCheckedChangeListener;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.AdapterView.OnItemClickListener;
@@ -39,6 +41,7 @@ public class MainActivity extends Activity {
 	private HorizontalScrollView _scrollView;
 	
 	private ListView _listViewFolder;
+	private ListView _listViewAlbum;
 	
 	private GridView _gridViewImage;
 	
@@ -87,12 +90,14 @@ public class MainActivity extends Activity {
 	// Adapter
 	private FolderAdapter _folderAdapter;
 	private ImageAdapter _imageAdapter;
+	private AlbumAdapter _albumAdapter;
 	
 	// Các thuộc tính quản lý
 	private FolderManager _folderManager;
 	private AlbumManager _albumManager;
 	private MarkManager _markManager;
 	private LockManager _lockManager;
+
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) 
@@ -110,15 +115,19 @@ public class MainActivity extends Activity {
 		loadData();
         
 		// B4: Cài đặt dữ liệu lên giao diện
-		_folderAdapter = new FolderAdapter(this, _folderManager.getsFolderPathList());
-		_imageAdapter = new ImageAdapter(this, _folderManager.getsFolderImages(ImageSupporter.DEFAULT_PICTUREPATH));
+		_imageAdapter = new ImageAdapter(this, new ArrayList<String>());
 		_gridViewImage.setAdapter(_imageAdapter);
+			
+		_folderAdapter = new FolderAdapter(this, _folderManager.getsFolderPathList());
 		_listViewFolder.setAdapter(_folderAdapter);
 		_listViewFolder.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
-		Toast.makeText(this, "kuro1", Toast.LENGTH_SHORT).show();
 		
-		_listViewFolder.setOnItemClickListener(new OnItemClickListener() {
-			
+		_albumAdapter = new AlbumAdapter(this, _albumManager.getsAlbumList());
+		_listViewAlbum.setAdapter(_albumAdapter);
+		_listViewAlbum.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+
+		_listViewFolder.setOnItemClickListener(new OnItemClickListener() 
+		{	
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 
@@ -129,10 +138,55 @@ public class MainActivity extends Activity {
             	_lastIndex = position;
             	
             	// Thay dữ liệu vô
+        		_imageAdapter.updateData(_folderManager.getsFolderImages((String)_folderAdapter.getItem(position)));
+            	
                 //_folderAdapter.setChecked(view);
-                //Toast.makeText(MainActivity.this, "kuro", Toast.LENGTH_SHORT).show();
             }
         });
+		
+		_listViewAlbum.setOnItemClickListener(new OnItemClickListener() 
+		{	
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                
+            	if (_lastIndex != -1)
+            		_listViewFolder.setItemChecked(_lastIndex, false);
+            	
+            	_listViewFolder.setItemChecked(position, true);
+            	_lastIndex = position;
+            	
+            	// Thay dữ liệu vô
+        		_imageAdapter.updateData(_albumManager.getsAlbumImages((String) _albumAdapter.getItem(position)));
+            }
+        });
+		
+		_radioViewgroup.setOnCheckedChangeListener(new OnCheckedChangeListener() 
+	    {
+	        @Override
+	        public void onCheckedChanged(RadioGroup group, int checkedId) 
+	        {
+	            if (_radioAll.isChecked())
+	            {
+	            	_listViewFolder.setVisibility(View.VISIBLE);
+	            	_listViewAlbum.setVisibility(View.GONE);
+	            }
+	            else if (_radioAlbum.isChecked())
+	            {
+	            	_listViewAlbum.setVisibility(View.VISIBLE);
+	            	_listViewFolder.setVisibility(View.INVISIBLE);
+	            }
+	            else if (_radioLocks.isChecked())
+	            {
+	            	_listViewFolder.setVisibility(View.GONE);
+	            	_listViewAlbum.setVisibility(View.GONE);
+	            }
+	            else if (_radioMarks.isChecked())
+	            {
+	            	_listViewFolder.setVisibility(View.GONE);
+	            	_listViewAlbum.setVisibility(View.GONE);
+	            }
+	        }
+	    });
 	}
 	
 	// Thực hiện nạp dữ liệu
@@ -199,6 +253,8 @@ public class MainActivity extends Activity {
 		
 		// View thể hiện các thư mục/album
 		_listViewFolder = (ListView) this.findViewById(R.id.listView1);
+		_listViewAlbum = (ListView) this.findViewById(R.id.listViewAlbum);
+		_listViewAlbum.setVisibility(View.GONE);
 		
 		// View thể hiện danh sách ảnh
 		_gridViewImage = (GridView) this.findViewById(R.id.gridView1);
@@ -328,15 +384,6 @@ public class MainActivity extends Activity {
          else 
              return listView.getChildAt(pos - firstListItemPosition);
      }
- 	
-	View.OnClickListener onClickDelete = new View.OnClickListener() {
-		
-		@Override
-		public void onClick(View v) {
-			// TODO Auto-generated method stub
-			Toast.makeText(MainActivity.this, String.valueOf(v.getTag()), Toast.LENGTH_SHORT).show();			
-		}
-	};
 	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -362,9 +409,17 @@ public class MainActivity extends Activity {
 		else if (id == R.id.selectMode)
 		{
 			if (_scrollView.getVisibility() == View.GONE)
+			{
 				_scrollView.setVisibility(View.VISIBLE);
+				ImageAdapter.SELECT_MODE = View.VISIBLE;
+				//_imageAdapter.refresh();
+			}
 			else if (_scrollView.getVisibility() == View.VISIBLE)
+			{
 				_scrollView.setVisibility(View.GONE);
+				ImageAdapter.SELECT_MODE = View.INVISIBLE;
+				//_imageAdapter.refresh();
+			}
 			
 			return true;
 		}

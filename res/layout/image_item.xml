@@ -10,7 +10,7 @@
         android:layout_centerInParent="true"
         android:gravity="center|center_vertical"
 		android:layout_gravity="center|center_vertical"
-		android:adjustViewBounds  ="true"
+		android:adjustViewBounds ="true"
 		android:longClickable="true"/>
     
     <CheckBox android:id="@+id/checkBox0" 

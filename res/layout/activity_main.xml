@@ -110,7 +110,17 @@
          
     </ListView>
     
-  	 <GridView
+    <ListView
+        android:id="@+id/listViewAlbum"
+        android:layout_width="100dip"
+        android:layout_height="match_parent"
+        android:layout_above="@+id/horizontalScrollView1"
+        android:layout_below="@+id/groupView2"   
+        android:listSelector="@drawable/folder_listview_selector">
+         
+    </ListView>
+    
+  	<GridView
         android:id="@+id/gridView1"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -118,12 +128,14 @@
         android:layout_below="@+id/groupView2"
         android:layout_above="@+id/horizontalScrollView1"
         android:background="@color/LightSteelBlue"
-        android:columnWidth="100dip"
+        android:columnWidth="90dip"
    	    android:gravity="center"
    	    android:horizontalSpacing="2dip"
    	    android:numColumns="auto_fit"
    	    android:stretchMode="spacingWidth"
-   	    android:verticalSpacing="5dip" >>
+   	    android:verticalSpacing="15dip" 
+   	    android:paddingTop="10dip"
+   	    android:paddingBottom="10dip">
     </GridView>
 
 </RelativeLayout>

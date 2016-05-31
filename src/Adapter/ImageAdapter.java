@@ -23,6 +23,9 @@ public class ImageAdapter extends ArrayAdapter
 {
 	private ArrayList<String> _items;
 	private Context _context;
+	public static int REQ_HEIGHT;
+	public static int REQ_WIDTH;
+	public static int SELECT_MODE = View.INVISIBLE;
 	
 	public ImageAdapter(Context context, ArrayList<String> data) 
 	{
@@ -31,6 +34,9 @@ public class ImageAdapter extends ArrayAdapter
 		 // TODO Auto-generated constructor stub
 		 this._context = context;
 		 this._items = data;
+		 
+		 REQ_HEIGHT = (int) ImageSupporter.convertDipToPixels(context, 75);
+		 REQ_WIDTH = (int) ImageSupporter.convertDipToPixels(context, 75);
 	}
 
     public Object getItem(int position) 
@@ -63,7 +69,8 @@ public class ImageAdapter extends ArrayAdapter
 
     	 holder.checkbox.setId(position);
     	 holder.imageview.setId(position);
-    	 holder.imageview.setTag(holder.checkbox);     
+    	 holder.imageview.setTag(holder.checkbox);   
+    	 holder.checkbox.setVisibility(ImageAdapter.SELECT_MODE);
         
     	 holder.imageview.setOnClickListener(new View.OnClickListener() 
     	 {	
@@ -94,6 +101,11 @@ public class ImageAdapter extends ArrayAdapter
     {
     	_items.clear();
     	_items.addAll(data);
+    	super.notifyDataSetChanged();
+    }
+    
+    public void refresh()
+    {
     	super.notifyDataSetChanged();
     }
 }
