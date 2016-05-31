@@ -40,7 +40,6 @@ public class ImageSupporter
 {
 	public static final List<String> FILE_EXTN = Arrays.asList("jpg", "jpeg", "png");
 	public static final String DEFAULT_PICTUREPATH = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).getAbsolutePath();
-	
 	// Kiểm tra 1 file có là ảnh
 	public static boolean isImage(File file)
 	{

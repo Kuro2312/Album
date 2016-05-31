@@ -1,8 +1,19 @@
 package com.example.neogalleryds;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.TimeZone;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import Adapter.AlbumAdapter;
 import Adapter.FolderAdapter;
@@ -15,6 +26,10 @@ import BusinessLayer.LockManager;
 import BusinessLayer.MarkManager;
 import BusinessLayer.ResourceManager;
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.view.Menu;
@@ -71,7 +86,7 @@ public class MainActivity extends Activity {
 	private View btnConvertToVideo;
 	
 	// Các xữ lý chức năng cho sự kiện nhấn nút.
-	private OnClickListener onClickConvertToVideo;
+	private OnClickListener onClickSlideshow;
 	private OnClickListener onClickCompressImage;
 	private OnClickListener onClickShareImage;
 	private OnClickListener onClickRemoveFromAlbum;
@@ -84,6 +99,7 @@ public class MainActivity extends Activity {
 	private OnClickListener onClickDeleteImage;
 	
 	// Thuộc tính cho việc xữ lý chức năng và lưu dữ liệu
+	private Activity _this = this;
 	private int _lastIndex = -1;
 	private int _selectedTab = 0;
 	
@@ -125,6 +141,21 @@ public class MainActivity extends Activity {
 		_albumAdapter = new AlbumAdapter(this, _albumManager.getsAlbumList());
 		_listViewAlbum.setAdapter(_albumAdapter);
 		_listViewAlbum.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+				
+		// mặc định hiển thị ảnh chụp từ camera
+		ArrayList<String> folderPaths = _folderManager.getsFolderPathList();	
+		String dcim = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM).getAbsolutePath()
+				+ File.separator + "Camera";
+		int defaultPos = 0;
+		for (int i = 0; i < folderPaths.size(); i++) {
+			if (folderPaths.get(i).equals(dcim)) {
+				defaultPos = i;
+				break;
+			}
+		}
+		_imageAdapter.updateData(_folderManager.getsFolderImages(folderPaths.get(defaultPos)));
+		_listViewFolder.setItemChecked(defaultPos, true);
+		_lastIndex = defaultPos;
 
 		_listViewFolder.setOnItemClickListener(new OnItemClickListener() 
 		{	
@@ -270,6 +301,7 @@ public class MainActivity extends Activity {
 	// Xây dựng thanh công cụ chức năng
 	public void populateFunctionBar()
 	{
+		setUpOnClickListeners();
 		initializeAllFunctionButtons();
 		_scrollView.setVisibility(View.GONE);
 	}
@@ -310,7 +342,7 @@ public class MainActivity extends Activity {
 		btnCompressImage = setUpFunctionButton(_scrollViewgroup, id++, R.drawable.compress, "Compress", onClickCompressImage);
 		
 		// Convert To Video
-		btnConvertToVideo = setUpFunctionButton(_scrollViewgroup, id++, R.drawable.convert_video, "Convert", onClickConvertToVideo);
+		btnConvertToVideo = setUpFunctionButton(_scrollViewgroup, id++, R.drawable.convert_video, "Convert", onClickSlideshow);
 	}
 	
 	// Xây dựng 1 nút chức năng
@@ -390,6 +422,171 @@ public class MainActivity extends Activity {
 		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.main, menu);
 		return true;
+	}
+	
+	private void setUpOnClickListeners() {
+		onClickDeleteImage = new View.OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				AlertDialog.Builder builder = new AlertDialog.Builder(_this);
+ 				builder.setMessage("Are you sure you want to delete?")
+ 					   .setTitle("Delete");
+ 				
+ 				builder.setPositiveButton("Delete", new DialogInterface.OnClickListener() {
+ 					
+ 					@Override
+ 					public void onClick(DialogInterface dialog, int which) {
+ 						if (_radioAll.isChecked()) { // xoá ảnh
+ 							ArrayList<String> selectedItems = getSelectedPaths(_gridViewImage, _imageAdapter);
+ 							_imageAdapter.removeImages(selectedItems);
+ 		                 	if (_folderManager.deletesImages(selectedItems))
+ 		                 		Toast.makeText(getApplicationContext(), "Deleted", Toast.LENGTH_SHORT);
+ 						}
+ 		                 else {
+ 		                 	//_albumManager.deleteSelectedAlbums(); // Xóa album
+ 		                 }								
+ 					}
+ 				});
+ 				
+ 				builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+ 					
+ 					@Override
+ 					public void onClick(DialogInterface dialog, int which) {
+ 						dialog.dismiss();				
+ 					}
+ 				});
+ 				
+ 				builder.show();  
+			}
+		};
+		
+		onClickShareImage = new View.OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				if (_radioAll.isChecked()) {
+					ArrayList<String> paths = getSelectedPaths(_gridViewImage, _imageAdapter);
+					if (paths.size() == 0)
+						return;
+					
+					ArrayList<Uri> files = new ArrayList<Uri>();		
+					for (String path : paths) {
+						files.add(Uri.fromFile(new File(path)));
+					}
+					
+					Intent intent;
+			        
+			        if (files.size() == 1) {
+			        	intent = new Intent(Intent.ACTION_SEND);
+			        	intent.putExtra(Intent.EXTRA_STREAM, files.get(0));
+			        }
+			        else {
+			        	intent = new Intent(Intent.ACTION_SEND_MULTIPLE);
+			        	intent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, files);
+			        }
+			        
+			        intent.setType("image/*");
+			        _this.startActivity(intent);
+				}				
+			}
+		};
+		
+		onClickCompressImage = new View.OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				ArrayList<String> paths = getSelectedPaths(_gridViewImage, _imageAdapter);
+				if (paths.size() == 0)
+					return;
+				
+				final int BUFFER = 2048; 
+				String zipFile = getZipFileName();
+				File zipped = new File(zipFile);		
+						
+				try {
+					zipped.createNewFile();
+					
+					BufferedInputStream origin = null; 
+					FileOutputStream dest = new FileOutputStream(zipFile);
+					ZipOutputStream out = new ZipOutputStream(new BufferedOutputStream(dest));
+					
+					byte data[] = new byte[BUFFER];
+					
+					for(int i=0; i < paths.size(); i++) { 
+						FileInputStream fi = new FileInputStream(paths.get(i)); 
+						origin = new BufferedInputStream(fi, BUFFER); 
+						ZipEntry entry = new ZipEntry(paths.get(i).substring(paths.get(i).lastIndexOf("/") + 1)); 
+						out.putNextEntry(entry); 
+			        	int count; 
+			        	while ((count = origin.read(data, 0, BUFFER)) != -1) { 
+			        		out.write(data, 0, count); 
+			        	} 
+			        	origin.close(); 
+					} 
+			 
+					out.close(); 
+					
+				} catch (FileNotFoundException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
+				Intent intent = new Intent(Intent.ACTION_SEND);
+		        intent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(zipped));        
+		        intent.setType("application/zip");
+		        
+		        _this.startActivity(intent);				
+			}
+		};
+	
+		onClickSlideshow = new View.OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				ArrayList<String> paths = getSelectedPaths(_gridViewImage, _imageAdapter);
+				if (paths.size() == 0)
+					return;
+	        	// Đóng gói dữ liệu truyền đi
+	        	Intent intent = new Intent(_this, ViewImageActivity.class);
+	        	
+	        	intent.putExtra("filePaths", paths);
+	        	intent.putExtra("position", 0);
+	        	intent.putExtra("slideshow", true);
+	        	_this.startActivity(intent);
+			}
+		};
+	}
+	
+	private ArrayList<String> getSelectedPaths(GridView gridView, ImageAdapter adapter) {
+ 		int count = adapter.getCount();
+ 		ArrayList<String> result = new ArrayList<String>();
+ 		
+        for (int i = 0; i < count; i++) 
+        {
+            View view = this.getViewByPosition(i, gridView);
+            ViewHolder holder = (ViewHolder) view.getTag();
+            if (holder.checkbox.isChecked()) {
+            	result.add(holder.filePath);
+            }
+        }
+        
+        return result;
+ 	}
+	
+ 	private String getZipFileName() {
+		String folder = ImageSupporter.DEFAULT_PICTUREPATH + File.separator + "zipped";
+		File f = new File(folder);
+		f.mkdirs();
+		
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss");
+		sdf.setTimeZone(TimeZone.getDefault());
+		String time = sdf.format(new Date());
+		
+		return folder + File.separator + "GalleryDS_" + time + ".zip";
 	}
 
 	@Override

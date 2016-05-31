@@ -84,6 +84,15 @@ public class FolderManager
     	
     	return true;
     }
+    
+    // xoá nhiều ảnh
+    public boolean deletesImages(ArrayList<String> imagePaths) {
+    	for (String path : imagePaths) {
+    		if(!deletesImage(path))
+    			return false;
+    	}
+    	return true;
+    }
 
     // Sao chép 1 ảnh vào thư mục
     public boolean copiesImage(String folderPath, String imagePath)

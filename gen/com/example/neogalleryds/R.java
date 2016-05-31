@@ -17,6 +17,14 @@ public final class R {
         public static final int out_to_right=0x7f040005;
     }
     public static final class attr {
+        /** <p>Must be a reference to another resource, in the form "<code>@[+][<i>package</i>:]<i>type</i>:<i>name</i></code>"
+or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>".
+         */
+        public static final int metaButtonBarButtonStyle=0x7f010001;
+        /** <p>Must be a reference to another resource, in the form "<code>@[+][<i>package</i>:]<i>type</i>:<i>name</i></code>"
+or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>".
+         */
+        public static final int metaButtonBarStyle=0x7f010000;
     }
     public static final class color {
         public static final int AliceBlue=0x7f05002c;
@@ -160,6 +168,7 @@ public final class R {
         public static final int WhiteSmoke=0x7f050026;
         public static final int Yellow=0x7f050003;
         public static final int YellowGreen=0x7f050050;
+        public static final int black_overlay=0x7f05008d;
     }
     public static final class dimen {
         /**  Default screen margins, per the Android Design guidelines. 
@@ -201,33 +210,38 @@ public final class R {
         public static final int yellow_folder=0x7f020019;
     }
     public static final class id {
-        public static final int LinearLayout1=0x7f0a000b;
-        public static final int action_settings=0x7f0a0012;
-        public static final int addNewAlbum=0x7f0a0013;
-        public static final int checkBox0=0x7f0a0011;
+        public static final int LinearLayout1=0x7f0a000d;
+        public static final int action_settings=0x7f0a0015;
+        public static final int addNewAlbum=0x7f0a0016;
+        public static final int checkBox0=0x7f0a0014;
+        public static final int fullScreenImage=0x7f0a0010;
+        public static final int fullscreen_content_controls=0x7f0a000c;
         public static final int gridView1=0x7f0a000a;
         public static final int groupView1=0x7f0a0001;
         public static final int groupView2=0x7f0a0002;
         public static final int horizontalScrollView1=0x7f0a0000;
-        public static final int imageView0=0x7f0a0010;
-        public static final int imageViewFolder=0x7f0a000c;
-        public static final int imageViewFunction=0x7f0a000e;
+        public static final int imageView0=0x7f0a0013;
+        public static final int imageViewFolder=0x7f0a000e;
+        public static final int imageViewFunction=0x7f0a0011;
         public static final int listView1=0x7f0a0008;
         public static final int listViewAlbum=0x7f0a0009;
+        public static final int pager=0x7f0a000b;
         public static final int radioAlbum=0x7f0a0005;
         public static final int radioAll=0x7f0a0004;
         public static final int radioLocks=0x7f0a0007;
         public static final int radioMarks=0x7f0a0006;
         public static final int radioTabGroup=0x7f0a0003;
-        public static final int selectMode=0x7f0a0014;
-        public static final int textViewFolder=0x7f0a000d;
-        public static final int textViewFunction=0x7f0a000f;
+        public static final int selectMode=0x7f0a0017;
+        public static final int textViewFolder=0x7f0a000f;
+        public static final int textViewFunction=0x7f0a0012;
     }
     public static final class layout {
         public static final int activity_main=0x7f030000;
-        public static final int folder_item=0x7f030001;
-        public static final int function_item=0x7f030002;
-        public static final int image_item=0x7f030003;
+        public static final int activity_view_image=0x7f030001;
+        public static final int folder_item=0x7f030002;
+        public static final int fullscreen_image_layout=0x7f030003;
+        public static final int function_item=0x7f030004;
+        public static final int image_item=0x7f030005;
     }
     public static final class menu {
         public static final int main=0x7f090000;
@@ -238,24 +252,30 @@ public final class R {
         public static final int albums=0x7f070006;
         public static final int all=0x7f070005;
         public static final int app_name=0x7f070000;
+        public static final int dummy_button=0x7f07000a;
+        public static final int dummy_content=0x7f07000b;
         public static final int hello_world=0x7f070001;
         public static final int locks=0x7f070008;
         public static final int marks=0x7f070007;
         public static final int selectMode=0x7f070004;
+        public static final int title_activity_view_image=0x7f070009;
     }
     public static final class style {
         /** 
         Base application theme, dependent on API level. This theme is replaced
         by AppBaseTheme from res/values-vXX/styles.xml on newer devices.
+
     
 
             Theme customizations available in newer API levels can go in
             res/values-vXX/styles.xml, while customizations related to
             backward-compatibility can go here.
+
         
 
         Base application theme for API 11+. This theme completely replaces
         AppBaseTheme from res/values/styles.xml on API 11+ devices.
+
     
  API 11 theme customizations can go here. 
 
@@ -270,7 +290,53 @@ public final class R {
  All customizations that are NOT specific to a particular API-level can go here. 
          */
         public static final int AppTheme=0x7f080001;
+        public static final int ButtonBar=0x7f080005;
+        public static final int ButtonBarButton=0x7f080006;
+        public static final int FullscreenActionBarStyle=0x7f080007;
+        public static final int FullscreenTheme=0x7f080004;
         public static final int MyActionBar=0x7f080003;
         public static final int MyTheme=0x7f080002;
     }
+    public static final class styleable {
+        /** 
+         Declare custom theme attributes that allow changing which styles are
+         used for button bars depending on the API level.
+         ?android:attr/buttonBarStyle is new as of API 11 so this is
+         necessary to support previous API levels.
+    
+           <p>Includes the following attributes:</p>
+           <table>
+           <colgroup align="left" />
+           <colgroup align="left" />
+           <tr><th>Attribute</th><th>Description</th></tr>
+           <tr><td><code>{@link #ButtonBarContainerTheme_metaButtonBarButtonStyle com.example.neogalleryds:metaButtonBarButtonStyle}</code></td><td></td></tr>
+           <tr><td><code>{@link #ButtonBarContainerTheme_metaButtonBarStyle com.example.neogalleryds:metaButtonBarStyle}</code></td><td></td></tr>
+           </table>
+           @see #ButtonBarContainerTheme_metaButtonBarButtonStyle
+           @see #ButtonBarContainerTheme_metaButtonBarStyle
+         */
+        public static final int[] ButtonBarContainerTheme = {
+            0x7f010000, 0x7f010001
+        };
+        /**
+          <p>This symbol is the offset where the {@link com.example.neogalleryds.R.attr#metaButtonBarButtonStyle}
+          attribute's value can be found in the {@link #ButtonBarContainerTheme} array.
+
+
+          <p>Must be a reference to another resource, in the form "<code>@[+][<i>package</i>:]<i>type</i>:<i>name</i></code>"
+or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>".
+          @attr name com.example.neogalleryds:metaButtonBarButtonStyle
+        */
+        public static final int ButtonBarContainerTheme_metaButtonBarButtonStyle = 1;
+        /**
+          <p>This symbol is the offset where the {@link com.example.neogalleryds.R.attr#metaButtonBarStyle}
+          attribute's value can be found in the {@link #ButtonBarContainerTheme} array.
+
+
+          <p>Must be a reference to another resource, in the form "<code>@[+][<i>package</i>:]<i>type</i>:<i>name</i></code>"
+or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>".
+          @attr name com.example.neogalleryds:metaButtonBarStyle
+        */
+        public static final int ButtonBarContainerTheme_metaButtonBarStyle = 0;
+    };
 }
