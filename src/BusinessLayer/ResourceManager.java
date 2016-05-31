@@ -1,6 +1,9 @@
-package com.example.neogalleryds;
+package BusinessLayer;
 
 import java.util.ArrayList;
+
+import com.example.neogalleryds.R;
+import com.example.neogalleryds.R.drawable;
 
 import android.content.Context;
 import android.content.res.Resources;
@@ -22,7 +25,7 @@ public class ResourceManager
 	protected static int _reqWidth;
 	protected static int _reqHeight;
 	
-	public ResourceManager(Context context)
+	private static void setDefaultSize(Context context)
 	{
 		// Khởi tạo kích thước mặc định sang pixel
 		_reqWidth = (int) ImageSupporter.convertDipToPixels(context, 50);
@@ -30,24 +33,30 @@ public class ResourceManager
 	}
 
 	// Lấy ảnh Bitmap theo mã tài nguyên 
-	public static Bitmap getImageFunctionIcon(Resources resource, int resourceID)
+	public static Bitmap getImageFunctionIcon(Context context, int resourceID)
 	{
+		// Cài đặt kích thước mặc định
+		setDefaultSize(context);
+		
 		int size = _imageIcon.length;
 		
 		// Tìm kiếm theo mã ID của resource
 		// Trả về ảnh Bitmap
 		for (int i = 0; i < size; i++)
 			if (_imageIcon[i] == resourceID)
-				return ImageSupporter.decodeSampledBitmapFromResource(resource, _imageIcon[i], _reqWidth, _reqHeight);
+				return ImageSupporter.decodeSampledBitmapFromResource(context.getResources(), _imageIcon[i], _reqWidth, _reqHeight);
 		
 		return null;
 	}
 	
 	// Lấy ảnh Bitmap theo mã tài nguyên 
-	public static Bitmap getImageFunctionIcon(Resources resource, int resourceID, int reqWidth, int reqHeight)
+	public static Bitmap getImageFunctionIcon(Context context, int resourceID, int reqWidth, int reqHeight)
 	{
-		if (reqWidth <= 0 || reqHeight <=0 )
+		if (reqWidth <= 0 || reqHeight <= 0 )
 			return null;	
+		
+		_reqWidth = (int) ImageSupporter.convertDipToPixels(context, reqWidth);
+		_reqHeight = (int) ImageSupporter.convertDipToPixels(context, reqHeight);	
 		
 		int size = _imageIcon.length;
 		
@@ -55,7 +64,7 @@ public class ResourceManager
 		// Trả về ảnh Bitmap
 		for (int i = 0; i < size; i++)
 			if (_imageIcon[i] == resourceID)
-				return ImageSupporter.decodeSampledBitmapFromResource(resource, _imageIcon[0], reqWidth, reqHeight);
+				return ImageSupporter.decodeSampledBitmapFromResource(context.getResources(), _imageIcon[0], reqWidth, reqHeight);
 		
 		return null;
 	}

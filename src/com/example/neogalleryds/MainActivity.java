@@ -2,8 +2,11 @@ package com.example.neogalleryds;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 
-
+import Adapter.FolderAdapter;
+import BusinessLayer.ImageSupporter;
+import BusinessLayer.ResourceManager;
 import android.app.Activity;
 import android.os.Bundle;
 import android.os.Environment;
@@ -16,18 +19,28 @@ import android.widget.AdapterView;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.GridView;
 
 public class MainActivity extends Activity {
-
+	
+	// Thuộc tính lưu đối tượng giao diện
 	private ViewGroup _scrollViewgroup;
-	private ResourceManager _resource;
 	private HorizontalScrollView _scrollView;
+	
 	private ListView _listViewFolder;
-	private FolderAdapter _folderAdapter;
-	private ArrayList<String> _data;
+	
+	private GridView _gridViewImage;
+	
+	private RadioGroup _radioViewgroup;
+	private RadioButton _radioLocks;
+	private RadioButton _radioMarks;
+	private RadioButton _radioAll;
+	private RadioButton _radioAlbum;
 	
 	private View btnDeleteImage;
 	private View btnDeleteAlbum;
@@ -47,6 +60,8 @@ public class MainActivity extends Activity {
 	private View btnEditImage;
 	
 	private View btnConvertToVideo;
+	
+	// Các xữ lý chức năng cho sự kiện nhấn nút.
 	private OnClickListener onClickConvertToVideo;
 	private OnClickListener onClickCompressImage;
 	private OnClickListener onClickShareImage;
@@ -59,31 +74,37 @@ public class MainActivity extends Activity {
 	private OnClickListener onClickDeleteAlbum;
 	private OnClickListener onClickDeleteImage;
 	
-	protected int _lastIndex = -1;
+	// Thuộc tính cho việc xữ lý chức năng và lưu dữ liệu
+	private int _lastIndex = -1;
+	private int _selectedTab = 0;
+	private FolderAdapter _folderAdapter;
+	private HashMap<String, ArrayList<String>> _folderData;
+	private HashMap<String, ArrayList<String>> _albumData;
+	private HashMap<String, String> _markData;
+	private HashMap<String, String> _lockData;
 	
-		
 	@Override
-	protected void onCreate(Bundle savedInstanceState) {
+	protected void onCreate(Bundle savedInstanceState) 
+	{
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		
-		_resource = new ResourceManager(this);
-		_scrollViewgroup = (ViewGroup) findViewById(R.id.groupView1);
-		_scrollView = (HorizontalScrollView) this.findViewById(R.id.horizontalScrollView1);
-		_listViewFolder = (ListView) this.findViewById(R.id.listView1);
+		// B1: Lấy các đối tượng giao diện
+		setAllViewInstances();
 		
-		File imageDir = new File(Environment.getExternalStorageDirectory().toString());
-		_data = new ArrayList<String>();
+		// B2: Phát sinh thanh công cụ
+		populateFunctionBar();
 		
-        // Duyệt đệ quy theo chiến lược
-        if (imageDir.exists()) 
-            dirFolder(imageDir);
+		// B3: Lấy dữ liệu
+		loadData();
         
-		_folderAdapter = new FolderAdapter(this, _data);
+		// B4: Cài đặt dữ liệu lên giao diện
+		_folderAdapter = new FolderAdapter(this, new ArrayList<String>(_folderData.keySet()));
 		_listViewFolder.setAdapter(_folderAdapter);
 		_listViewFolder.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+		Toast.makeText(this, "kuro1", Toast.LENGTH_SHORT).show();
 		
-		_listViewFolder.setOnItemClickListener(new OnItemClickListener() {
+		/*_listViewFolder.setOnItemClickListener(new OnItemClickListener() {
 			
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -98,47 +119,94 @@ public class MainActivity extends Activity {
                 
                 Toast.makeText(MainActivity.this, "kuro", Toast.LENGTH_SHORT).show();
             }
-        });
-
-		populateFunctionBar();
+        });*/
 	}
 	
-	 public void dirFolder(File file) {
-	    	
-    	// Kiểm tra tên có hợp lệ không
-        if (file.getName().startsWith(".") || file.getName().startsWith("com."))
-            return;
+	// Thực hiện nạp dữ liệu
+	// Khi xoay màn hình, thay đổi cấu hình, resume
+	public void loadData()
+	{
+		File imageDir = new File(Environment.getExternalStorageDirectory().toString());
+		
+		// Tạo mới để cập nhật dữ liệu nếu cần
+		_folderData = new HashMap<String, ArrayList<String>>();
+		_albumData = new HashMap<String, ArrayList<String>>();
+		_markData = new HashMap<String, String>();
+		_lockData = new HashMap<String, String>();
+		
+        // Duyệt đệ quy theo chiến lược
+        if (imageDir.exists()) 
+            dirFolder(imageDir);
+	}
+	
+	// Duyệt toàn bộ cây thư mục
+	// Tìm thư mục có ảnh và danh sách ảnh
+	// Thực hiện duyệt cây thư mục
+	// Tìm kiếm thư mục có ảnh và ảnh
+	public void dirFolder(File file) 
+	{   	
+		 // Kiểm tra tên có hợp lệ không
+		 if (file.getName().startsWith(".") || file.getName().startsWith("com."))
+			 return;
 
-        File[] files = file.listFiles();
+		 File[] files = file.listFiles();
 
-        // Kiễm tra các tập tin con có rỗng không
-        if (files == null)
-            return;
+		 // Kiễm tra các tập tin con có rỗng không
+		 if (files == null)
+			 return;
 
-        for (File f : files) {
-        	
-        	// Kiểm tra xem có phải ảnh không
-            if (ImageSupporter.isImage(f)) 
-            {
-            	String path = f.getParentFile().getAbsolutePath();
-            	
-            	if (!_data.contains(path))
-            		_data.add(path);
-            }
+		 for (File f : files) 
+		 {	
+			 // Kiểm tra xem có phải ảnh không
+			 if (ImageSupporter.isImage(f))       
+			 {
+				 String parent = file.getAbsolutePath();
+				 // Chưa có thư mục này, thêm vào dữ liệu
+				 if (!_folderData.containsKey(file.getAbsolutePath()))
+					 _folderData.put(file.getAbsolutePath(), new ArrayList<String>());
 
-            // Kiểm tra phải thư mục không
-            if (f.isDirectory())
-                dirFolder(f);
-        }
+				 // Thêm ảnh vào dữ liệu
+				 ArrayList<String> data = _folderData.get(file.getAbsolutePath());
+				 data.add(f.getAbsolutePath());
+			 }
 
+			 // Kiểm tra phải thư mục không
+			 if (f.isDirectory())
+				 dirFolder(f);
+		 }
 	}
 	 
+	// Lấy đối tượng đại diện cho các đối tượng giao diện cần xữ lý
+	// Thực hiện lấy các control cần thiết
+	private void setAllViewInstances()
+	{
+		// View cho việc thể hiện các chức năng xử lý ảnh và album
+		_scrollViewgroup = (ViewGroup) findViewById(R.id.groupView1);
+		_scrollView = (HorizontalScrollView) this.findViewById(R.id.horizontalScrollView1);
+		
+		// View thể hiện các thư mục/album
+		_listViewFolder = (ListView) this.findViewById(R.id.listView1);
+		
+		// View thể hiện danh sách ảnh
+		_gridViewImage = (GridView) this.findViewById(R.id.gridView1);
+		
+		// View thể hiện danh sách các mục xem ảnh
+		_radioViewgroup = (RadioGroup) findViewById(R.id.radioTabGroup);
+		_radioAlbum = (RadioButton) findViewById(R.id.radioAlbum);
+		_radioAll = (RadioButton) findViewById(R.id.radioAll);
+		_radioMarks = (RadioButton) findViewById(R.id.radioMarks);
+		_radioLocks = (RadioButton) findViewById(R.id.radioLocks);
+	}
+	
+	// Xây dựng thanh công cụ chức năng
 	public void populateFunctionBar()
 	{
 		initializeAllFunctionButtons();
 		_scrollView.setVisibility(View.GONE);
 	}
 	
+	// Xây các nút trong công cụ chức năng
+	// Xây dựng các nút chức năng
 	public void initializeAllFunctionButtons()
 	{
 		int id = 0;
@@ -177,6 +245,8 @@ public class MainActivity extends Activity {
 		btnConvertToVideo = setUpFunctionButton(_scrollViewgroup, id++, R.drawable.convert_video, "Convert", onClickConvertToVideo);
 	}
 	
+	// Xây dựng 1 nút chức năng
+	// Xây dựng 1 nút chức năng
 	public View setUpFunctionButton(ViewGroup parent, int id, int resourceID, String name, View.OnClickListener onClickEvent)
 	{
 		// Khởi tạo với layout cho trước
@@ -190,7 +260,7 @@ public class MainActivity extends Activity {
 		TextView content = (TextView) btn.findViewById(R.id.textViewFunction);
 		
 		// Gán ảnh icon cho nút bấm
-		icon.setImageBitmap(ResourceManager.getImageFunctionIcon(this.getResources(), resourceID));
+		icon.setImageBitmap(ResourceManager.getImageFunctionIcon(this, resourceID));
 		
 		// Gán tên chức năng cho nút bấm
 		content.setText(name);

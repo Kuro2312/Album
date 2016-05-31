@@ -1,4 +1,4 @@
-package com.example.neogalleryds;
+package BusinessLayer;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -83,7 +83,7 @@ public class ImageSupporter
 	    return inSampleSize;
 	}
 	
-	// Chuyễn hóa thành bitmap có kích cỡ phù hợp
+	// Chuyễn hóa thành bitmap có kích cỡ phù hợp đối với tập tin
 	public static Bitmap decodeSampledBitmapFromFile(File file, int reqWidth, int reqHeight) 
 	{
 	    // First decode with inJustDecodeBounds=true to check dimensions
@@ -99,7 +99,7 @@ public class ImageSupporter
 	    return BitmapFactory.decodeFile(file.getAbsolutePath(), options);
 	}
 	
-	// Chuyễn hóa thành bitmap có kích cỡ phù hợp
+	// Chuyễn hóa thành bitmap có kích cỡ phù hợp với tài nguyên
 	public static Bitmap decodeSampledBitmapFromResource(Resources resource, int resourceId, int reqWidth, int reqHeight) 
 	{
 	    // First decode with inJustDecodeBounds=true to check dimensions
@@ -113,5 +113,110 @@ public class ImageSupporter
 	    // Decode bitmap with inSampleSize set
 	    options.inJustDecodeBounds = false;
 	    return BitmapFactory.decodeResource(resource, resourceId, options);
+	}
+
+	// Di chuyển tập tin 
+	public static boolean moveFile(String inputPath, String inputFile, String outputPath) 
+	{
+		if (!ImageSupporter.copyFile(inputPath, inputFile, outputPath))
+			return false;
+		
+        // Xóa file gốc
+        File file = new File(inputPath + File.separator + inputFile);
+        file.delete();
+        
+        return true;
+	}
+
+	// Xóa cả thư mục và tập tin con bên trong
+	public static void deleteWholeFolder(String path)
+	{
+		File folder = new File(path);
+		
+		// Kiểm tra có tồn tại folder đó không
+		if (folder.exists()) 
+		{
+			File[] files = folder.listFiles();
+			
+			// Xóa tất cả file trong thư mục
+		    if (files != null)	    
+		    	for (File f : files) 
+		    		f.delete();
+			
+		    // Xóa thư mục
+		    folder.delete();
+		}
+	}
+
+	// Đổi tên 1 tập tin
+	public static boolean renameFile(String path, String newName)
+	{		
+		File oldFile = new File(path);
+		
+		if (!oldFile.exists())
+			return false;
+		
+        File newFile = new File(oldFile.getParent(), newName);
+        
+        if (newFile.exists())
+        	return false;
+        
+        oldFile.renameTo(newFile);
+        return true;
+	}
+
+	// Tạo 1 thư mục
+	public static boolean createFolder(String path, String name)
+	{
+		File folder = new File(path + File.separator + name);
+		
+		// Kiểm tra có tồn tại folder đó không
+		if (!folder.exists()) 
+			return folder.mkdir();
+		
+		return false;
+	}
+
+	// Di chuyển tập tin 
+	public static boolean copyFile(String inputPath, String inputFile, String outputPath) 
+	{
+	    InputStream in = null;
+	    OutputStream out = null;
+	    
+	    try {
+
+	        // Nếu chưa có, thì tạo thư mục tới
+	        File dir = new File (outputPath); 
+	        if (!dir.exists())
+	            dir.mkdirs();
+
+	        // Khởi tạo file để đọc & ghi
+	        in = new FileInputStream(inputPath + File.separator + inputFile);        
+	        out = new FileOutputStream(outputPath + File.separator + inputFile);
+
+	        byte[] buffer = new byte[1024];
+	        int read;
+	        
+	        // Đọc và ghi cho tới hết
+	        while ((read = in.read(buffer)) != -1) 
+	            out.write(buffer, 0, read);
+	        
+	        // Kết thúc đóng file
+            out.flush();
+	        out.close();        
+	        in.close();
+	        
+	        return true;
+	    } 
+    	catch (FileNotFoundException fnfe1) 
+	    {
+	        Log.e("GalleryDS_copyFile", fnfe1.getMessage());
+	        return false;
+	    }
+	    catch (Exception e) 
+	    {
+	        Log.e("GalleryDS_copyFile", e.getMessage());
+	        return false;
+	    }
 	}
 }

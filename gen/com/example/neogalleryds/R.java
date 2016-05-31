@@ -202,9 +202,9 @@ public final class R {
         public static final int listView1=0x7f090008;
         public static final int radioAlbum=0x7f090005;
         public static final int radioAll=0x7f090004;
-        public static final int radioFavourite=0x7f090006;
-        public static final int radioLocked=0x7f090007;
-        public static final int rdogrp=0x7f090003;
+        public static final int radioLocks=0x7f090007;
+        public static final int radioMarks=0x7f090006;
+        public static final int radioTabGroup=0x7f090003;
         public static final int selectMode=0x7f090011;
         public static final int textViewFolder=0x7f09000c;
         public static final int textViewFunction=0x7f09000e;
@@ -220,8 +220,12 @@ public final class R {
     public static final class string {
         public static final int action_settings=0x7f060002;
         public static final int addNewAlbum=0x7f060003;
+        public static final int albums=0x7f060006;
+        public static final int all=0x7f060005;
         public static final int app_name=0x7f060000;
         public static final int hello_world=0x7f060001;
+        public static final int locks=0x7f060008;
+        public static final int marks=0x7f060007;
         public static final int selectMode=0x7f060004;
     }
     public static final class style {

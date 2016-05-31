@@ -33,7 +33,7 @@
 		android:background="@color/LimeGreen" >    
 		
          <RadioGroup
-		    android:id="@+id/rdogrp"
+		    android:id="@+id/radioTabGroup"
 		    android:layout_width="match_parent"
 		    android:layout_height="match_parent"
 		    android:gravity="center"
@@ -49,7 +49,7 @@
 	            android:checked="true"
 	            android:gravity="center"
 	            android:padding="10dp"
-	            android:text="All"
+	            android:text="@string/all"
 	            android:textColor="@drawable/radiotab_textcolor_selector" 
 	            android:textSize="15sp"
 	            android:textStyle="bold"/>
@@ -63,13 +63,13 @@
 	            android:button="@null"
 	            android:gravity="center"
 	            android:padding="10dp"
-	            android:text="Albums"
+	            android:text="@string/albums"
 	            android:textColor="@drawable/radiotab_textcolor_selector" 
 	            android:textSize="15sp"
 	            android:textStyle="bold"/>
 	 
 	        <RadioButton
-	            android:id="@+id/radioFavourite"
+	            android:id="@+id/radioMarks"
 	            android:layout_width="match_parent"
 	            android:layout_height="wrap_content"
 	            android:layout_weight="1"
@@ -77,13 +77,13 @@
 	            android:button="@null"
 	            android:gravity="center"
 	            android:padding="10dp"
-	            android:text="Marks"
+	            android:text="@string/marks"
 	            android:textColor="@drawable/radiotab_textcolor_selector"
 	            android:textSize="15sp"
 	            android:textStyle="bold"/>
 				
 	        <RadioButton
-	            android:id="@+id/radioLocked"
+	            android:id="@+id/radioLocks"
 	            android:layout_width="match_parent"
 	            android:layout_height="wrap_content"
 	            android:layout_weight="1"
@@ -91,7 +91,7 @@
 	            android:button="@null"
 	            android:gravity="center"
 	            android:padding="10dp"
-	            android:text="Locks"
+	            android:text="@string/locks"
 	            android:textColor="@drawable/radiotab_textcolor_selector"
 	            android:textSize="15sp"
 	            android:textStyle="bold"/>
@@ -105,9 +105,9 @@
         android:layout_width="100dip"
         android:layout_height="match_parent"
         android:layout_above="@+id/horizontalScrollView1"
-        android:layout_below="@+id/groupView2"
-       
+        android:layout_below="@+id/groupView2"   
         android:listSelector="@drawable/folder_listview_selector">
+         
     </ListView>
     
   	 <GridView
@@ -120,7 +120,5 @@
         android:layout_above="@+id/horizontalScrollView1"
         android:background="@color/LightSteelBlue">
     </GridView>
-
-  	 
 
 </RelativeLayout>

@@ -1,9 +1,15 @@
-package com.example.neogalleryds;
+package Adapter;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Random;
 
+import com.example.neogalleryds.R;
+import com.example.neogalleryds.R.drawable;
+import com.example.neogalleryds.R.id;
+import com.example.neogalleryds.R.layout;
+
+import BusinessLayer.ImageSupporter;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -93,6 +99,6 @@ public class FolderAdapter extends ArrayAdapter  {
 		 
 		 int num = _folderIcon[0];
 		 Bitmap bitmap = ImageSupporter.decodeSampledBitmapFromResource(_context.getResources(), num, _reqWidth, _reqHeight);
-	     dataHolder.imageView.setImageBitmap(bitmap);
+	     dataHolder.imageView.setImageBitmap(null);
 	}
 }
