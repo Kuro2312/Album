@@ -26,6 +26,8 @@ public class MarkManager
 	// Khởi tạo dữ liệu
 	public void initializesData()
 	{
+		_markData = new HashMap<String, String>();
+				
 		ArrayList<String> markedImages = AlbumManager.getsAlbumPaths(_context);
 		int n = markedImages.size();
 		
@@ -99,11 +101,11 @@ public class MarkManager
 	    catch (FileNotFoundException e) 
 	    {
 	    	Log.e("GalleryDS_Marks", "File not found: " + e.toString());
-	        return null;
+	        return new ArrayList<String>();
 	    } catch (IOException e) 
 	    {
 	    	Log.e("GalleryDS_Marks", "Can not read file: " + e.toString());
-	        return null;
+	        return new ArrayList<String>();
 	    }
 	}
 

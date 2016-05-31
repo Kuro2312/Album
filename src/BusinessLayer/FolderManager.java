@@ -14,8 +14,15 @@ public class FolderManager
 	public FolderManager(Context context)
 	{
 		_context = context;
+		initializesData();
 	}
 	
+	// Khởi tạo dữ liệu
+	public void initializesData()
+	{
+		_folderData = new HashMap<String, ArrayList<String>>();
+	}
+		
 	// Lấy dữ liệu danh sách ảnh của 1 thư mục
 	public ArrayList<String> getsFolderImages(String folderPath)
 	{
@@ -94,6 +101,28 @@ public class FolderManager
 		
 		// Thêm vào album
     	this.getsFolderImages(folderPath).add(imagePath);
+    	
+    	return true;
+    }
+
+    // Thêm thư mục
+    public boolean addsFolder(String folderPath)
+    {
+    	if (this.containsFolder(folderPath))
+    		return false;
+    				
+    	this._folderData.put(folderPath, new ArrayList<String>());
+    	return true;
+    }
+
+    // Thêm thông tin ảnh vào 1 thư mục
+    public boolean addsImage(String folderPath, String imagePath)
+    {
+    	if (!this.containsFolder(folderPath))
+    		return false;
+    	
+    	ArrayList<String> data = _folderData.get(folderPath);
+    	data.add(imagePath);
     	
     	return true;
     }

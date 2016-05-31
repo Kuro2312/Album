@@ -5,7 +5,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import Adapter.FolderAdapter;
+import Adapter.ImageAdapter;
+import Adapter.ViewHolder;
+import BusinessLayer.AlbumManager;
+import BusinessLayer.FolderManager;
 import BusinessLayer.ImageSupporter;
+import BusinessLayer.LockManager;
+import BusinessLayer.MarkManager;
 import BusinessLayer.ResourceManager;
 import android.app.Activity;
 import android.os.Bundle;
@@ -77,11 +83,16 @@ public class MainActivity extends Activity {
 	// Thuộc tính cho việc xữ lý chức năng và lưu dữ liệu
 	private int _lastIndex = -1;
 	private int _selectedTab = 0;
+	
+	// Adapter
 	private FolderAdapter _folderAdapter;
-	private HashMap<String, ArrayList<String>> _folderData;
-	private HashMap<String, ArrayList<String>> _albumData;
-	private HashMap<String, String> _markData;
-	private HashMap<String, String> _lockData;
+	private ImageAdapter _imageAdapter;
+	
+	// Các thuộc tính quản lý
+	private FolderManager _folderManager;
+	private AlbumManager _albumManager;
+	private MarkManager _markManager;
+	private LockManager _lockManager;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) 
@@ -99,12 +110,14 @@ public class MainActivity extends Activity {
 		loadData();
         
 		// B4: Cài đặt dữ liệu lên giao diện
-		_folderAdapter = new FolderAdapter(this, new ArrayList<String>(_folderData.keySet()));
+		_folderAdapter = new FolderAdapter(this, _folderManager.getsFolderPathList());
+		_imageAdapter = new ImageAdapter(this, _folderManager.getsFolderImages(ImageSupporter.DEFAULT_PICTUREPATH));
+		_gridViewImage.setAdapter(_imageAdapter);
 		_listViewFolder.setAdapter(_folderAdapter);
 		_listViewFolder.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
 		Toast.makeText(this, "kuro1", Toast.LENGTH_SHORT).show();
 		
-		/*_listViewFolder.setOnItemClickListener(new OnItemClickListener() {
+		_listViewFolder.setOnItemClickListener(new OnItemClickListener() {
 			
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -115,34 +128,32 @@ public class MainActivity extends Activity {
             	_listViewFolder.setItemChecked(position, true);
             	_lastIndex = position;
             	
-                _folderAdapter.setChecked(view);
-                
-                Toast.makeText(MainActivity.this, "kuro", Toast.LENGTH_SHORT).show();
+            	// Thay dữ liệu vô
+                //_folderAdapter.setChecked(view);
+                //Toast.makeText(MainActivity.this, "kuro", Toast.LENGTH_SHORT).show();
             }
-        });*/
+        });
 	}
 	
 	// Thực hiện nạp dữ liệu
 	// Khi xoay màn hình, thay đổi cấu hình, resume
 	public void loadData()
-	{
+	{		
+		// Tạo mới để cập nhật dữ liệu nếu cần
+		_folderManager = new FolderManager(this);
+		_albumManager = new AlbumManager(this);
+		_markManager = new MarkManager(this);
+		_lockManager = new LockManager(this);
+		
 		File imageDir = new File(Environment.getExternalStorageDirectory().toString());
 		
-		// Tạo mới để cập nhật dữ liệu nếu cần
-		_folderData = new HashMap<String, ArrayList<String>>();
-		_albumData = new HashMap<String, ArrayList<String>>();
-		_markData = new HashMap<String, String>();
-		_lockData = new HashMap<String, String>();
-		
         // Duyệt đệ quy theo chiến lược
-        if (imageDir.exists()) 
-            dirFolder(imageDir);
+		if (imageDir.exists()) 
+			dirFolder(imageDir);
 	}
 	
 	// Duyệt toàn bộ cây thư mục
 	// Tìm thư mục có ảnh và danh sách ảnh
-	// Thực hiện duyệt cây thư mục
-	// Tìm kiếm thư mục có ảnh và ảnh
 	public void dirFolder(File file) 
 	{   	
 		 // Kiểm tra tên có hợp lệ không
@@ -161,13 +172,16 @@ public class MainActivity extends Activity {
 			 if (ImageSupporter.isImage(f))       
 			 {
 				 String parent = file.getAbsolutePath();
+				 
 				 // Chưa có thư mục này, thêm vào dữ liệu
-				 if (!_folderData.containsKey(file.getAbsolutePath()))
-					 _folderData.put(file.getAbsolutePath(), new ArrayList<String>());
+				 if (!_folderManager.containsFolder(parent))
+					 _folderManager.addsFolder(file.getAbsolutePath());
 
 				 // Thêm ảnh vào dữ liệu
-				 ArrayList<String> data = _folderData.get(file.getAbsolutePath());
-				 data.add(f.getAbsolutePath());
+				 if (_albumManager.containsImage(f.getAbsolutePath()))
+					 _albumManager.addImage(f.getAbsolutePath());
+				 else
+					 _folderManager.addsImage(file.getAbsolutePath(), f.getAbsolutePath());	
 			 }
 
 			 // Kiểm tra phải thư mục không
@@ -177,7 +191,6 @@ public class MainActivity extends Activity {
 	}
 	 
 	// Lấy đối tượng đại diện cho các đối tượng giao diện cần xữ lý
-	// Thực hiện lấy các control cần thiết
 	private void setAllViewInstances()
 	{
 		// View cho việc thể hiện các chức năng xử lý ảnh và album
@@ -205,8 +218,7 @@ public class MainActivity extends Activity {
 		_scrollView.setVisibility(View.GONE);
 	}
 	
-	// Xây các nút trong công cụ chức năng
-	// Xây dựng các nút chức năng
+	// Xây các nút trong thanh công cụ chức năng
 	public void initializeAllFunctionButtons()
 	{
 		int id = 0;
@@ -246,7 +258,6 @@ public class MainActivity extends Activity {
 	}
 	
 	// Xây dựng 1 nút chức năng
-	// Xây dựng 1 nút chức năng
 	public View setUpFunctionButton(ViewGroup parent, int id, int resourceID, String name, View.OnClickListener onClickEvent)
 	{
 		// Khởi tạo với layout cho trước
@@ -275,6 +286,49 @@ public class MainActivity extends Activity {
 		return btn;
 	}
 	
+	// Bật chế độ chọn hình ảnh
+    public void turnOnSelectionMode(GridView gridView, ImageAdapter adapter) 
+    {
+        int count = adapter.getCount();
+
+        for (int i = 0; i < count; i++) 
+        {
+            View view = this.getViewByPosition(i, gridView);
+
+            ViewHolder holder = (ViewHolder) view.getTag();
+
+            holder.checkbox.setVisibility(View.VISIBLE);
+            holder.checkbox.setChecked(false);
+        }
+    }  
+ 
+    // Tắt chế độ chọn hình ảnh
+    public void turnOffSelectionMode(GridView gridView, ImageAdapter adapter) 
+    {
+        int count = adapter.getCount();
+
+        for (int i = 0; i < count; i++) {
+            View view = this.getViewByPosition(i, gridView);
+
+            ViewHolder holder = (ViewHolder) view.getTag();
+
+            holder.checkbox.setVisibility(View.INVISIBLE);
+            holder.checkbox.setChecked(false);
+        }
+    }
+    
+    // Lấy View tại 1 vị trí i
+ 	public View getViewByPosition(int pos, GridView listView)
+ 	{
+         final int firstListItemPosition = listView.getFirstVisiblePosition();
+         final int lastListItemPosition = firstListItemPosition + listView.getChildCount() - 1;
+         
+         if (pos < firstListItemPosition || pos > lastListItemPosition) 
+             return listView.getAdapter().getView(pos, null, listView);
+         else 
+             return listView.getChildAt(pos - firstListItemPosition);
+     }
+ 	
 	View.OnClickListener onClickDelete = new View.OnClickListener() {
 		
 		@Override

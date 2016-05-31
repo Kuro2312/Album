@@ -1,7 +1,11 @@
 eclipse.preferences.version=1
+encoding//src/Adapter/ImageAdapter.java=UTF-8
+encoding//src/AsyncTask/AsyncTaskSupporter.java=UTF-8
+encoding//src/AsyncTask/BitmapLoadingTask.java=UTF-8
 encoding//src/BusinessLayer/AlbumManager.java=UTF-8
 encoding//src/BusinessLayer/FolderManager.java=UTF-8
 encoding//src/BusinessLayer/ImageSupporter.java=UTF-8
+encoding//src/BusinessLayer/LockManager.java=UTF-8
 encoding//src/BusinessLayer/MarkManager.java=UTF-8
 encoding//src/BusinessLayer/ResourceManager.java=UTF-8
 encoding//src/com/example/neogalleryds/MainActivity.java=UTF-8

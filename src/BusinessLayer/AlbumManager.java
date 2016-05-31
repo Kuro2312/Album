@@ -28,6 +28,8 @@ public class AlbumManager {
 	// Khởi tạo dữ liệu
 	public void initializesData()
 	{
+		_albumData = new HashMap<String, ArrayList<String>>();
+		
 		ArrayList<String> albumList = AlbumManager.getsAlbumPaths(_context);
 		int n = albumList.size();
 		
@@ -84,11 +86,11 @@ public class AlbumManager {
 	    catch (FileNotFoundException e) 
 	    {
 	    	Log.e("NeoGalleryDS_Album", "File not found: " + e.toString());
-	        return null;
+	        return new ArrayList<String>();
 	    } catch (IOException e) 
 	    {
 	    	Log.e("NeoGalleryDS_Album", "Can not read file: " + e.toString());
-	        return null;
+	        return new ArrayList<String>();
 	    }
 	}
 
@@ -256,15 +258,43 @@ public class AlbumManager {
     {	
     	File f = new File(imagePath);
     	File parent = f.getParentFile();
+    	String albumPath = ImageSupporter.DEFAULT_PICTUREPATH + File.separator + albumName;
     	
     	// Kiểm tra xem ảnh có trong album chưa
-    	if (!this.containsAlbum(albumName) || albumName.equals(parent.getName()))
+    	if (!this.containsAlbum(albumName) || albumPath.equals(parent.getAbsolutePath()))
     		return;
 		
 		// Sao chép file
-		ImageSupporter.copyFile(parent.getAbsolutePath(), f.getName(), ImageSupporter.DEFAULT_PICTUREPATH + File.separator + albumName);
+		ImageSupporter.copyFile(parent.getAbsolutePath(), f.getName(), albumPath);
 		
 		// Thêm vào album
     	this.getsAlbumImages(albumName).add(imagePath);
+    }
+    
+    // Kiểm tra xem 1 ảnh có nằm trong album 2 yếu tố
+    // Tên thư mục chứa ảnh có là tên album ?
+    // Đường dẫn thư mục của thư mục chứa ảnh phải đường dẫn tới mục Picture mặc định của thiết bị
+    public boolean containsImage(String imagePath)
+    {
+    	File f = new File(imagePath);
+    	File parent = f.getParentFile();
+
+    	return parent.getParent().equals(ImageSupporter.DEFAULT_PICTUREPATH) && this.containsAlbum(parent.getName());
+    }
+    
+    // Thêm thông tin ảnh vào
+    public boolean addImage(String imagePath)
+    {
+    	// Kiểm tra có phải ảnh album
+    	if (!containsImage(imagePath))
+    		return false;
+    	
+    	File f = new File(imagePath);
+    	String parent = f.getParentFile().getName();
+    	
+    	// Thêm vào dữ liệu
+    	this.getsAlbumImages(parent).add(imagePath);
+    		
+    	return true;
     }
 }
