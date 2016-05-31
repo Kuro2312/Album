@@ -32,14 +32,18 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.view.ContextMenu;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
@@ -47,6 +51,7 @@ import android.widget.RadioGroup.OnCheckedChangeListener;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.EditText;
 import android.widget.GridView;
 
 public class MainActivity extends Activity {
@@ -101,7 +106,7 @@ public class MainActivity extends Activity {
 	// Thuộc tính cho việc xữ lý chức năng và lưu dữ liệu
 	private Activity _this = this;
 	private int _lastIndex = -1;
-	private int _selectedTab = 0;
+	private int _contextPosition;
 	
 	// Adapter
 	private FolderAdapter _folderAdapter;
@@ -228,7 +233,8 @@ public class MainActivity extends Activity {
 	        {
 	            if (_radioAll.isChecked())
 	            {
-	            	_imageAdapter.updateData(new ArrayList<String>());
+	            	String currentFolder = (String)_folderAdapter.getItem(_listViewFolder.getCheckedItemPosition());
+	            	_imageAdapter.updateData(_folderManager.getsFolderImages(currentFolder));
 	            	_listViewFolder.setVisibility(View.VISIBLE);
 	            	_listViewAlbum.setVisibility(View.GONE);
 	            	
@@ -243,7 +249,11 @@ public class MainActivity extends Activity {
 	            }
 	            else if (_radioAlbum.isChecked())
 	            {
-	            	_imageAdapter.updateData(new ArrayList<String>());
+	            	int pos = _listViewAlbum.getCheckedItemPosition();
+	            	if (pos == ListView.INVALID_POSITION)
+	            		_imageAdapter.updateData(new ArrayList<String>());
+	            	else
+	            		_imageAdapter.updateData(_albumManager.getsAlbumImages(_albumManager.getsAlbumList().get(pos)));
 	            	_listViewAlbum.setVisibility(View.VISIBLE);
 	            	_listViewFolder.setVisibility(View.INVISIBLE);
 	            	
@@ -258,7 +268,7 @@ public class MainActivity extends Activity {
 	            }
 	            else if (_radioMarks.isChecked())
 	            {
-	            	_imageAdapter.updateData(_lockManager.getsLockedImages());
+	            	_imageAdapter.updateData(_markManager.getsMarkedImages());
 	            	_listViewFolder.setVisibility(View.GONE);
 	            	_listViewAlbum.setVisibility(View.GONE);
 	            	
@@ -273,7 +283,7 @@ public class MainActivity extends Activity {
 	            }
 	            else if (_radioLocks.isChecked())
 	            {
-	            	_imageAdapter.updateData(_markManager.getsMarkedImages());
+	            	_imageAdapter.updateData(_lockManager.getsLockedImages());
 	            	_listViewFolder.setVisibility(View.GONE);
 	            	_listViewAlbum.setVisibility(View.GONE);
 	            	
@@ -366,6 +376,9 @@ public class MainActivity extends Activity {
 		_radioAll = (RadioButton) findViewById(R.id.radioAll);
 		_radioMarks = (RadioButton) findViewById(R.id.radioMarks);
 		_radioLocks = (RadioButton) findViewById(R.id.radioLocks);
+		
+		registerForContextMenu(_gridViewImage);
+		registerForContextMenu(_listViewAlbum);
 	}
 	
 	// Xây dựng thanh công cụ chức năng
@@ -443,37 +456,6 @@ public class MainActivity extends Activity {
 		
 		return btn;
 	}
-	
-	// Bật chế độ chọn hình ảnh
-    public void turnOnSelectionMode(GridView gridView, ImageAdapter adapter) 
-    {
-        int count = adapter.getCount();
-
-        for (int i = 0; i < count; i++) 
-        {
-            View view = this.getViewByPosition(i, gridView);
-
-            ViewHolder holder = (ViewHolder) view.getTag();
-
-            holder.checkbox.setVisibility(View.VISIBLE);
-            holder.checkbox.setChecked(false);
-        }
-    }  
- 
-    // Tắt chế độ chọn hình ảnh
-    public void turnOffSelectionMode(GridView gridView, ImageAdapter adapter) 
-    {
-        int count = adapter.getCount();
-
-        for (int i = 0; i < count; i++) {
-            View view = this.getViewByPosition(i, gridView);
-
-            ViewHolder holder = (ViewHolder) view.getTag();
-
-            holder.checkbox.setVisibility(View.INVISIBLE);
-            holder.checkbox.setChecked(false);
-        }
-    }
     
     // Lấy View tại 1 vị trí i
  	public View getViewByPosition(int pos, GridView listView)
@@ -500,49 +482,32 @@ public class MainActivity extends Activity {
 			
 			@Override
 			public void onClick(View v) {
-				AlertDialog.Builder builder = new AlertDialog.Builder(_this);
- 				builder.setMessage("Are you sure you want to delete?")
- 					   .setTitle("Delete");
- 				
- 				builder.setPositiveButton("Delete", new DialogInterface.OnClickListener() {
- 					
- 					@Override
- 					public void onClick(DialogInterface dialog, int which) 
- 					{
- 						if (_radioAll.isChecked()) 
- 						{ 
- 							// Xóa ảnh trong thư mục
- 							ArrayList<String> selectedItems = getSelectedPaths(_gridViewImage, _imageAdapter);
- 							_imageAdapter.removeImages(selectedItems);
- 							
- 		                 	if (_folderManager.deletesImages(selectedItems))
- 		                 		Toast.makeText(getApplicationContext(), "Deleted", Toast.LENGTH_SHORT).show();
- 		                 	else
- 		                 		Toast.makeText(getApplicationContext(), "Fail To Delete", Toast.LENGTH_SHORT).show();
- 						}
- 		                else if (_radioAll.isChecked())
- 		                {
- 		                	// Xóa ảnh trong album
- 		                	ArrayList<String> selectedItems = getSelectedPaths(_gridViewImage, _imageAdapter);
- 							_imageAdapter.removeImages(selectedItems);
- 							
- 		                 	if (_albumManager.deletesImages(selectedItems))
- 		                 		Toast.makeText(getApplicationContext(), "Deleted", Toast.LENGTH_SHORT).show();
- 		                 	else
- 		                 		Toast.makeText(getApplicationContext(), "Fail To Delete", Toast.LENGTH_SHORT).show();
- 		                }								
- 					}
- 				});
- 				
- 				builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
- 					
- 					@Override
- 					public void onClick(DialogInterface dialog, int which) {
- 						dialog.dismiss();				
- 					}
- 				});
- 				
- 				builder.show();  
+				deleteImages(getSelectedPaths()); 
+			}
+		};
+		
+		onClickMarkImage = new View.OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {				
+				_markManager.marksImages(getSelectedPaths());								
+			}
+		};
+
+		onClickUnmarkImage = new View.OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				_markManager.unmarksImages(getSelectedPaths());
+				_imageAdapter.updateData(_markManager.getsMarkedImages());
+			}
+		};
+		
+		onClickAddToAlbum = new View.OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				chooseAlbum();				
 			}
 		};
 		
@@ -551,7 +516,7 @@ public class MainActivity extends Activity {
 			@Override
 			public void onClick(View v) {
 				if (_radioAll.isChecked()) {
-					ArrayList<String> paths = getSelectedPaths(_gridViewImage, _imageAdapter);
+					ArrayList<String> paths = getSelectedPaths();
 					if (paths.size() == 0)
 						return;
 					
@@ -581,7 +546,7 @@ public class MainActivity extends Activity {
 			
 			@Override
 			public void onClick(View v) {
-				ArrayList<String> paths = getSelectedPaths(_gridViewImage, _imageAdapter);
+				ArrayList<String> paths = getSelectedPaths();
 				if (paths.size() == 0)
 					return;
 				
@@ -634,7 +599,7 @@ public class MainActivity extends Activity {
 			
 			@Override
 			public void onClick(View v) {
-				ArrayList<String> paths = getSelectedPaths(_gridViewImage, _imageAdapter);
+				ArrayList<String> paths = getSelectedPaths();
 				
 				if (paths.size() == 0)
 					return;
@@ -654,7 +619,7 @@ public class MainActivity extends Activity {
 			@Override
 			public void onClick(View v) {
 
-				ArrayList<String> paths = getSelectedPaths(_gridViewImage, _imageAdapter);
+				ArrayList<String> paths = getSelectedPaths();
 				
 				if (paths.size() == 0)
 					return;
@@ -675,7 +640,7 @@ public class MainActivity extends Activity {
 			@Override
 			public void onClick(View v) {
 
-				ArrayList<String> paths = getSelectedPaths(_gridViewImage, _imageAdapter);
+				ArrayList<String> paths = getSelectedPaths();
 				
 				if (paths.size() == 0)
 					return;
@@ -696,16 +661,17 @@ public class MainActivity extends Activity {
 		};
 	}
 	
-	private ArrayList<String> getSelectedPaths(GridView gridView, ImageAdapter adapter) {
- 		int count = adapter.getCount();
+	private ArrayList<String> getSelectedPaths() {
+ 		int count = _imageAdapter.getCount();
  		ArrayList<String> result = new ArrayList<String>();
  		
         for (int i = 0; i < count; i++) 
         {
-            View view = this.getViewByPosition(i, gridView);
+            View view = this.getViewByPosition(i, _gridViewImage);
             ViewHolder holder = (ViewHolder) view.getTag();
-            if (holder.checkbox.isChecked())
+            if (holder.checkbox.isChecked()) {
             	result.add(holder.filePath);
+            }
         }
         
         return result;
@@ -723,6 +689,131 @@ public class MainActivity extends Activity {
 		return folder + File.separator + "GalleryDS_" + time + ".zip";
 	}
 
+ 	// Hiện dialog dể chọn album 
+    private void chooseAlbum()
+    {
+    	AlertDialog.Builder builderSingle = new AlertDialog.Builder(this);
+    	builderSingle.setIcon(R.drawable.icon);
+    	builderSingle.setTitle("Select an Album: ");
+
+    	final ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(this, android.R.layout.select_dialog_singlechoice);
+    	
+    	// Nạp dữ liệu cho thông báo qua adapter 
+    	arrayAdapter.addAll(_albumManager.getsAlbumList());
+
+    	// Tạo sự kiện cho nút hủy thông báo
+    	builderSingle.setNegativeButton("Cancel", new DialogInterface.OnClickListener() 
+    	{
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+    	});
+
+    	// Tạo sự kiện cho nút chọn album
+    	builderSingle.setAdapter(arrayAdapter, new DialogInterface.OnClickListener() 
+    	{
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                String strName = arrayAdapter.getItem(which);
+                
+                ArrayList<String> paths = getSelectedPaths();
+                for (String path: paths) {
+                	_albumManager.addsImageToAlbum(strName, path);
+                }
+                
+            }
+        });
+    	
+    	builderSingle.show();
+    }
+ 	
+    private void deleteImages(final ArrayList<String> images) {
+    	if (images.size() == 0)
+    		return;
+    	
+		AlertDialog.Builder builder = new AlertDialog.Builder(_this);
+		builder.setMessage("Are you sure you want to delete?")
+			   .setTitle("Delete");
+		
+		builder.setPositiveButton("Delete", new DialogInterface.OnClickListener() {
+			
+			@Override
+			public void onClick(DialogInterface dialog, int which) 
+			{
+				if (_radioAll.isChecked()) 
+				{ 
+					// Xóa ảnh trong thư mục
+					_imageAdapter.removeImages(images);
+					
+                 	if (_folderManager.deletesImages(images))
+                 		Toast.makeText(getApplicationContext(), "Deleted", Toast.LENGTH_SHORT).show();
+                 	else
+                 		Toast.makeText(getApplicationContext(), "Fail To Delete", Toast.LENGTH_SHORT).show();
+				}
+                else if (_radioAlbum.isChecked())
+                {
+                	// Xóa ảnh trong album
+                	_imageAdapter.removeImages(images);
+					
+                 	if (_albumManager.deletesImages(images))
+                 		Toast.makeText(getApplicationContext(), "Deleted", Toast.LENGTH_SHORT).show();
+                 	else
+                 		Toast.makeText(getApplicationContext(), "Fail To Delete", Toast.LENGTH_SHORT).show();
+                }								
+			}
+		});
+		
+		builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+			
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				dialog.dismiss();				
+			}
+		});
+		
+		builder.show();
+	}
+    
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+        
+    	super.onCreateContextMenu(menu, v, menuInfo);
+        MenuInflater inflater = getMenuInflater();
+        
+        if (_radioAll.isChecked())
+            inflater.inflate(R.menu.context_menu_all, menu);
+        if (_radioAlbum.isChecked())
+            inflater.inflate(R.menu.context_menu_albums, menu);
+        if (_radioMarks.isChecked())
+            inflater.inflate(R.menu.context_menu_marks, menu);
+        if (_radioLocks.isChecked())
+            inflater.inflate(R.menu.context_menu_locks, menu);            
+        
+        menu.setHeaderTitle("Choose an action");
+
+        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) menuInfo;
+        _contextPosition = info.position;
+    }
+
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+        
+    	String path = (String) _imageAdapter.getItem(_contextPosition);
+    	
+    	if (item.getTitle().equals("Delete")) {
+			ArrayList<String> paths = new ArrayList<String>();
+			paths.add(path);
+			deleteImages(paths);
+		}
+
+    	
+    	if (_radioAll.isChecked()) {
+    	}
+         
+        return true;
+    }
+    
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		// Handle action bar item clicks here. The action bar will
@@ -735,6 +826,38 @@ public class MainActivity extends Activity {
 		}
 		else if (id == R.id.addNewAlbum)
 		{
+			AlertDialog.Builder alertDialog = new AlertDialog.Builder(MainActivity.this);
+            alertDialog.setTitle("New Album");
+            alertDialog.setMessage("Enter Album name");
+            
+            final EditText input = new EditText(MainActivity.this);  
+            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                                  LinearLayout.LayoutParams.MATCH_PARENT,
+                                  LinearLayout.LayoutParams.MATCH_PARENT);
+            input.setLayoutParams(lp);
+            alertDialog.setView(input);
+
+            alertDialog.setPositiveButton("OK",
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog,int which) {
+                            String name = input.getText().toString();
+                            if (_albumManager.createsAlbum(name)) {
+                            	_albumAdapter.updateData(_albumManager.getsAlbumList());
+                            	Toast.makeText(_this, "Album created", Toast.LENGTH_SHORT).show();
+                            }
+                            else
+                            	Toast.makeText(_this, "Failed to create album", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+            
+            alertDialog.setNegativeButton("Cancel",
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                        }
+                    });
+
+            alertDialog.show();			
 			return true;
 		}
 		else if (id == R.id.selectMode)

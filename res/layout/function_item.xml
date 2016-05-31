@@ -4,7 +4,8 @@
     android:layout_height="70dip"     
     android:gravity="center"
     android:paddingLeft="13dp"
-    android:paddingRight="13dp">
+    android:paddingRight="13dp"
+    android:background="?android:attr/selectableItemBackground" >
 
     <ImageView
         android:id="@+id/imageViewFunction"

@@ -92,4 +92,12 @@ public class AlbumAdapter extends ArrayAdapter  {
         
         return convertView;
     }
+    
+    // Cập toàn bộ dữ liệu 
+    public void updateData(ArrayList<String> data)
+    {
+    	_items.clear();
+    	_items.addAll(data);
+    	super.notifyDataSetChanged();
+    }
 }

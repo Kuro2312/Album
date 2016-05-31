@@ -28,7 +28,7 @@ public class MarkManager
 	{
 		_markData = new HashMap<String, String>();
 				
-		ArrayList<String> markedImages = AlbumManager.getsAlbumPaths(_context);
+		ArrayList<String> markedImages = getsMarkedImagePaths(_context);
 		int n = markedImages.size();
 		
 		for (int i = 0; i < n; i++)
