@@ -118,7 +118,7 @@ public class ImageSupporter
 	// Di chuyển tập tin 
 	public static boolean moveFile(String inputPath, String inputFile, String outputPath) 
 	{
-		if (!ImageSupporter.copyFile(inputPath, inputFile, outputPath))
+		if (!ImageSupporter.copyFile(inputPath, inputFile, outputPath, null))
 			return false;
 		
         // Xóa file gốc
@@ -128,6 +128,19 @@ public class ImageSupporter
         return true;
 	}
 
+	// Di chuyển tập tin 
+	public static boolean moveFile(String inputPath, String inputFile, String outputPath, String outputFile) 
+	{
+		if (!ImageSupporter.copyFile(inputPath, inputFile, outputPath, outputFile))
+			return false;
+		
+        // Xóa file gốc
+        File file = new File(inputPath + File.separator + inputFile);
+        file.delete();
+        
+        return true;
+	}
+	
 	// Xóa cả thư mục và tập tin con bên trong
 	public static void deleteWholeFolder(String path)
 	{
@@ -178,7 +191,7 @@ public class ImageSupporter
 	}
 
 	// Di chuyển tập tin 
-	public static boolean copyFile(String inputPath, String inputFile, String outputPath) 
+	public static boolean copyFile(String inputPath, String inputFile, String outputPath, String outputFile) 
 	{
 	    InputStream in = null;
 	    OutputStream out = null;
@@ -191,8 +204,12 @@ public class ImageSupporter
 	            dir.mkdirs();
 
 	        // Khởi tạo file để đọc & ghi
-	        in = new FileInputStream(inputPath + File.separator + inputFile);        
-	        out = new FileOutputStream(outputPath + File.separator + inputFile);
+	        in = new FileInputStream(inputPath + File.separator + inputFile);
+	        
+	        if (outputFile == null)
+	        	out = new FileOutputStream(outputPath + File.separator + inputFile);
+	        else
+	        	out = new FileOutputStream(outputPath + File.separator + outputFile);
 
 	        byte[] buffer = new byte[1024];
 	        int read;
@@ -210,13 +227,24 @@ public class ImageSupporter
 	    } 
     	catch (FileNotFoundException fnfe1) 
 	    {
-	        Log.e("GalleryDS_copyFile", fnfe1.getMessage());
+	        Log.e("NeoGalleryDS_copyFile", fnfe1.getMessage());
 	        return false;
 	    }
 	    catch (Exception e) 
 	    {
-	        Log.e("GalleryDS_copyFile", e.getMessage());
+	        Log.e("NeoGalleryDS_copyFile", e.getMessage());
 	        return false;
 	    }
+	}
+	
+	// Lấy đuôi tập tin
+	public static String getsExtensionOfFile(String path)
+	{
+		String extension = "";
+		int pos = path.lastIndexOf(".");
+		if (pos > 0)
+			extension = path.substring(pos + 1);
+		
+		return extension;
 	}
 }

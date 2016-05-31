@@ -37,7 +37,7 @@ public class MarkManager
 	}
 		
 	// Lấy danh sách ảnh đánh dấu
-	public ArrayList<String> getsMarkedImage()
+	public ArrayList<String> getsMarkedImages()
 	{
 		return new ArrayList<String>(_markData.keySet());
 	}
@@ -71,7 +71,7 @@ public class MarkManager
 		
 		_markData.remove(imagePath);
 		
-		MarkManager.savesMarkedImagePaths(_context, getsMarkedImage());
+		MarkManager.savesMarkedImagePaths(_context, getsMarkedImages());
 		return true;
 	}
 
@@ -82,7 +82,7 @@ public class MarkManager
 		
 	    try 
 	    {
-	        InputStream inputStream = context.openFileInput("GalleryDS_Marks.txt");
+	        InputStream inputStream = context.openFileInput("NeoGalleryDS_Marks.txt");
 	        result = new ArrayList<String>();
 	        
 	        if ( inputStream != null )
@@ -114,7 +114,7 @@ public class MarkManager
 	{
 		try
 		{
-			FileOutputStream fos = context.openFileOutput("GalleryDS_Marks.txt", Context.MODE_PRIVATE);
+			FileOutputStream fos = context.openFileOutput("NeoGalleryDS_Marks.txt", Context.MODE_PRIVATE);
 			
 			if (data != null)
 				for (int i = 0; i < data.size(); i++) 
@@ -135,7 +135,7 @@ public class MarkManager
 	{
 		try
 		{
-			FileOutputStream fos = context.openFileOutput("GalleryDS_Marks.txt", Context.MODE_PRIVATE | Context.MODE_APPEND);
+			FileOutputStream fos = context.openFileOutput("NeoGalleryDS_Marks.txt", Context.MODE_PRIVATE | Context.MODE_APPEND);
 			
 			if (data != null)
 				for (int i = 0; i < data.size(); i++) 

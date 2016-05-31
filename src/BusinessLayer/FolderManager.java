@@ -97,7 +97,7 @@ public class FolderManager
     		return false;
     			
 		// Di chuyển file
-		ImageSupporter.copyFile(parentPath, f.getName(), folderPath);
+		ImageSupporter.copyFile(parentPath, f.getName(), folderPath, null);
 		
 		// Thêm vào album
     	this.getsFolderImages(folderPath).add(imagePath);

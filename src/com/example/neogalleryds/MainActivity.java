@@ -98,7 +98,6 @@ public class MainActivity extends Activity {
 	private MarkManager _markManager;
 	private LockManager _lockManager;
 
-	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) 
 	{
@@ -124,8 +123,20 @@ public class MainActivity extends Activity {
 		
 		_albumAdapter = new AlbumAdapter(this, _albumManager.getsAlbumList());
 		_listViewAlbum.setAdapter(_albumAdapter);
-		_listViewAlbum.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
-
+		_listViewAlbum.setChoiceMode(ListView.CHOICE_MODE_SINGLE);		
+		
+		// B5: Cài đặt sự kiện xử lý
+		setOnFolderSelected();
+		setOnAlbumSelected();
+		setOnTabChange();
+		
+		//_lockManager.locksImage(this, _folderManager.getsFolderImages(ImageSupporter.DEFAULT_PICTUREPATH).get(0));
+		//_lockManager.locksImage(this, ImageSupporter.DEFAULT_PICTUREPATH + File.separator + );
+	}
+	
+	// Cài đặt sự kiện chọn 1 item trong danh sách thư mục
+	public void setOnFolderSelected()
+	{
 		_listViewFolder.setOnItemClickListener(new OnItemClickListener() 
 		{	
             @Override
@@ -143,7 +154,11 @@ public class MainActivity extends Activity {
                 //_folderAdapter.setChecked(view);
             }
         });
-		
+	}
+	
+	// Cài đặt sự kiện chọn 1 item trong danh sách album
+	public void setOnAlbumSelected()
+	{
 		_listViewAlbum.setOnItemClickListener(new OnItemClickListener() 
 		{	
             @Override
@@ -159,7 +174,11 @@ public class MainActivity extends Activity {
         		_imageAdapter.updateData(_albumManager.getsAlbumImages((String) _albumAdapter.getItem(position)));
             }
         });
-		
+	}
+	
+	// Cài đặt sự kiện thay đổi tab
+	public void setOnTabChange()
+	{
 		_radioViewgroup.setOnCheckedChangeListener(new OnCheckedChangeListener() 
 	    {
 	        @Override
@@ -167,21 +186,25 @@ public class MainActivity extends Activity {
 	        {
 	            if (_radioAll.isChecked())
 	            {
+	            	_imageAdapter.updateData(new ArrayList<String>());
 	            	_listViewFolder.setVisibility(View.VISIBLE);
 	            	_listViewAlbum.setVisibility(View.GONE);
 	            }
 	            else if (_radioAlbum.isChecked())
 	            {
+	            	_imageAdapter.updateData(new ArrayList<String>());
 	            	_listViewAlbum.setVisibility(View.VISIBLE);
 	            	_listViewFolder.setVisibility(View.INVISIBLE);
 	            }
 	            else if (_radioLocks.isChecked())
 	            {
+	            	_imageAdapter.updateData(_lockManager.getsLockedImages());
 	            	_listViewFolder.setVisibility(View.GONE);
 	            	_listViewAlbum.setVisibility(View.GONE);
 	            }
 	            else if (_radioMarks.isChecked())
 	            {
+	            	_imageAdapter.updateData(_markManager.getsMarkedImages());
 	            	_listViewFolder.setVisibility(View.GONE);
 	            	_listViewAlbum.setVisibility(View.GONE);
 	            }

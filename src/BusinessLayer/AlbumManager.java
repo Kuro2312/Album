@@ -265,7 +265,7 @@ public class AlbumManager {
     		return;
 		
 		// Sao chép file
-		ImageSupporter.copyFile(parent.getAbsolutePath(), f.getName(), albumPath);
+		ImageSupporter.copyFile(parent.getAbsolutePath(), f.getName(), albumPath, null);
 		
 		// Thêm vào album
     	this.getsAlbumImages(albumName).add(imagePath);
