@@ -212,6 +212,15 @@ public class MainActivity extends Activity {
 	// Cài đặt sự kiện thay đổi tab
 	public void setOnTabChange()
 	{
+		btnAddToAlbum.setVisibility(View.VISIBLE);
+    	btnMarkImage.setVisibility(View.VISIBLE);
+    	btnLockImage.setVisibility(View.VISIBLE);
+    	
+    	btnDeleteAlbum.setVisibility(View.GONE);
+    	btnUnmarkImage.setVisibility(View.GONE);
+    	btnUnlockImage.setVisibility(View.GONE);
+    	btnRemoveFromAlbum.setVisibility(View.GONE);
+    	
 		_radioViewgroup.setOnCheckedChangeListener(new OnCheckedChangeListener() 
 	    {
 	        @Override
@@ -222,24 +231,60 @@ public class MainActivity extends Activity {
 	            	_imageAdapter.updateData(new ArrayList<String>());
 	            	_listViewFolder.setVisibility(View.VISIBLE);
 	            	_listViewAlbum.setVisibility(View.GONE);
+	            	
+	            	btnAddToAlbum.setVisibility(View.VISIBLE);
+	            	btnMarkImage.setVisibility(View.VISIBLE);
+	            	btnLockImage.setVisibility(View.VISIBLE);
+	            	
+	            	btnDeleteAlbum.setVisibility(View.GONE);
+	            	btnUnmarkImage.setVisibility(View.GONE);
+	            	btnUnlockImage.setVisibility(View.GONE);
+	            	btnRemoveFromAlbum.setVisibility(View.GONE);
 	            }
 	            else if (_radioAlbum.isChecked())
 	            {
 	            	_imageAdapter.updateData(new ArrayList<String>());
 	            	_listViewAlbum.setVisibility(View.VISIBLE);
 	            	_listViewFolder.setVisibility(View.INVISIBLE);
+	            	
+	            	btnMarkImage.setVisibility(View.VISIBLE);
+	            	btnLockImage.setVisibility(View.VISIBLE);
+	            	btnRemoveFromAlbum.setVisibility(View.VISIBLE);
+	            	
+	            	btnDeleteAlbum.setVisibility(View.GONE);
+	            	btnUnmarkImage.setVisibility(View.GONE);
+	            	btnUnlockImage.setVisibility(View.GONE);
+	            	btnAddToAlbum.setVisibility(View.GONE);
 	            }
-	            else if (_radioLocks.isChecked())
+	            else if (_radioMarks.isChecked())
 	            {
 	            	_imageAdapter.updateData(_lockManager.getsLockedImages());
 	            	_listViewFolder.setVisibility(View.GONE);
 	            	_listViewAlbum.setVisibility(View.GONE);
+	            	
+	            	btnUnmarkImage.setVisibility(View.VISIBLE);
+	            	
+	            	btnLockImage.setVisibility(View.GONE);
+	            	btnRemoveFromAlbum.setVisibility(View.GONE);            	
+	            	btnDeleteAlbum.setVisibility(View.GONE);
+	            	btnMarkImage.setVisibility(View.GONE);
+	            	btnUnlockImage.setVisibility(View.GONE);
+	            	btnAddToAlbum.setVisibility(View.GONE);
 	            }
-	            else if (_radioMarks.isChecked())
+	            else if (_radioLocks.isChecked())
 	            {
 	            	_imageAdapter.updateData(_markManager.getsMarkedImages());
 	            	_listViewFolder.setVisibility(View.GONE);
 	            	_listViewAlbum.setVisibility(View.GONE);
+	            	
+            		btnUnlockImage.setVisibility(View.VISIBLE);
+	            	
+	            	btnLockImage.setVisibility(View.GONE);
+	            	btnRemoveFromAlbum.setVisibility(View.GONE);            	
+	            	btnDeleteAlbum.setVisibility(View.GONE);
+	            	btnUnmarkImage.setVisibility(View.GONE);
+	            	btnLockImage.setVisibility(View.GONE);
+	            	btnAddToAlbum.setVisibility(View.GONE);
 	            }
 	        }
 	    });
@@ -449,7 +494,8 @@ public class MainActivity extends Activity {
 		return true;
 	}
 	
-	private void setUpOnClickListeners() {
+	private void setUpOnClickListeners() 
+	{
 		onClickDeleteImage = new View.OnClickListener() {
 			
 			@Override
@@ -461,16 +507,30 @@ public class MainActivity extends Activity {
  				builder.setPositiveButton("Delete", new DialogInterface.OnClickListener() {
  					
  					@Override
- 					public void onClick(DialogInterface dialog, int which) {
- 						if (_radioAll.isChecked()) { // xoá ảnh
+ 					public void onClick(DialogInterface dialog, int which) 
+ 					{
+ 						if (_radioAll.isChecked()) 
+ 						{ 
+ 							// Xóa ảnh trong thư mục
  							ArrayList<String> selectedItems = getSelectedPaths(_gridViewImage, _imageAdapter);
  							_imageAdapter.removeImages(selectedItems);
+ 							
  		                 	if (_folderManager.deletesImages(selectedItems))
- 		                 		Toast.makeText(getApplicationContext(), "Deleted", Toast.LENGTH_SHORT);
+ 		                 		Toast.makeText(getApplicationContext(), "Deleted", Toast.LENGTH_SHORT).show();
+ 		                 	else
+ 		                 		Toast.makeText(getApplicationContext(), "Fail To Delete", Toast.LENGTH_SHORT).show();
  						}
- 		                 else {
- 		                 	//_albumManager.deleteSelectedAlbums(); // Xóa album
- 		                 }								
+ 		                else if (_radioAll.isChecked())
+ 		                {
+ 		                	// Xóa ảnh trong album
+ 		                	ArrayList<String> selectedItems = getSelectedPaths(_gridViewImage, _imageAdapter);
+ 							_imageAdapter.removeImages(selectedItems);
+ 							
+ 		                 	if (_albumManager.deletesImages(selectedItems))
+ 		                 		Toast.makeText(getApplicationContext(), "Deleted", Toast.LENGTH_SHORT).show();
+ 		                 	else
+ 		                 		Toast.makeText(getApplicationContext(), "Fail To Delete", Toast.LENGTH_SHORT).show();
+ 		                }								
  					}
  				});
  				
@@ -541,8 +601,10 @@ public class MainActivity extends Activity {
 					for(int i=0; i < paths.size(); i++) { 
 						FileInputStream fi = new FileInputStream(paths.get(i)); 
 						origin = new BufferedInputStream(fi, BUFFER); 
+						
 						ZipEntry entry = new ZipEntry(paths.get(i).substring(paths.get(i).lastIndexOf("/") + 1)); 
 						out.putNextEntry(entry); 
+						
 			        	int count; 
 			        	while ((count = origin.read(data, 0, BUFFER)) != -1) { 
 			        		out.write(data, 0, count); 
@@ -573,8 +635,10 @@ public class MainActivity extends Activity {
 			@Override
 			public void onClick(View v) {
 				ArrayList<String> paths = getSelectedPaths(_gridViewImage, _imageAdapter);
+				
 				if (paths.size() == 0)
 					return;
+				
 	        	// Đóng gói dữ liệu truyền đi
 	        	Intent intent = new Intent(_this, ViewImageActivity.class);
 	        	
@@ -582,6 +646,52 @@ public class MainActivity extends Activity {
 	        	intent.putExtra("position", 0);
 	        	intent.putExtra("slideshow", true);
 	        	_this.startActivity(intent);
+			}
+		};
+		
+		onClickLockImage = new View.OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+
+				ArrayList<String> paths = getSelectedPaths(_gridViewImage, _imageAdapter);
+				
+				if (paths.size() == 0)
+					return;
+				
+				_lockManager.locksImages(paths);
+				
+				if (_radioAll.isChecked())
+					_folderManager.deletesImages(paths);
+				else
+					_albumManager.deletesImages(paths);
+				
+				_markManager.unmarksImages(paths);
+			}
+		};
+		
+		onClickUnlockImage = new View.OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+
+				ArrayList<String> paths = getSelectedPaths(_gridViewImage, _imageAdapter);
+				
+				if (paths.size() == 0)
+					return;
+				
+				_lockManager.unlocksImages(paths);
+				
+				// Xóa sạch dữ liệu 
+				_folderManager.getsFolderImages(ImageSupporter.DEFAULT_PICTUREPATH).clear();
+				
+				// Duyệt lại dữ liệu
+				File file = new File(ImageSupporter.DEFAULT_PICTUREPATH);
+				File[] files = file.listFiles();
+				
+				for (File f : files)
+					if (ImageSupporter.isImage(f))
+						_folderManager.addsImage(ImageSupporter.DEFAULT_PICTUREPATH, f.getAbsolutePath());							
 			}
 		};
 	}
@@ -594,9 +704,8 @@ public class MainActivity extends Activity {
         {
             View view = this.getViewByPosition(i, gridView);
             ViewHolder holder = (ViewHolder) view.getTag();
-            if (holder.checkbox.isChecked()) {
+            if (holder.checkbox.isChecked())
             	result.add(holder.filePath);
-            }
         }
         
         return result;

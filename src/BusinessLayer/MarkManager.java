@@ -75,6 +75,24 @@ public class MarkManager
 		return true;
 	}
 
+	// Đánh dấu nhiều ảnh
+	public boolean marksImages(ArrayList<String> imagePaths)
+    {
+    	for (String path : imagePaths)
+    		marksImage(path);
+
+    	return true;
+    }
+	
+	// Bỏ đánh dấu nhiều ảnh
+	public boolean unmarksImages(ArrayList<String> imagePaths)
+    {
+    	for (String path : imagePaths)
+    		unmarksImage(path);
+
+    	return true;
+    }
+	 
 	// Lấy thông tin ảnh đánh dấu
 	protected static ArrayList<String> getsMarkedImagePaths(Context context)
 	{

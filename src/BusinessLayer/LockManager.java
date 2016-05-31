@@ -97,6 +97,26 @@ public class LockManager {
 		return true;
 	}
 	
+	// Khóa nhiều ảnh
+	public boolean locksImages(ArrayList<String> imagePaths)
+    {
+    	for (String path : imagePaths)
+    		if (!locksImage(path))
+    			return false;
+
+    	return true;
+    }
+	
+	// Bỏ khóa nhiều ảnh
+	public boolean unlocksImages(ArrayList<String> imagePaths)
+    {
+    	for (String path : imagePaths)
+    		if (!locksImage(path))
+    			return false;
+
+    	return true;
+    }
+		
 	// Phát sinh tên không trùng
 	public String generateFileName(String fileName)
 	{

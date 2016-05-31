@@ -297,4 +297,14 @@ public class AlbumManager {
     		
     	return true;
     }
+    
+    // Xoá nhiều ảnh
+    public boolean deletesImages(ArrayList<String> imagePaths) 
+    {
+    	for (String path : imagePaths)
+    		if(!removesImageFromAlbum(path))
+    			return false;
+
+    	return true;
+    }
 }

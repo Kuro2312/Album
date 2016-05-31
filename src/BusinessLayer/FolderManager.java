@@ -85,12 +85,13 @@ public class FolderManager
     	return true;
     }
     
-    // xoá nhiều ảnh
-    public boolean deletesImages(ArrayList<String> imagePaths) {
-    	for (String path : imagePaths) {
-    		if(!deletesImage(path))
+    // Xoá nhiều ảnh
+    public boolean deletesImages(ArrayList<String> imagePaths)
+    {
+    	for (String path : imagePaths)
+    		if (!deletesImage(path))
     			return false;
-    	}
+
     	return true;
     }
 
