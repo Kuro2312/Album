@@ -27,6 +27,7 @@ import BusinessLayer.MarkManager;
 import BusinessLayer.ResourceManager;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
@@ -41,6 +42,7 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -48,6 +50,7 @@ import android.widget.ListView;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.RadioGroup.OnCheckedChangeListener;
+import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.AdapterView.OnItemClickListener;
@@ -536,19 +539,72 @@ public class MainActivity extends Activity {
 			
 			@Override
 			public void onClick(View v) {
-				ArrayList<String> paths = getSelectedPaths();
+
+				final Dialog dialog = new Dialog(_this);
+				dialog.setContentView(R.layout.slideshow_dialog_layout);
+				dialog.setTitle("Settings");
+			
+				final TextView txtWait = (TextView) dialog.findViewById(R.id.txtWait);
+				final SeekBar sbrWait = (SeekBar) dialog.findViewById(R.id.sbrWait);
+				sbrWait.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {					
+					@Override
+					public void onStopTrackingTouch(SeekBar seekBar) {}					
+					@Override
+					public void onStartTrackingTouch(SeekBar seekBar) {}
+					
+					@Override
+					public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+						float wait = ((float) progress) / 2;
+						txtWait.setText("Wait: " + wait + "s");
+					}
+				});
 				
+				final TextView txtSpeed = (TextView) dialog.findViewById(R.id.txtSpeed);
+				final SeekBar sbrSpeed = (SeekBar) dialog.findViewById(R.id.sbrSpeed);
+				sbrSpeed.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {					
+					@Override
+					public void onStopTrackingTouch(SeekBar seekBar) {}					
+					@Override
+					public void onStartTrackingTouch(SeekBar seekBar) {}
+					
+					@Override
+					public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+						
+						txtSpeed.setText("Spped: " + (progress + 1));
+					}
+				});
 				
-	        	// Đóng gói dữ liệu truyền đi
-	        	Intent intent = new Intent(_this, ViewImageActivity.class);
-	        	
-	        	if (paths.size() == 0)
-	        		intent.putExtra("filePaths", _imageAdapter.getItems());
-	        	else
-	        		intent.putExtra("filePaths", paths);
-	        	intent.putExtra("position", 0);
-	        	intent.putExtra("slideshow", true);
-	        	_this.startActivity(intent);
+				Button btnOk = (Button) dialog.findViewById(R.id.btnOk);
+				btnOk.setOnClickListener(new OnClickListener() {
+					@Override
+					public void onClick(View v) {
+						ArrayList<String> paths = getSelectedPaths();
+						
+			        	// Đóng gói dữ liệu truyền đi
+			        	Intent intent = new Intent(_this, ViewImageActivity.class);
+			        	
+			        	if (paths.size() == 0)
+			        		intent.putExtra("filePaths", _imageAdapter.getItems());
+			        	else
+			        		intent.putExtra("filePaths", paths);
+			        	intent.putExtra("position", 0);
+			        	intent.putExtra("slideshow", true);
+			        	intent.putExtra("wait", sbrWait.getProgress() * 500);
+			        	intent.putExtra("slide", 3000 / (sbrSpeed.getProgress() + 1));
+			        	_this.startActivity(intent);
+			        	dialog.dismiss();
+					}
+				});
+				
+				Button btnCancel = (Button) dialog.findViewById(R.id.btnCancel);
+				btnCancel.setOnClickListener(new OnClickListener() {
+					@Override
+					public void onClick(View v) {
+						dialog.dismiss();
+					}
+				});
+
+				dialog.show();				
 			}
 		};
 		

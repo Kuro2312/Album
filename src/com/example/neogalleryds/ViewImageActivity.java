@@ -138,7 +138,8 @@ public class ViewImageActivity extends Activity {
 		int position = i.getIntExtra("position", 0);
 		_filePaths = (ArrayList<String>) i.getSerializableExtra("filePaths");
 		boolean slideshow = i.getBooleanExtra("slideshow", false);
-
+		int wait = i.getIntExtra("wait", 500);
+		int slide = i.getIntExtra("slide", 2000);
 		
 		_adapter = new FullscreenImageAdapter(this, _filePaths);
 		_viewPager.setAdapter(_adapter);		
@@ -155,19 +156,19 @@ public class ViewImageActivity extends Activity {
 			    mScroller = ViewPager.class.getDeclaredField("mScroller");
 			    mScroller.setAccessible(true);
 			    Interpolator sInterpolator = new DecelerateInterpolator();
-			    CustomScroller scroller = new CustomScroller(_this, sInterpolator, 2000);
+			    CustomScroller scroller = new CustomScroller(_this, sInterpolator, slide);
 			    mScroller.set(_viewPager, scroller);
 			} catch (NoSuchFieldException e) {
 			} catch (IllegalArgumentException e) {
 			} catch (IllegalAccessException e) {
 			}
-			pageSwitcher(3);
+			pageSwitcher(slide + wait);
 		}
     }
     
-    public void pageSwitcher(int seconds) {
+    public void pageSwitcher(int miliseconds) {
         timer = new Timer();
-        timer.scheduleAtFixedRate(new RemindTask(), 0, seconds * 1000);
+        timer.scheduleAtFixedRate(new RemindTask(), 0, miliseconds);
     }
 
         // this is an inner class...
@@ -181,9 +182,6 @@ public class ViewImageActivity extends Activity {
 
                     if (page >= maxPage) { 
                         timer.cancel();
-                        // Showing a toast for just testing purpose
-                        Toast.makeText(getApplicationContext(), "Timer stoped",
-                                Toast.LENGTH_LONG).show();
                     } else {
                         _viewPager.setCurrentItem(page++);
                     }

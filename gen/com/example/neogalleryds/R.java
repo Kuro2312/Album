@@ -211,8 +211,10 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
     }
     public static final class id {
         public static final int LinearLayout1=0x7f0a000d;
-        public static final int action_settings=0x7f0a0015;
-        public static final int addNewAlbum=0x7f0a0016;
+        public static final int action_settings=0x7f0a001b;
+        public static final int addNewAlbum=0x7f0a001c;
+        public static final int btnCancel=0x7f0a0019;
+        public static final int btnOk=0x7f0a001a;
         public static final int checkBox0=0x7f0a0014;
         public static final int fullScreenImage=0x7f0a0010;
         public static final int fullscreen_content_controls=0x7f0a000c;
@@ -231,9 +233,13 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
         public static final int radioLocks=0x7f0a0007;
         public static final int radioMarks=0x7f0a0006;
         public static final int radioTabGroup=0x7f0a0003;
-        public static final int selectMode=0x7f0a0017;
+        public static final int sbrSpeed=0x7f0a0018;
+        public static final int sbrWait=0x7f0a0016;
+        public static final int selectMode=0x7f0a001d;
         public static final int textViewFolder=0x7f0a000f;
         public static final int textViewFunction=0x7f0a0012;
+        public static final int txtSpeed=0x7f0a0017;
+        public static final int txtWait=0x7f0a0015;
     }
     public static final class layout {
         public static final int activity_main=0x7f030000;
@@ -242,6 +248,7 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
         public static final int fullscreen_image_layout=0x7f030003;
         public static final int function_item=0x7f030004;
         public static final int image_item=0x7f030005;
+        public static final int slideshow_dialog_layout=0x7f030006;
     }
     public static final class menu {
         public static final int context_menu_album_item=0x7f090000;
