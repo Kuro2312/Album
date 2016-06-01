@@ -101,4 +101,17 @@ public class FolderAdapter extends ArrayAdapter  {
 		 Bitmap bitmap = ImageSupporter.decodeSampledBitmapFromResource(_context.getResources(), num, _reqWidth, _reqHeight);
 	     dataHolder.imageView.setImageBitmap(null);
 	}
+	
+	public void refresh()
+    {
+    	super.notifyDataSetChanged();
+    }
+	
+	// Cập toàn bộ dữ liệu 
+    public void updateData(ArrayList<String> data)
+    {
+    	_items.clear();
+    	_items.addAll(data);
+    	super.notifyDataSetChanged();
+    }
 }

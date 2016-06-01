@@ -27,23 +27,28 @@ public class AlbumManager {
 	
 	// Khởi tạo dữ liệu
 	public void initializesData()
-	{
-		try {
-			FileOutputStream fos = _context.openFileOutput("NeoGalleryDS_Album.txt", Context.MODE_PRIVATE | Context.MODE_APPEND);
-			fos.close();
-		} catch (Exception e)
-		{
-			Log.e("GalleryDS_Album", e.getMessage());
-		}		
-		
+	{			
 		_albumData = new HashMap<String, ArrayList<String>>();
 		
 		ArrayList<String> albumList = AlbumManager.getsAlbumPaths(_context);
 		int n = albumList.size();
 		
 		for (int i = 0; i < n; i++)
-			if (!_albumData.containsKey(albumList.get(i)))					
+		{
+			if (!_albumData.containsKey(albumList.get(i)))	
+			{
+				// Kiểm tra xem album còn tồn tại trên thiết bị
+				File f = new File(ImageSupporter.DEFAULT_PICTUREPATH + File.separator + albumList.get(i));
+				
+				// Không còn thì tạo mới lại
+				if (!f.exists())
+					f.mkdir();
+					
 				_albumData.put(albumList.get(i), new ArrayList<String>());
+			}
+		}
+		
+		AlbumManager.savesAlbumPaths(_context, getsAlbumList());
 	}
 	
 	// Lấy danh sách các album

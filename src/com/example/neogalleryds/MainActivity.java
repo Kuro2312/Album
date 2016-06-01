@@ -107,7 +107,10 @@ public class MainActivity extends Activity {
 	
 	// Thuộc tính cho việc xữ lý chức năng và lưu dữ liệu
 	private Activity _this = this;
-	private int _lastIndex = -1;
+	private int _lastIndexFolder = -1;
+	private int _lastIndexAlbum = -1;
+	private String _selectedAlbumName = "";
+	private String _selectedFolderPath = "";
 	private int _contextPosition;
 	private int _albumContextPosition;
 	public static int currentTab = 0;
@@ -159,12 +162,50 @@ public class MainActivity extends Activity {
 		//_lockManager.locksImage(this, ImageSupporter.DEFAULT_PICTUREPATH + File.separator + );
 	}
 	
+	protected void onRestart()
+	{
+		super.onRestart();
+		
+		// Tải lại dử liệu
+		loadData();
+		
+		// Cập nhật dữ liệu Album và Folder
+		_folderAdapter.updateData(_folderManager.getsFolderPathList());
+		_albumAdapter.updateData(_albumManager.getsAlbumList());
+		
+		if (_radioAll.isChecked())
+		{
+			if (_folderManager.containsFolder(_selectedFolderPath))
+				_imageAdapter.updateData(_folderManager.getsFolderImages(_selectedFolderPath));
+			else
+				_imageAdapter.updateData(new ArrayList<String>());
+		}
+		else if (_radioAlbum.isChecked())
+		{
+			if (_albumManager.containsAlbum(_selectedAlbumName))
+				_imageAdapter.updateData(_albumManager.getsAlbumImages(_selectedAlbumName));
+			else
+				_imageAdapter.updateData(new ArrayList<String>());
+		}
+		else if (_radioMarks.isChecked())
+			_imageAdapter.updateData(_markManager.getsMarkedImages());
+		else if (_radioLocks.isChecked())
+			_imageAdapter.updateData(_lockManager.getsLockedImages());
+		else
+			_imageAdapter.updateData(new ArrayList<String>());
+		
+		_folderAdapter.refresh();
+		_albumAdapter.refresh();
+		_imageAdapter.refresh();
+	}
+	
 	// Cài đặt sự kiện chọn 1 item trong danh sách thư mục
 	public void setOnFolderSelected()
 	{			
 		// mặc định hiển thị ảnh chụp từ camera
 		ArrayList<String> folderPaths = _folderManager.getsFolderPathList();	
 		String dcim = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM).getAbsolutePath() + File.separator + "Camera";
+		_selectedFolderPath = dcim;
 		
 		int defaultPos = 0;
 		for (int i = 0; i < folderPaths.size(); i++) 
@@ -177,21 +218,22 @@ public class MainActivity extends Activity {
 		
 		_imageAdapter.updateData(_folderManager.getsFolderImages(folderPaths.get(defaultPos)));
 		_listViewFolder.setItemChecked(defaultPos, true);
-		_lastIndex = defaultPos;
+		_lastIndexFolder = defaultPos;
 
 		_listViewFolder.setOnItemClickListener(new OnItemClickListener() 
 		{	
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 
-            	if (_lastIndex != -1)
-            		_listViewFolder.setItemChecked(_lastIndex, false);
+            	if (_lastIndexFolder != -1)
+            		_listViewFolder.setItemChecked(_lastIndexFolder, false);
             	
             	_listViewFolder.setItemChecked(position, true);
-            	_lastIndex = position;
+            	_lastIndexFolder = position;
+            	_selectedFolderPath = (String)_folderAdapter.getItem(position);
             	
             	// Thay dữ liệu vô
-        		_imageAdapter.updateData(_folderManager.getsFolderImages((String)_folderAdapter.getItem(position)));
+        		_imageAdapter.updateData(_folderManager.getsFolderImages(_selectedFolderPath));
             	
                 //_folderAdapter.setChecked(view);
             }
@@ -206,14 +248,15 @@ public class MainActivity extends Activity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 
-            	if (_lastIndex != -1)
-            		_listViewFolder.setItemChecked(_lastIndex, false);
+            	if (_lastIndexAlbum != -1)
+            		_listViewFolder.setItemChecked(_lastIndexFolder, false);
             	
             	_listViewFolder.setItemChecked(position, true);
-            	_lastIndex = position;
+            	_lastIndexAlbum = position;
+            	_selectedAlbumName = (String) _albumAdapter.getItem(position);
             	
             	// Thay dữ liệu vô
-        		_imageAdapter.updateData(_albumManager.getsAlbumImages((String) _albumAdapter.getItem(position)));
+        		_imageAdapter.updateData(_albumManager.getsAlbumImages(_selectedAlbumName));
             }
         });
 	}
@@ -239,9 +282,11 @@ public class MainActivity extends Activity {
 	            	currentTab = 0;
 	            	String currentFolder = (String)_folderAdapter.getItem(_listViewFolder.getCheckedItemPosition());
 	            	_imageAdapter.updateData(_folderManager.getsFolderImages(currentFolder));
+	            	
 	            	_listViewFolder.setVisibility(View.VISIBLE);
 	            	_listViewAlbum.setVisibility(View.GONE);
 	            	
+	            	btnDeleteImage.setVisibility(View.VISIBLE);
 	            	btnAddToAlbum.setVisibility(View.VISIBLE);
 	            	btnMarkImage.setVisibility(View.VISIBLE);
 	            	btnLockImage.setVisibility(View.VISIBLE);
@@ -258,9 +303,11 @@ public class MainActivity extends Activity {
 	            		_imageAdapter.updateData(new ArrayList<String>());
 	            	else
 	            		_imageAdapter.updateData(_albumManager.getsAlbumImages(_albumManager.getsAlbumList().get(pos)));
+	            	
 	            	_listViewAlbum.setVisibility(View.VISIBLE);
 	            	_listViewFolder.setVisibility(View.INVISIBLE);
 	            	
+	            	btnDeleteImage.setVisibility(View.VISIBLE);
 	            	btnMarkImage.setVisibility(View.VISIBLE);
 	            	btnLockImage.setVisibility(View.VISIBLE);
 	            	btnRemoveFromAlbum.setVisibility(View.VISIBLE);
@@ -289,6 +336,7 @@ public class MainActivity extends Activity {
 	            {
 	            	currentTab = 3;
 	            	_imageAdapter.updateData(_lockManager.getsLockedImages());
+	            	
 	            	_listViewFolder.setVisibility(View.GONE);
 	            	_listViewAlbum.setVisibility(View.GONE);
 	            	

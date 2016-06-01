@@ -100,4 +100,9 @@ public class AlbumAdapter extends ArrayAdapter  {
     	_items.addAll(data);
     	super.notifyDataSetChanged();
     }
+    
+    public void refresh()
+    {
+    	super.notifyDataSetChanged();
+    }
 }
