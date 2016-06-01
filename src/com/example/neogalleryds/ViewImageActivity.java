@@ -100,15 +100,12 @@ public class ViewImageActivity extends Activity {
             }
             return false;
         }
-    };
-    
-    
-    
+    };   
 
 	private ArrayList<String> _filePaths;
 	private FullscreenImageAdapter _adapter;
 	
-	private ImageButton btnFavourite;
+	private ImageButton btnMark;
 	private ImageButton btnAdd;
 	private ImageButton btnDelete;
 	private Context _this;
@@ -145,7 +142,79 @@ public class ViewImageActivity extends Activity {
 		_viewPager.setAdapter(_adapter);		
 		_viewPager.setCurrentItem(position);
 
+		btnMark = (ImageButton) findViewById(R.id.btnMark);
+		btnMark.setOnClickListener(new View.OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				String path = _filePaths.get(_viewPager.getCurrentItem());
+				MainActivity._markManager.marksImage(path);
+			}
+		});
 		
+		btnAdd = (ImageButton) findViewById(R.id.btnAdd);
+		btnAdd.setOnClickListener(new View.OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				String path = _filePaths.get(_viewPager.getCurrentItem());
+				ArrayList<String> paths = new ArrayList<String>();
+				paths.add(path);
+				chooseAlbum(paths);
+			}
+		});
+		
+		btnDelete = (ImageButton) findViewById(R.id.btnDelete);
+		btnDelete.setOnClickListener(new View.OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				AlertDialog.Builder builder = new AlertDialog.Builder(_this);
+				builder.setMessage("Are you sure you want to delete?")
+					   .setTitle("Delete");
+				
+				builder.setPositiveButton("Delete", new DialogInterface.OnClickListener() {
+					
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						int pos = _viewPager.getCurrentItem();
+						String path = _filePaths.get(pos);
+						ArrayList<String> paths = new ArrayList<String>();
+						paths.add(path);
+						
+						MainActivity._imageAdapter.removeImages(paths);
+						
+						switch (MainActivity.currentTab) {
+						case 0: // tab All
+							if (MainActivity._folderManager.deletesImages(paths))
+		                 		Toast.makeText(getApplicationContext(), "Deleted", Toast.LENGTH_SHORT).show();
+		                 	else
+		                 		Toast.makeText(getApplicationContext(), "Fail To Delete", Toast.LENGTH_SHORT).show();
+							break;
+						case 1: // tab Albums
+							if (MainActivity._albumManager.deletesImages(paths))
+		                 		Toast.makeText(getApplicationContext(), "Deleted", Toast.LENGTH_SHORT).show();
+		                 	else
+		                 		Toast.makeText(getApplicationContext(), "Fail To Delete", Toast.LENGTH_SHORT).show();
+							break;
+						}
+
+						if (!_adapter.removeImage(pos)) // nếu đã xoá hết ảnh
+							finish();		
+					}
+				});
+				
+				builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+					
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						dialog.dismiss();				
+					}
+				});
+				
+				builder.show();
+			}
+		});
 
 		if (slideshow == true) {
 			_viewPager.disablePaging();
@@ -164,6 +233,44 @@ public class ViewImageActivity extends Activity {
 			}
 			pageSwitcher(slide + wait);
 		}
+    }
+    
+ // Hiện dialog dể chọn album 
+    private void chooseAlbum(final ArrayList<String> images)
+    {
+    	AlertDialog.Builder builderSingle = new AlertDialog.Builder(this);
+    	builderSingle.setIcon(R.drawable.icon);
+    	builderSingle.setTitle("Select an Album: ");
+
+    	final ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(this, android.R.layout.select_dialog_singlechoice);
+    	
+    	// Nạp dữ liệu cho thông báo qua adapter 
+    	arrayAdapter.addAll(MainActivity._albumManager.getsAlbumList());
+
+    	// Tạo sự kiện cho nút hủy thông báo
+    	builderSingle.setNegativeButton("Cancel", new DialogInterface.OnClickListener() 
+    	{
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+    	});
+
+    	// Tạo sự kiện cho nút chọn album
+    	builderSingle.setAdapter(arrayAdapter, new DialogInterface.OnClickListener() 
+    	{
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                String strName = arrayAdapter.getItem(which);
+                
+                for (String path: images) {
+                	MainActivity._albumManager.addsImageToAlbum(strName, path);
+                }
+                
+            }
+        });
+    	
+    	builderSingle.show();
     }
     
     public void pageSwitcher(int miliseconds) {
@@ -190,6 +297,8 @@ public class ViewImageActivity extends Activity {
 
         }
     }
+    
+    
     
     /////////////////////////////////////////////////////////////////////////////////
 

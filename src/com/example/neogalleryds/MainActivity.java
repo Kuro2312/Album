@@ -110,17 +110,18 @@ public class MainActivity extends Activity {
 	private int _lastIndex = -1;
 	private int _contextPosition;
 	private int _albumContextPosition;
+	public static int currentTab = 0;
 	
 	// Adapter
 	private FolderAdapter _folderAdapter;
-	private ImageAdapter _imageAdapter;
+	public static ImageAdapter _imageAdapter;
 	private AlbumAdapter _albumAdapter;
 	
 	// Các thuộc tính quản lý
-	private FolderManager _folderManager;
-	private AlbumManager _albumManager;
-	private MarkManager _markManager;
-	private LockManager _lockManager;
+	public static FolderManager _folderManager;
+	public static AlbumManager _albumManager;
+	public static MarkManager _markManager;
+	public static LockManager _lockManager;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) 
@@ -235,6 +236,7 @@ public class MainActivity extends Activity {
 	        {
 	            if (_radioAll.isChecked())
 	            {
+	            	currentTab = 0;
 	            	String currentFolder = (String)_folderAdapter.getItem(_listViewFolder.getCheckedItemPosition());
 	            	_imageAdapter.updateData(_folderManager.getsFolderImages(currentFolder));
 	            	_listViewFolder.setVisibility(View.VISIBLE);
@@ -250,6 +252,7 @@ public class MainActivity extends Activity {
 	            }
 	            else if (_radioAlbum.isChecked())
 	            {
+	            	currentTab = 1;
 	            	int pos = _listViewAlbum.getCheckedItemPosition();
 	            	if (pos == ListView.INVALID_POSITION)
 	            		_imageAdapter.updateData(new ArrayList<String>());
@@ -268,6 +271,7 @@ public class MainActivity extends Activity {
 	            }
 	            else if (_radioMarks.isChecked())
 	            {
+	            	currentTab = 2;
 	            	_imageAdapter.updateData(_markManager.getsMarkedImages());
 	            	_listViewFolder.setVisibility(View.GONE);
 	            	_listViewAlbum.setVisibility(View.GONE);
@@ -282,6 +286,7 @@ public class MainActivity extends Activity {
 	            }
 	            else if (_radioLocks.isChecked())
 	            {
+	            	currentTab = 3;
 	            	_imageAdapter.updateData(_lockManager.getsLockedImages());
 	            	_listViewFolder.setVisibility(View.GONE);
 	            	_listViewAlbum.setVisibility(View.GONE);
@@ -702,28 +707,29 @@ public class MainActivity extends Activity {
 		builder.setPositiveButton("Delete", new DialogInterface.OnClickListener() {
 			
 			@Override
-			public void onClick(DialogInterface dialog, int which) 
-			{
-				if (_radioAll.isChecked()) 
-				{ 
-					// Xóa ảnh trong thư mục
-					_imageAdapter.removeImages(images);
+			public void onClick(DialogInterface dialog, int which) {
+				
+				_imageAdapter.removeImages(images);
+				
+				if (_radioAll.isChecked()) { 
 					
+					// Xóa ảnh trong thư mục					
                  	if (_folderManager.deletesImages(images))
                  		Toast.makeText(getApplicationContext(), "Deleted", Toast.LENGTH_SHORT).show();
                  	else
                  		Toast.makeText(getApplicationContext(), "Fail To Delete", Toast.LENGTH_SHORT).show();
-				}
-                else if (_radioAlbum.isChecked())
-                {
-                	// Xóa ảnh trong album
-                	_imageAdapter.removeImages(images);
+				
+				} else if (_radioAlbum.isChecked()) {
 					
+                	// Xóa ảnh trong album			
                  	if (_albumManager.deletesImages(images))
                  		Toast.makeText(getApplicationContext(), "Deleted", Toast.LENGTH_SHORT).show();
                  	else
                  		Toast.makeText(getApplicationContext(), "Fail To Delete", Toast.LENGTH_SHORT).show();
-                }								
+                
+				} else if (_radioMarks.isChecked()) {
+					
+				}
 			}
 		});
 		
