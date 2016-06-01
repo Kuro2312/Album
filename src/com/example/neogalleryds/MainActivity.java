@@ -118,10 +118,10 @@ public class MainActivity extends Activity {
 	private AlbumAdapter _albumAdapter;
 	
 	// Các thuộc tính quản lý
-	private FolderManager _folderManager;
-	private AlbumManager _albumManager;
-	private MarkManager _markManager;
-	private LockManager _lockManager;
+	public static FolderManager _folderManager;
+	public static AlbumManager _albumManager;
+	public static MarkManager _markManager;
+	public static LockManager _lockManager;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) 
@@ -278,6 +278,7 @@ public class MainActivity extends Activity {
 	            	
 	            	btnUnmarkImage.setVisibility(View.VISIBLE);
 	            	
+	            	btnDeleteImage.setVisibility(View.GONE);
 	            	btnLockImage.setVisibility(View.GONE);
 	            	btnRemoveFromAlbum.setVisibility(View.GONE);            	
 	            	btnMarkImage.setVisibility(View.GONE);
@@ -291,10 +292,12 @@ public class MainActivity extends Activity {
 	            	_listViewFolder.setVisibility(View.GONE);
 	            	_listViewAlbum.setVisibility(View.GONE);
 	            	
+	            	btnDeleteImage.setVisibility(View.VISIBLE);
             		btnUnlockImage.setVisibility(View.VISIBLE);
 	            	
 	            	btnLockImage.setVisibility(View.GONE);
-	            	btnRemoveFromAlbum.setVisibility(View.GONE);            	
+	            	btnRemoveFromAlbum.setVisibility(View.GONE);
+	            	btnMarkImage.setVisibility(View.GONE);
 	            	btnUnmarkImage.setVisibility(View.GONE);
 	            	btnLockImage.setVisibility(View.GONE);
 	            	btnAddToAlbum.setVisibility(View.GONE);
@@ -732,7 +735,14 @@ public class MainActivity extends Activity {
                  	else
                  		Toast.makeText(getApplicationContext(), "Fail To Delete", Toast.LENGTH_SHORT).show();
                 
-				} else if (_radioMarks.isChecked()) {
+				} else if (_radioLocks.isChecked()) {
+					
+					// Xóa ảnh trong locks			
+                 	if (_lockManager.deletesImages(images)) {
+                 		Toast.makeText(getApplicationContext(), "Deleted", Toast.LENGTH_SHORT).show();
+                 	}
+                 	else
+                 		Toast.makeText(getApplicationContext(), "Fail To Delete", Toast.LENGTH_SHORT).show();
 					
 				}
 			}
@@ -833,6 +843,7 @@ public class MainActivity extends Activity {
 			_albumManager.deletesImages(images);
 		
 		_markManager.unmarksImages(images);
+		_imageAdapter.removeImages(images);
     }
     
     private void unlockImages(ArrayList<String> images) {
@@ -851,6 +862,8 @@ public class MainActivity extends Activity {
 		for (File f : files)
 			if (ImageSupporter.isImage(f))
 				_folderManager.addsImage(ImageSupporter.DEFAULT_PICTUREPATH, f.getAbsolutePath());
+		
+		_imageAdapter.removeImages(images);
     }
     
     private void removeFromAlbum(ArrayList<String> images) {

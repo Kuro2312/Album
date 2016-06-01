@@ -97,6 +97,40 @@ public class LockManager {
 		return true;
 	}
 	
+	// Xoá ảnh
+	public boolean deletesImage(String imagePath) {
+		
+		// Kiểm tra thư mục có tồn tại, nếu chưa thì tạo
+				File mydir = _context.getDir("NeoGalleryDS_Locks", Context.MODE_PRIVATE);
+				
+				if (!mydir.exists())
+					return false;
+				
+				// Tạo và lưu tập tin
+				File file = new File(imagePath);
+				
+				// Xoá file
+				
+				if (!file.delete())
+					return false;
+				
+				// Xóa trong dữ liệu
+				if (!_lockData.containsKey(imagePath))
+					return false;
+				
+				_lockData.remove(imagePath);
+				
+				return true;
+	}
+	
+	public boolean deletesImages(ArrayList<String> imagePaths) {	
+		for (String path : imagePaths)
+    		if (!deletesImage(path))
+    			return false;
+
+    	return true;
+	}
+	
 	// Khóa nhiều ảnh
 	public boolean locksImages(ArrayList<String> imagePaths)
     {

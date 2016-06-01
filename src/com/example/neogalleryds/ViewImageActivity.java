@@ -122,7 +122,6 @@ public class ViewImageActivity extends Activity {
 	private FolderManager _folderManager;
 	private AlbumManager _albumManager;
 	private MarkManager _markManager;
-	private LockManager _lockManager;
 	
 	// dành cho slideshow
 	private Timer timer;
@@ -230,7 +229,8 @@ public class ViewImageActivity extends Activity {
 						ArrayList<String> paths = new ArrayList<String>();
 						paths.add(path);
 						
-						MainActivity._imageAdapter.removeImages(paths);
+						if (MainActivity._imageAdapter != null)
+							MainActivity._imageAdapter.removeImages(paths);
 						
 						switch (curTab) {
 						case 0: // tab All
@@ -292,10 +292,15 @@ public class ViewImageActivity extends Activity {
  	public void loadData()
  	{		
  		// Tạo mới để cập nhật dữ liệu nếu cần
- 		_folderManager = new FolderManager(this);
- 		_albumManager = new AlbumManager(this);
- 		_markManager = new MarkManager(this);
- 		_lockManager = new LockManager(this);
+ 		if (MainActivity._albumManager == null) {
+	 		_folderManager = new FolderManager(this);
+	 		_albumManager = new AlbumManager(this);
+	 		_markManager = new MarkManager(this);
+ 		} else {
+ 			_folderManager = MainActivity._folderManager;
+ 			_albumManager = MainActivity._albumManager;
+ 			_markManager = MainActivity._markManager;
+ 		}
  		
  		File imageDir = new File(Environment.getExternalStorageDirectory().toString());
  		

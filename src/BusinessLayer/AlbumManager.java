@@ -29,7 +29,7 @@ public class AlbumManager {
 	public void initializesData()
 	{
 		try {
-			FileOutputStream fos = _context.openFileOutput("NeoGalleryDS_Album.txt", Context.MODE_PRIVATE);
+			FileOutputStream fos = _context.openFileOutput("NeoGalleryDS_Album.txt", Context.MODE_PRIVATE | Context.MODE_APPEND);
 			fos.close();
 		} catch (Exception e)
 		{

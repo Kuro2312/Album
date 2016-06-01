@@ -28,7 +28,7 @@ public class MarkManager
 	{
 		try
 		{
-			FileOutputStream fos = _context.openFileOutput("NeoGalleryDS_Marks.txt", Context.MODE_PRIVATE);
+			FileOutputStream fos = _context.openFileOutput("NeoGalleryDS_Marks.txt", Context.MODE_PRIVATE | Context.MODE_APPEND);
 			fos.close();	
 		}
 		catch (Exception e)
