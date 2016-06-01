@@ -118,10 +118,10 @@ public class MainActivity extends Activity {
 	private AlbumAdapter _albumAdapter;
 	
 	// Các thuộc tính quản lý
-	public static FolderManager _folderManager;
-	public static AlbumManager _albumManager;
-	public static MarkManager _markManager;
-	public static LockManager _lockManager;
+	private FolderManager _folderManager;
+	private AlbumManager _albumManager;
+	private MarkManager _markManager;
+	private LockManager _lockManager;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) 
@@ -594,6 +594,7 @@ public class MainActivity extends Activity {
 			        		intent.putExtra("filePaths", paths);
 			        	intent.putExtra("position", 0);
 			        	intent.putExtra("slideshow", true);
+			        	intent.putExtra("internal", true);
 			        	intent.putExtra("wait", sbrWait.getProgress() * 500);
 			        	intent.putExtra("slide", 3000 / (sbrSpeed.getProgress() + 1));
 			        	_this.startActivity(intent);
@@ -714,16 +715,20 @@ public class MainActivity extends Activity {
 				if (_radioAll.isChecked()) { 
 					
 					// Xóa ảnh trong thư mục					
-                 	if (_folderManager.deletesImages(images))
+                 	if (_folderManager.deletesImages(images)) {
+                 		_markManager.unmarksImages(images);
                  		Toast.makeText(getApplicationContext(), "Deleted", Toast.LENGTH_SHORT).show();
+                 	}
                  	else
                  		Toast.makeText(getApplicationContext(), "Fail To Delete", Toast.LENGTH_SHORT).show();
 				
 				} else if (_radioAlbum.isChecked()) {
 					
                 	// Xóa ảnh trong album			
-                 	if (_albumManager.deletesImages(images))
+                 	if (_albumManager.deletesImages(images)) {
+                 		_markManager.unmarksImages(images);
                  		Toast.makeText(getApplicationContext(), "Deleted", Toast.LENGTH_SHORT).show();
+                 	}
                  	else
                  		Toast.makeText(getApplicationContext(), "Fail To Delete", Toast.LENGTH_SHORT).show();
                 
@@ -852,6 +857,7 @@ public class MainActivity extends Activity {
     	for (String path : images) {
     		_albumManager.removesImageFromAlbum(path);
     	}
+    	_markManager.unmarksImages(images);
     	int pos = _listViewAlbum.getCheckedItemPosition();
     	_imageAdapter.updateData(_albumManager.getsAlbumImages(_albumManager.getsAlbumList().get(pos)));
     }

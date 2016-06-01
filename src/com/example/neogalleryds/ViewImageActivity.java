@@ -3,9 +3,15 @@ package com.example.neogalleryds;
 import java.io.File;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import BusinessLayer.AlbumManager;
+import BusinessLayer.FolderManager;
+import BusinessLayer.ImageSupporter;
+import BusinessLayer.LockManager;
+import BusinessLayer.MarkManager;
 import FullscreenImage.CustomScroller;
 import FullscreenImage.FullscreenImageAdapter;
 import FullscreenImage.MyViewPager;
@@ -17,8 +23,10 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.support.v4.view.ViewPager;
 import android.view.MotionEvent;
@@ -110,10 +118,18 @@ public class ViewImageActivity extends Activity {
 	private ImageButton btnDelete;
 	private Context _this;
 	
+	// Các thuộc tính quản lý
+	private FolderManager _folderManager;
+	private AlbumManager _albumManager;
+	private MarkManager _markManager;
+	private LockManager _lockManager;
+	
 	// dành cho slideshow
-	Timer timer;
-	int page;
-	int maxPage;
+	private Timer timer;
+	private int page;
+	private int maxPage;
+	
+	private int curTab = MainActivity.currentTab;
 
     @SuppressWarnings("deprecation")
 	@Override
@@ -128,15 +144,47 @@ public class ViewImageActivity extends Activity {
         /////////////////////////////////////////////////////////////
         
         _this = this;
+        loadData();
         
 		_viewPager.setPageMargin(10);
 		
-		Intent i = getIntent();
-		int position = i.getIntExtra("position", 0);
-		_filePaths = (ArrayList<String>) i.getSerializableExtra("filePaths");
-		boolean slideshow = i.getBooleanExtra("slideshow", false);
-		int wait = i.getIntExtra("wait", 500);
-		int slide = i.getIntExtra("slide", 2000);
+		Intent intent = getIntent();
+		boolean slideshow = false;
+		int wait = -1;
+		int slide = -1;
+		
+		int position;
+		
+		boolean internal = intent.getBooleanExtra("internal", false);
+		if (internal == true) { // nếu được gọi từ bên trong app
+			
+			position = intent.getIntExtra("position", 0);
+			_filePaths = (ArrayList<String>) intent.getSerializableExtra("filePaths");
+			slideshow = intent.getBooleanExtra("slideshow", false);
+			wait = intent.getIntExtra("wait", 500);
+			slide = intent.getIntExtra("slide", 2000);
+			
+			
+			
+		} else {
+			
+			curTab = -1;
+			
+			Uri receivedUri = intent.getData();
+			File initFile = new File(receivedUri.getPath());
+			String initPath = initFile.getAbsolutePath();
+			if (_albumManager.containsImage(initPath)) { // nếu ảnh này nằm trong album
+				curTab = 1;
+				_filePaths = _albumManager.getsAlbumImages(initFile.getParentFile().getName());
+			} else {
+				curTab = 0;
+				_filePaths = _folderManager.getsFolderImages(initFile.getParent());
+			}
+			
+			Collections.sort(_filePaths, String.CASE_INSENSITIVE_ORDER);
+
+			position = _filePaths.indexOf(initPath);			
+		}
 		
 		_adapter = new FullscreenImageAdapter(this, _filePaths);
 		_viewPager.setAdapter(_adapter);		
@@ -148,7 +196,7 @@ public class ViewImageActivity extends Activity {
 			@Override
 			public void onClick(View v) {
 				String path = _filePaths.get(_viewPager.getCurrentItem());
-				MainActivity._markManager.marksImage(path);
+				_markManager.marksImage(path);
 			}
 		});
 		
@@ -184,18 +232,22 @@ public class ViewImageActivity extends Activity {
 						
 						MainActivity._imageAdapter.removeImages(paths);
 						
-						switch (MainActivity.currentTab) {
+						switch (curTab) {
 						case 0: // tab All
-							if (MainActivity._folderManager.deletesImages(paths))
-		                 		Toast.makeText(getApplicationContext(), "Deleted", Toast.LENGTH_SHORT).show();
+							if (_folderManager.deletesImages(paths)) {
+								_markManager.unmarksImages(paths);
+		                 		Toast.makeText(_this, "Deleted", Toast.LENGTH_SHORT).show();
+							}
 		                 	else
-		                 		Toast.makeText(getApplicationContext(), "Fail To Delete", Toast.LENGTH_SHORT).show();
+		                 		Toast.makeText(_this, "Fail To Delete", Toast.LENGTH_SHORT).show();
 							break;
 						case 1: // tab Albums
-							if (MainActivity._albumManager.deletesImages(paths))
-		                 		Toast.makeText(getApplicationContext(), "Deleted", Toast.LENGTH_SHORT).show();
+							if (_albumManager.deletesImages(paths)) {
+								_markManager.unmarksImages(paths);
+								Toast.makeText(_this, "Deleted", Toast.LENGTH_SHORT).show();
+							}	                 		
 		                 	else
-		                 		Toast.makeText(getApplicationContext(), "Fail To Delete", Toast.LENGTH_SHORT).show();
+		                 		Toast.makeText(_this, "Fail To Delete", Toast.LENGTH_SHORT).show();
 							break;
 						}
 
@@ -235,6 +287,65 @@ public class ViewImageActivity extends Activity {
 		}
     }
     
+ // Thực hiện nạp dữ liệu
+ 	// Khi xoay màn hình, thay đổi cấu hình, resume
+ 	public void loadData()
+ 	{		
+ 		// Tạo mới để cập nhật dữ liệu nếu cần
+ 		_folderManager = new FolderManager(this);
+ 		_albumManager = new AlbumManager(this);
+ 		_markManager = new MarkManager(this);
+ 		_lockManager = new LockManager(this);
+ 		
+ 		File imageDir = new File(Environment.getExternalStorageDirectory().toString());
+ 		
+         // Duyệt đệ quy theo chiến lược
+ 		if (imageDir.exists()) 
+ 			dirFolder(imageDir);
+ 	}
+ 	
+ 	// Duyệt toàn bộ cây thư mục
+ 	// Tìm thư mục có ảnh và danh sách ảnh
+ 	public void dirFolder(File file) 
+ 	{   	
+ 		 // Kiểm tra tên có hợp lệ không
+ 		 if (file.getName().startsWith(".") || file.getName().startsWith("com."))
+ 			 return;
+
+ 		 File[] files = file.listFiles();
+
+ 		 // Kiễm tra các tập tin con có rỗng không
+ 		 if (files == null)
+ 			 return;
+
+ 		 for (File f : files) 
+ 		 {	
+ 			 // Kiểm tra xem có phải ảnh không
+ 			 if (ImageSupporter.isImage(f))       
+ 			 {
+ 				 String filePath = file.getAbsolutePath();
+ 				 String parent = file.getParent();
+
+ 				 // Chưa có thư mục này, thêm vào dữ liệu
+ 				 if ((parent.equals(ImageSupporter.DEFAULT_PICTUREPATH) 
+ 						 && !_albumManager.containsAlbum(file.getName())) 
+ 					|| (!parent.equals(ImageSupporter.DEFAULT_PICTUREPATH) 
+ 						 &&!_folderManager.containsFolder(filePath)))
+ 					 _folderManager.addsFolder(file.getAbsolutePath());
+
+ 				 // Thêm ảnh vào dữ liệu
+ 				 if (_albumManager.containsImage(f.getAbsolutePath()))
+ 					 _albumManager.addImage(f.getAbsolutePath());
+ 				 else
+ 					 _folderManager.addsImage(file.getAbsolutePath(), f.getAbsolutePath());	
+ 			 }
+
+ 			 // Kiểm tra phải thư mục không
+ 			 if (f.isDirectory())
+ 				 dirFolder(f);
+ 		 }
+ 	}
+    
  // Hiện dialog dể chọn album 
     private void chooseAlbum(final ArrayList<String> images)
     {
@@ -245,7 +356,7 @@ public class ViewImageActivity extends Activity {
     	final ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(this, android.R.layout.select_dialog_singlechoice);
     	
     	// Nạp dữ liệu cho thông báo qua adapter 
-    	arrayAdapter.addAll(MainActivity._albumManager.getsAlbumList());
+    	arrayAdapter.addAll(_albumManager.getsAlbumList());
 
     	// Tạo sự kiện cho nút hủy thông báo
     	builderSingle.setNegativeButton("Cancel", new DialogInterface.OnClickListener() 
@@ -264,7 +375,7 @@ public class ViewImageActivity extends Activity {
                 String strName = arrayAdapter.getItem(which);
                 
                 for (String path: images) {
-                	MainActivity._albumManager.addsImageToAlbum(strName, path);
+                	_albumManager.addsImageToAlbum(strName, path);
                 }
                 
             }

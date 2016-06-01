@@ -28,6 +28,14 @@ public class AlbumManager {
 	// Khởi tạo dữ liệu
 	public void initializesData()
 	{
+		try {
+			FileOutputStream fos = _context.openFileOutput("NeoGalleryDS_Album.txt", Context.MODE_PRIVATE);
+			fos.close();
+		} catch (Exception e)
+		{
+			Log.e("GalleryDS_Album", e.getMessage());
+		}		
+		
 		_albumData = new HashMap<String, ArrayList<String>>();
 		
 		ArrayList<String> albumList = AlbumManager.getsAlbumPaths(_context);

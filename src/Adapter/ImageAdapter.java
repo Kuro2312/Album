@@ -100,6 +100,7 @@ public class ImageAdapter extends ArrayAdapter
 		        	intent.putExtra("filePaths", _items);
 		        	intent.putExtra("position", cb.getId());
 		        	intent.putExtra("slideshow", false);
+		        	intent.putExtra("internal", true);
 		        	_context.startActivity(intent);
 					
 					((Activity) _context).overridePendingTransition(R.animator.animator_slide_in_right, R.animator.animator_zoom_out);

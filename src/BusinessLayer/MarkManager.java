@@ -26,6 +26,16 @@ public class MarkManager
 	// Khởi tạo dữ liệu
 	public void initializesData()
 	{
+		try
+		{
+			FileOutputStream fos = _context.openFileOutput("NeoGalleryDS_Marks.txt", Context.MODE_PRIVATE);
+			fos.close();	
+		}
+		catch (Exception e)
+		{
+			Log.e("GalleryDS_Marks", e.getMessage());
+		}
+		
 		_markData = new HashMap<String, String>();
 				
 		ArrayList<String> markedImages = getsMarkedImagePaths(_context);
