@@ -35,6 +35,8 @@ import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Interpolator;
 import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 /**
@@ -113,15 +115,36 @@ public class ViewImageActivity extends Activity {
 	private ArrayList<String> _filePaths;
 	private FullscreenImageAdapter _adapter;
 	
+	// Các thành phần trên toolbar
+	private ImageButton btnShare;
+	
+	private LinearLayout llMark;
 	private ImageButton btnMark;
+	private TextView txtMark;
+	private View vwMark;
+	
+	private LinearLayout llLock;
+	private ImageButton btnLock;
+	private TextView txtLock;
+	private View vwLock;
+	
+	private LinearLayout llAdd;
 	private ImageButton btnAdd;
+	private View vwAdd;
+	
+	private LinearLayout llDelete;
 	private ImageButton btnDelete;
+	private TextView txtDelete;
+	private View vwDelete;
+	
+	
 	private Context _this;
 	
 	// Các thuộc tính quản lý
 	private FolderManager _folderManager;
 	private AlbumManager _albumManager;
 	private MarkManager _markManager;
+	private LockManager _lockManager;
 	
 	// dành cho slideshow
 	private Timer timer;
@@ -163,8 +186,6 @@ public class ViewImageActivity extends Activity {
 			wait = intent.getIntExtra("wait", 500);
 			slide = intent.getIntExtra("slide", 2000);
 			
-			
-			
 		} else {
 			
 			curTab = -1;
@@ -188,18 +209,63 @@ public class ViewImageActivity extends Activity {
 		_adapter = new FullscreenImageAdapter(this, _filePaths);
 		_viewPager.setAdapter(_adapter);		
 		_viewPager.setCurrentItem(position);
-
-		btnMark = (ImageButton) findViewById(R.id.btnMark);
-		btnMark.setOnClickListener(new View.OnClickListener() {
+		
+		populateToolbar();
+		
+		btnShare.setOnClickListener(new View.OnClickListener() {
 			
 			@Override
 			public void onClick(View v) {
 				String path = _filePaths.get(_viewPager.getCurrentItem());
-				_markManager.marksImage(path);
+				ArrayList<Uri> files = new ArrayList<Uri>();		
+				files.add(Uri.fromFile(new File(path)));
+				
+				Intent intent = new Intent(Intent.ACTION_SEND);
+	        	intent.putExtra(Intent.EXTRA_STREAM, files.get(0));		        
+		        intent.setType("image/*");
+		        _this.startActivity(intent);				
 			}
 		});
 		
-		btnAdd = (ImageButton) findViewById(R.id.btnAdd);
+		btnMark.setOnClickListener(new View.OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				int pos = _viewPager.getCurrentItem();
+				String path = _filePaths.get(pos);
+				if (curTab == 2) {
+					_markManager.unmarksImage(path);
+					if (!_adapter.removeImage(pos)) // nếu đã xoá hết ảnh
+						finish();
+				} else {
+					_markManager.marksImage(path);
+				}
+			}
+		});
+		
+		btnLock.setOnClickListener(new View.OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				int pos = _viewPager.getCurrentItem();
+				String path = _filePaths.get(pos);
+				if (curTab == 3) { // tab Lock --> chức năng unlock
+					_lockManager.unlocksImage(path);					
+				} else { // chức năng lock
+					_lockManager.locksImage(path);
+					_markManager.unmarksImage(path);
+					if (curTab == 0) { // tab All
+						_folderManager.deletesImage(path);
+					} else { // tab Album
+						_albumManager.removesImageFromAlbum(path);
+					}
+				}
+				
+				if (!_adapter.removeImage(pos)) // nếu đã xoá hết ảnh
+					finish();
+			}
+		});
+		
 		btnAdd.setOnClickListener(new View.OnClickListener() {
 			
 			@Override
@@ -211,7 +277,6 @@ public class ViewImageActivity extends Activity {
 			}
 		});
 		
-		btnDelete = (ImageButton) findViewById(R.id.btnDelete);
 		btnDelete.setOnClickListener(new View.OnClickListener() {
 			
 			@Override
@@ -287,8 +352,59 @@ public class ViewImageActivity extends Activity {
 		}
     }
     
- // Thực hiện nạp dữ liệu
- 	// Khi xoay màn hình, thay đổi cấu hình, resume
+    private void populateToolbar() {
+    	btnShare = (ImageButton) findViewById(R.id.btnShare);
+    	
+    	llMark = (LinearLayout) findViewById(R.id.llMark);
+    	btnMark = (ImageButton) findViewById(R.id.btnMark);
+    	txtMark = (TextView) findViewById(R.id.txtMark);
+    	vwMark = (View) findViewById(R.id.vwMark);
+    	
+    	llLock = (LinearLayout) findViewById(R.id.llLock);
+    	btnLock = (ImageButton) findViewById(R.id.btnLock);
+    	txtLock = (TextView) findViewById(R.id.txtLock);
+    	vwLock = (View) findViewById(R.id.vwLock);
+    	
+    	llAdd = (LinearLayout) findViewById(R.id.llAdd);
+    	btnAdd = (ImageButton) findViewById(R.id.btnAdd);
+    	vwAdd = (View) findViewById(R.id.vwAdd);
+    	
+    	llDelete = (LinearLayout) findViewById(R.id.llDelete);
+    	btnDelete = (ImageButton) findViewById(R.id.btnDelete);
+    	txtDelete = (TextView) findViewById(R.id.txtDelete);
+    	vwDelete = (View) findViewById(R.id.vwDelete);
+    	
+    	switch (curTab) {
+    	case 1: // tab Album
+    		llAdd.setVisibility(View.GONE);
+    		vwAdd.setVisibility(View.GONE);  
+    		
+    		txtDelete.setText("Remove");
+    		break;
+    	case 2: // tab Marks
+    		btnMark.setImageResource(R.drawable.white_unmark);
+    		txtMark.setText("Unmark");
+    		
+    		llAdd.setVisibility(View.GONE);
+    		vwAdd.setVisibility(View.GONE);
+    		llDelete.setVisibility(View.GONE);
+    		vwDelete.setVisibility(View.GONE);  
+    		llLock.setVisibility(View.GONE);
+    		vwLock.setVisibility(View.GONE);
+    		break;
+    	case 3: // tab Locks
+    		btnLock.setImageResource(R.drawable.white_unlock);
+    		txtLock.setText("Unlock");
+    		
+    		llAdd.setVisibility(View.GONE);
+    		vwAdd.setVisibility(View.GONE);
+    		llMark.setVisibility(View.GONE);
+    		vwMark.setVisibility(View.GONE);
+    		break;
+    	}
+    }
+    
+    // Thực hiện nạp dữ liệu
  	public void loadData()
  	{		
  		// Tạo mới để cập nhật dữ liệu nếu cần
@@ -296,10 +412,12 @@ public class ViewImageActivity extends Activity {
 	 		_folderManager = new FolderManager(this);
 	 		_albumManager = new AlbumManager(this);
 	 		_markManager = new MarkManager(this);
+	 		_lockManager = new LockManager(this);
  		} else {
  			_folderManager = MainActivity._folderManager;
  			_albumManager = MainActivity._albumManager;
  			_markManager = MainActivity._markManager;
+ 			_lockManager = MainActivity._lockManager;
  		}
  		
  		File imageDir = new File(Environment.getExternalStorageDirectory().toString());

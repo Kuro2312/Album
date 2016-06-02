@@ -307,7 +307,7 @@ public class MainActivity extends Activity {
 	            	_listViewAlbum.setVisibility(View.VISIBLE);
 	            	_listViewFolder.setVisibility(View.INVISIBLE);
 	            	
-	            	btnDeleteImage.setVisibility(View.VISIBLE);
+	            	btnDeleteImage.setVisibility(View.GONE);
 	            	btnMarkImage.setVisibility(View.VISIBLE);
 	            	btnLockImage.setVisibility(View.VISIBLE);
 	            	btnRemoveFromAlbum.setVisibility(View.VISIBLE);
@@ -773,16 +773,6 @@ public class MainActivity extends Activity {
                  	else
                  		Toast.makeText(getApplicationContext(), "Fail To Delete", Toast.LENGTH_SHORT).show();
 				
-				} else if (_radioAlbum.isChecked()) {
-					
-                	// Xóa ảnh trong album			
-                 	if (_albumManager.deletesImages(images)) {
-                 		_markManager.unmarksImages(images);
-                 		Toast.makeText(getApplicationContext(), "Deleted", Toast.LENGTH_SHORT).show();
-                 	}
-                 	else
-                 		Toast.makeText(getApplicationContext(), "Fail To Delete", Toast.LENGTH_SHORT).show();
-                
 				} else if (_radioLocks.isChecked()) {
 					
 					// Xóa ảnh trong locks			
@@ -916,13 +906,37 @@ public class MainActivity extends Activity {
 		_imageAdapter.removeImages(images);
     }
     
-    private void removeFromAlbum(ArrayList<String> images) {
-    	for (String path : images) {
-    		_albumManager.removesImageFromAlbum(path);
-    	}
-    	_markManager.unmarksImages(images);
-    	int pos = _listViewAlbum.getCheckedItemPosition();
-    	_imageAdapter.updateData(_albumManager.getsAlbumImages(_albumManager.getsAlbumList().get(pos)));
+    private void removeFromAlbum(final ArrayList<String> images) {
+    	if (images.size() == 0)
+    		return;
+    	
+		AlertDialog.Builder builder = new AlertDialog.Builder(_this);
+		builder.setMessage("Are you sure you want to delete?")
+			   .setTitle("Delete");
+		
+		builder.setPositiveButton("Delete", new DialogInterface.OnClickListener() {
+			
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				
+				_imageAdapter.removeImages(images);
+				
+				for (String path : images) {
+		    		_albumManager.removesImageFromAlbum(path);
+		    	}
+		    	_markManager.unmarksImages(images);
+			}
+		});
+		
+		builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+			
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				dialog.dismiss();				
+			}
+		});
+		
+		builder.show();
     }
     
     @Override
