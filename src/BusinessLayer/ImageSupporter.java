@@ -141,7 +141,7 @@ public class ImageSupporter
 	}
 	
 	// Xóa cả thư mục và tập tin con bên trong
-	public static void deleteWholeFolder(String path)
+	public static boolean deleteWholeFolder(String path)
 	{
 		File folder = new File(path);
 		
@@ -158,6 +158,8 @@ public class ImageSupporter
 		    // Xóa thư mục
 		    folder.delete();
 		}
+		
+		return true;
 	}
 
 	// Đổi tên 1 tập tin

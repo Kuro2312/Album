@@ -10,6 +10,8 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import AsyncTask.CopyFileAsyncTask;
+import AsyncTask.DeleteAlbumAsyncTask;
 import android.content.Context;
 import android.os.Environment;
 import android.util.Log;
@@ -157,7 +159,8 @@ public class AlbumManager {
     	try
     	{
 	    	// Thực hiện xóa album và toàn bộ ảnh trong album
-	        ImageSupporter.deleteWholeFolder(ImageSupporter.DEFAULT_PICTUREPATH + File.separator + name);
+	        // ImageSupporter.deleteWholeFolder(ImageSupporter.DEFAULT_PICTUREPATH + File.separator + name);
+	        new DeleteAlbumAsyncTask().execute(ImageSupporter.DEFAULT_PICTUREPATH + File.separator + name);
 	        
 	        // Xóa album
 	        _albumData.remove(name);
@@ -278,7 +281,8 @@ public class AlbumManager {
     		return;
 		
 		// Sao chép file
-		ImageSupporter.copyFile(parent.getAbsolutePath(), f.getName(), albumPath, null);
+		// ImageSupporter.copyFile(parent.getAbsolutePath(), f.getName(), albumPath, null);
+		new CopyFileAsyncTask().execute(parent.getAbsolutePath(), f.getName(), albumPath, null);
 		
 		// Thêm vào album
     	this.getsAlbumImages(albumName).add(albumPath + File.separator + f.getName());

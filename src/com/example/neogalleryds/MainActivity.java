@@ -417,16 +417,16 @@ public class MainActivity extends Activity {
 	private void setAllViewInstances()
 	{
 		// View cho việc thể hiện các chức năng xử lý ảnh và album
-		_scrollViewgroup = (ViewGroup) findViewById(R.id.groupView1);
+		_scrollViewgroup = (ViewGroup) findViewById(R.id.listViewFunctions);
 		_scrollView = (HorizontalScrollView) this.findViewById(R.id.horizontalScrollView1);
 		
 		// View thể hiện các thư mục/album
-		_listViewFolder = (ListView) this.findViewById(R.id.listView1);
+		_listViewFolder = (ListView) this.findViewById(R.id.listViewFolder);
 		_listViewAlbum = (ListView) this.findViewById(R.id.listViewAlbum);
 		_listViewAlbum.setVisibility(View.GONE);
 		
 		// View thể hiện danh sách ảnh
-		_gridViewImage = (GridView) this.findViewById(R.id.gridView1);
+		_gridViewImage = (GridView) this.findViewById(R.id.gridViewImage);
 		
 		// View thể hiện danh sách các mục xem ảnh
 		_radioViewgroup = (RadioGroup) findViewById(R.id.radioTabGroup);
@@ -597,7 +597,7 @@ public class MainActivity extends Activity {
 			public void onClick(View v) {
 
 				final Dialog dialog = new Dialog(_this);
-				dialog.setContentView(R.layout.slideshow_dialog_layout);
+				dialog.setContentView(R.layout.slideshow_dialog);
 				dialog.setTitle("Settings");
 			
 				final TextView txtWait = (TextView) dialog.findViewById(R.id.txtWait);
@@ -879,7 +879,8 @@ public class MainActivity extends Activity {
         _this.startActivity(intent);	
     }
     
-    private void lockImages(ArrayList<String> images) {
+    private void lockImages(ArrayList<String> images) 
+    {
     	if (images.size() == 0)
 			return;
 		
@@ -891,6 +892,7 @@ public class MainActivity extends Activity {
 			_albumManager.deletesImages(images);
 		
 		_markManager.unmarksImages(images);
+		
 		_imageAdapter.removeImages(images);
     }
     

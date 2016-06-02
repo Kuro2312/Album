@@ -11,7 +11,7 @@
     -->
     
     <FullscreenImage.MyViewPager
-        android:id="@+id/pager"
+        android:id="@+id/pagerFullscreenImage"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:gravity="center"
@@ -28,7 +28,7 @@
         android:fitsSystemWindows="true" >
 
         <LinearLayout
-            android:id="@+id/fullscreen_content_controls"
+            android:id="@+id/listImageFunction"
             style="?metaButtonBarStyle"
             android:layout_width="match_parent"
             android:layout_height="50dp"
@@ -55,7 +55,7 @@
 	                android:scaleType="fitCenter"
 	                android:layout_gravity="center"
 	                android:src = "@drawable/mark"
-	                android:background="@drawable/selector_circle_button"/>
+	                android:background="@drawable/circlebutton_selector"/>
 	            <TextView
 	                android:layout_width="wrap_content"
 	                android:layout_height="wrap_content"
@@ -84,7 +84,7 @@
 	                android:scaleType="fitCenter"
 	                android:layout_gravity="center"
 	                android:src = "@drawable/add"
-	                android:background="@drawable/selector_circle_button"/>
+	                android:background="@drawable/circlebutton_selector"/>
 	            <TextView
 	                android:layout_width="wrap_content"
 	                android:layout_height="wrap_content"
@@ -113,7 +113,7 @@
 	                android:scaleType="fitCenter"
 	                android:layout_gravity="center"
 	                android:src = "@drawable/delete"
-	                android:background="@drawable/selector_trash_button"/>
+	                android:background="@drawable/trashbutton_selector"/>
 	            <TextView
 	                android:layout_width="wrap_content"
 	                android:layout_height="wrap_content"

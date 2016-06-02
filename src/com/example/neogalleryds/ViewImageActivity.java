@@ -137,8 +137,8 @@ public class ViewImageActivity extends Activity {
         setContentView(R.layout.activity_view_image);
         
         mVisible = true;
-        mControlsView = findViewById(R.id.fullscreen_content_controls);
-        _viewPager = (MyViewPager) findViewById(R.id.pager);
+        mControlsView = findViewById(R.id.listImageFunction);
+        _viewPager = (MyViewPager) findViewById(R.id.pagerFullscreenImage);
         
         /////////////////////////////////////////////////////////////
         

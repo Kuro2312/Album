@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import AsyncTask.MoveFileAsyncTask;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -65,6 +66,7 @@ public class LockManager {
 		// Di chuyển 
 		String newName = this.generateFileName(inFile.getName());
 		ImageSupporter.moveFile(inFile.getParent(), inFile.getName(), mydir.getAbsolutePath(), newName);
+		//new MoveFileAsyncTask().execute(inFile.getParent(), inFile.getName(), mydir.getAbsolutePath(), newName);
 		
 		// Thêm vào dữ liệu
 		String newPath = mydir.getAbsolutePath() + File.separator + newName;
@@ -86,8 +88,9 @@ public class LockManager {
 		File file = new File(imagePath);
 		
 		// Di chuyển 
-		ImageSupporter.moveFile(file.getParent(), file.getName(), ImageSupporter.DEFAULT_PICTUREPATH);
-		
+		 ImageSupporter.moveFile(file.getParent(), file.getName(), ImageSupporter.DEFAULT_PICTUREPATH);
+		//new MoveFileAsyncTask().execute(file.getParent(), file.getName(), ImageSupporter.DEFAULT_PICTUREPATH);
+				
 		// Xóa trong dữ liệu
 		if (!_lockData.containsKey(imagePath))
 			return false;
@@ -101,26 +104,25 @@ public class LockManager {
 	public boolean deletesImage(String imagePath) {
 		
 		// Kiểm tra thư mục có tồn tại, nếu chưa thì tạo
-				File mydir = _context.getDir("NeoGalleryDS_Locks", Context.MODE_PRIVATE);
-				
-				if (!mydir.exists())
-					return false;
-				
-				// Tạo và lưu tập tin
-				File file = new File(imagePath);
-				
-				// Xoá file
-				
-				if (!file.delete())
-					return false;
-				
-				// Xóa trong dữ liệu
-				if (!_lockData.containsKey(imagePath))
-					return false;
-				
-				_lockData.remove(imagePath);
-				
-				return true;
+		File mydir = _context.getDir("NeoGalleryDS_Locks", Context.MODE_PRIVATE);
+		
+		if (!mydir.exists())
+			return false;
+		
+		// Tạo và lưu tập tin
+		File file = new File(imagePath);
+		
+		// Xoá file		
+		if (!file.delete())
+			return false;
+		
+		// Xóa trong dữ liệu
+		if (!_lockData.containsKey(imagePath))
+			return false;
+		
+		_lockData.remove(imagePath);
+		
+		return true;
 	}
 	
 	public boolean deletesImages(ArrayList<String> imagePaths) {	

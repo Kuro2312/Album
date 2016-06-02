@@ -83,7 +83,7 @@ public class FullscreenImageAdapter extends PagerAdapter{
 	@Override
     public Object instantiateItem(ViewGroup container, int position) {
 		
-        View viewLayout = _inflater.inflate(R.layout.fullscreen_image_layout, container, false); 
+        View viewLayout = _inflater.inflate(R.layout.fullscreen_item, container, false); 
         TouchImageView image = (TouchImageView) viewLayout.findViewById(R.id.fullScreenImage);
         
         Display display = _activity.getWindowManager().getDefaultDisplay();
