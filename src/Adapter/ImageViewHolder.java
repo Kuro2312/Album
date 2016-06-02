@@ -3,7 +3,7 @@ package Adapter;
 import android.widget.CheckBox;
 import android.widget.ImageView;
 
-public class ViewHolder
+public class ImageViewHolder
 {
     public ImageView imageview;
     public CheckBox checkbox;

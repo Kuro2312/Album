@@ -7,13 +7,13 @@ import java.util.Collections;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import Adapter.FullscreenImageAdapter;
 import BusinessLayer.AlbumManager;
 import BusinessLayer.FolderManager;
 import BusinessLayer.ImageSupporter;
 import BusinessLayer.LockManager;
 import BusinessLayer.MarkManager;
 import FullscreenImage.CustomScroller;
-import FullscreenImage.FullscreenImageAdapter;
 import FullscreenImage.MyViewPager;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;

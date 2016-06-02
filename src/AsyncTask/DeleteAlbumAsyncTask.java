@@ -1,17 +1,19 @@
 package AsyncTask;
 
+import BusinessLayer.AlbumManager;
 import BusinessLayer.ImageSupporter;
 import android.os.AsyncTask;
 
-public class DeleteAlbumAsyncTask extends AsyncTask<String, Void, Boolean> 
+public class DeleteAlbumAsyncTask extends AsyncTask<Object, Void, Boolean> 
 {
 
 	@Override
-	protected Boolean doInBackground(String... params) 
+	protected Boolean doInBackground(Object... params) 
 	{
-		String inputPath = params[0];
+		String inputPath = (String) params[0];
+		AlbumManager albumManager = (AlbumManager) params[1];
 		
-		return ImageSupporter.deleteWholeFolder(inputPath);
+		return albumManager.deletesAlbum(inputPath);
 	}
 	
 	protected void onPostExecute(Boolean result) 

@@ -1,6 +1,7 @@
 package BusinessLayer;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -25,25 +26,26 @@ public class MarkManager
 	
 	// Khởi tạo dữ liệu
 	public void initializesData()
-	{
-		try
-		{
-			FileOutputStream fos = _context.openFileOutput("NeoGalleryDS_Marks.txt", Context.MODE_PRIVATE | Context.MODE_APPEND);
-			fos.close();	
-		}
-		catch (Exception e)
-		{
-			Log.e("GalleryDS_Marks", e.getMessage());
-		}
-		
+	{		
 		_markData = new HashMap<String, String>();
 				
 		ArrayList<String> markedImages = getsMarkedImagePaths(_context);
 		int n = markedImages.size();
 		
+		// Kiểm tra xem có tồn tại không
+		// Nếu không thì bỏ qua
 		for (int i = 0; i < n; i++)
-			if (!_markData.containsKey(markedImages.get(i)))					
-				_markData.put(markedImages.get(i), markedImages.get(i));
+		{
+			if (!_markData.containsKey(markedImages.get(i)))		
+			{
+				File f = new File(markedImages.get(i));
+				
+				if (f.exists())
+					_markData.put(markedImages.get(i), markedImages.get(i));
+			}
+		}
+		
+		MarkManager.savesMarkedImagePaths(_context, getsMarkedImages());
 	}
 		
 	// Lấy danh sách ảnh đánh dấu
@@ -89,8 +91,11 @@ public class MarkManager
 	public boolean marksImages(ArrayList<String> imagePaths)
     {
     	for (String path : imagePaths)
-    		marksImage(path);
-
+    		if (!this.isMarkImage(path))
+    			_markData.put(path, path);
+    	
+		MarkManager.savesMarkedImagePaths(_context, getsMarkedImages());
+    		
     	return true;
     }
 	
@@ -98,7 +103,10 @@ public class MarkManager
 	public boolean unmarksImages(ArrayList<String> imagePaths)
     {
     	for (String path : imagePaths)
-    		unmarksImage(path);
+    		if (this.isMarkImage(path))
+    			_markData.remove(path);
+    	
+    	MarkManager.savesMarkedImagePaths(_context, getsMarkedImages());
 
     	return true;
     }

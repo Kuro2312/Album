@@ -64,20 +64,20 @@ public class ImageAdapter extends ArrayAdapter
     @Override
 	public View getView(int position, View convertView, ViewGroup parent) 
 	 {
-    	 ViewHolder holder;
+    	 ImageViewHolder holder;
     	 if (convertView == null) 
     	 {
 			 LayoutInflater inflater = ((Activity) _context).getLayoutInflater();
 			 convertView = inflater.inflate(R.layout.image_item, parent, false); 
 			 
-			 holder = new ViewHolder();
+			 holder = new ImageViewHolder();
 			 holder.imageview = (ImageView) convertView.findViewById(R.id.imageView0);
 			 holder.checkbox = (CheckBox) convertView.findViewById(R.id.checkBox0);	
 		        
 			 convertView.setTag(holder);
     	 }
     	 else
-             holder = (ViewHolder) convertView.getTag();
+             holder = (ImageViewHolder) convertView.getTag();
 
     	 holder.checkbox.setId(position);
     	 holder.imageview.setId(position);

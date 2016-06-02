@@ -1,4 +1,4 @@
-package FullscreenImage;
+package Adapter;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -10,6 +10,7 @@ import com.example.neogalleryds.R;
 import com.example.neogalleryds.ViewImageActivity;
 
 import BusinessLayer.ImageSupporter;
+import FullscreenImage.TouchImageView;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;

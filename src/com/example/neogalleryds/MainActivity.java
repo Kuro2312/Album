@@ -18,7 +18,7 @@ import java.util.zip.ZipOutputStream;
 import Adapter.AlbumAdapter;
 import Adapter.FolderAdapter;
 import Adapter.ImageAdapter;
-import Adapter.ViewHolder;
+import Adapter.ImageViewHolder;
 import BusinessLayer.AlbumManager;
 import BusinessLayer.FolderManager;
 import BusinessLayer.ImageSupporter;
@@ -160,6 +160,7 @@ public class MainActivity extends Activity {
 		
 		//_lockManager.locksImage(this, _folderManager.getsFolderImages(ImageSupporter.DEFAULT_PICTUREPATH).get(0));
 		//_lockManager.locksImage(this, ImageSupporter.DEFAULT_PICTUREPATH + File.separator + );
+		//_lockManager.locksImage(_folderManager.getsFolderImages(ImageSupporter.DEFAULT_PICTUREPATH).get(0));
 	}
 	
 	protected void onRestart()
@@ -689,7 +690,7 @@ public class MainActivity extends Activity {
         for (int i = 0; i < count; i++) 
         {
             View view = this.getViewByPosition(i, _gridViewImage);
-            ViewHolder holder = (ViewHolder) view.getTag();
+            ImageViewHolder holder = (ImageViewHolder) view.getTag();
             if (holder.checkbox.isChecked()) {
             	result.add(holder.filePath);
             }
@@ -903,16 +904,23 @@ public class MainActivity extends Activity {
 		_lockManager.unlocksImages(images);
 		
 		// Xóa sạch dữ liệu 
-		_folderManager.getsFolderImages(ImageSupporter.DEFAULT_PICTUREPATH).clear();
+		// Nếu chưa có trong danh sách thư mục thì tạo mới
+		if (_folderManager.containsFolder(ImageSupporter.DEFAULT_PICTUREPATH))
+			_folderManager.getsFolderImages(ImageSupporter.DEFAULT_PICTUREPATH).clear();
+		else
+			_folderManager.addsFolder(ImageSupporter.DEFAULT_PICTUREPATH);
 		
 		// Duyệt lại dữ liệu
 		File file = new File(ImageSupporter.DEFAULT_PICTUREPATH);
 		File[] files = file.listFiles();
 		
+		// Cập nhật ảnh trong thư mục Picture mặc định
 		for (File f : files)
 			if (ImageSupporter.isImage(f))
 				_folderManager.addsImage(ImageSupporter.DEFAULT_PICTUREPATH, f.getAbsolutePath());
 		
+		// Cập nhật dữ liệu trên các Adapter
+		_folderAdapter.updateData(_folderManager.getsFolderPathList());
 		_imageAdapter.removeImages(images);
     }
     

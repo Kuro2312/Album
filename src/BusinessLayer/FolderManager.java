@@ -4,8 +4,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import AsyncTask.CopyFileAsyncTask;
-import AsyncTask.MoveFileAsyncTask;
 import android.content.Context;
 
 public class FolderManager 
@@ -58,8 +56,7 @@ public class FolderManager
     		return false;
     			
 		// Di chuyển file
-		// ImageSupporter.moveFile(parentPath, f.getName(), folderPath);
-		new MoveFileAsyncTask().execute(parentPath, f.getName(), folderPath, null);
+		ImageSupporter.moveFile(parentPath, f.getName(), folderPath);
     	
 		// Xóa dữ liệu khỏi thư mục cũ nếu có
 		this.getsFolderImages(parentPath).remove(imagePath);
@@ -110,8 +107,7 @@ public class FolderManager
     		return false;
     			
 		// Di chuyển file
-		// ImageSupporter.copyFile(parentPath, f.getName(), folderPath, null);
-		new CopyFileAsyncTask().execute(parentPath, f.getName(), folderPath, null);
+		ImageSupporter.copyFile(parentPath, f.getName(), folderPath, null);
 		
 		// Thêm vào album
     	this.getsFolderImages(folderPath).add(imagePath);
