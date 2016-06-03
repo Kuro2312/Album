@@ -296,6 +296,23 @@ public class AlbumManager {
     	return parent.getParent().equals(ImageSupporter.DEFAULT_PICTUREPATH) && this.containsAlbum(parent.getName());
     }
     
+    // Kiểm tra 1 đường dẫn có phải là album
+    public boolean isAlbum(String folderPath)
+    {
+    	File folder = new File(folderPath);
+    	String parent = folder.getParent();
+    	
+    	// Kiểm tra thư mục cha có phải là thư mục Picture mặc định
+    	if (!parent.equals(ImageSupporter.DEFAULT_PICTUREPATH))
+    		return false;
+    	
+    	// Kiểm tra xem có tên trong danh sách album
+    	if (!this.containsAlbum(folder.getName()))
+    		return false;
+    	
+    	return true;
+    }
+    
     // Thêm thông tin ảnh vào
     public boolean addImage(String imagePath)
     {

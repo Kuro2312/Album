@@ -143,5 +143,9 @@
     <color name="Black">#000000</color>
     <color name="Lightblue">#1E88E5</color>
     <color name="black_overlay">#66000000</color>
-
+	<color name="color_preloader_start">#000000</color> 
+	<color name="color_preloader_center">#000000</color> 
+	<color name="color_preloader_end">#ff56a9c7</color>
+	 <color name="NeoSilver">#CCC0C0C0</color>
+	 
 </resources>

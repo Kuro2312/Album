@@ -136,6 +136,6 @@
    	    android:verticalSpacing="15dip" 
    	    android:paddingTop="10dip"
    	    android:paddingBottom="10dip">
-    </GridView>
+    </GridView>  
 
 </RelativeLayout>

@@ -119,8 +119,14 @@ public class ImageAdapter extends ArrayAdapter
     // Cập toàn bộ dữ liệu 
     public void updateData(ArrayList<String> data)
     {
+    	// Xóa toàn bộ dữ liệu
     	_items.clear();
-    	_items.addAll(data);
+    	
+    	// Thêm vào nếu không phải null
+    	if (data != null)
+    		_items.addAll(data);
+    	
+    	// Cập nhật giao diện
     	super.notifyDataSetChanged();
     }
     

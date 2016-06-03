@@ -248,4 +248,11 @@ public class ImageSupporter
 		
 		return extension;
 	}
+	
+	public static Boolean checkFileExisted(String path)
+	{
+		File file = new File(path);
+		
+		return file.exists();
+	}
 }

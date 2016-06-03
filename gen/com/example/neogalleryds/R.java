@@ -124,6 +124,7 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
         public static final int Moccasin=0x7f05000e;
         public static final int NavajoWhite=0x7f05000f;
         public static final int Navy=0x7f05008a;
+        public static final int NeoSilver=0x7f050091;
         public static final int OldLace=0x7f05001f;
         public static final int Olive=0x7f05005e;
         public static final int OliveDrab=0x7f050067;
@@ -169,6 +170,9 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
         public static final int Yellow=0x7f050003;
         public static final int YellowGreen=0x7f050050;
         public static final int black_overlay=0x7f05008d;
+        public static final int color_preloader_center=0x7f05008f;
+        public static final int color_preloader_end=0x7f050090;
+        public static final int color_preloader_start=0x7f05008e;
     }
     public static final class dimen {
         /**  Default screen margins, per the Android Design guidelines. 
@@ -206,27 +210,29 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
         public static final int mark=0x7f020015;
         public static final int mark_image=0x7f020016;
         public static final int orange_folder=0x7f020017;
-        public static final int radiotab_selector=0x7f020018;
-        public static final int radiotab_textcolor_selector=0x7f020019;
-        public static final int remove_image_album=0x7f02001a;
-        public static final int select=0x7f02001b;
-        public static final int share=0x7f02001c;
-        public static final int trash_bg_selected=0x7f02001d;
-        public static final int trashbutton_selector=0x7f02001e;
-        public static final int unlock_image=0x7f02001f;
-        public static final int unmark_image=0x7f020020;
-        public static final int yellow_folder=0x7f020021;
+        public static final int progress=0x7f020018;
+        public static final int radiotab_selector=0x7f020019;
+        public static final int radiotab_textcolor_selector=0x7f02001a;
+        public static final int remove_image_album=0x7f02001b;
+        public static final int select=0x7f02001c;
+        public static final int share=0x7f02001d;
+        public static final int trash_bg_selected=0x7f02001e;
+        public static final int trashbutton_selector=0x7f02001f;
+        public static final int unlock_image=0x7f020020;
+        public static final int unmark_image=0x7f020021;
+        public static final int yellow_folder=0x7f020022;
     }
     public static final class id {
         public static final int LinearLayout1=0x7f0a0010;
-        public static final int action_settings=0x7f0a001e;
-        public static final int addNewAlbum=0x7f0a001f;
+        public static final int action_settings=0x7f0a0020;
+        public static final int addNewAlbum=0x7f0a0021;
         public static final int btnAdd=0x7f0a000e;
-        public static final int btnCancel=0x7f0a001c;
+        public static final int btnCancel=0x7f0a001e;
         public static final int btnDelete=0x7f0a000f;
         public static final int btnMark=0x7f0a000d;
-        public static final int btnOk=0x7f0a001d;
+        public static final int btnOk=0x7f0a001f;
         public static final int checkBox0=0x7f0a0017;
+        public static final int container=0x7f0a0018;
         public static final int fullScreenImage=0x7f0a0013;
         public static final int gridViewImage=0x7f0a000a;
         public static final int horizontalScrollView1=0x7f0a0000;
@@ -239,18 +245,19 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
         public static final int listViewFunctions=0x7f0a0001;
         public static final int listViewTabs=0x7f0a0002;
         public static final int pagerFullscreenImage=0x7f0a000b;
+        public static final int progressBar=0x7f0a0019;
         public static final int radioAlbum=0x7f0a0005;
         public static final int radioAll=0x7f0a0004;
         public static final int radioLocks=0x7f0a0007;
         public static final int radioMarks=0x7f0a0006;
         public static final int radioTabGroup=0x7f0a0003;
-        public static final int sbrSpeed=0x7f0a001b;
-        public static final int sbrWait=0x7f0a0019;
-        public static final int selectMode=0x7f0a0020;
+        public static final int sbrSpeed=0x7f0a001d;
+        public static final int sbrWait=0x7f0a001b;
+        public static final int selectMode=0x7f0a0022;
         public static final int textViewFolder=0x7f0a0012;
         public static final int textViewFunction=0x7f0a0015;
-        public static final int txtSpeed=0x7f0a001a;
-        public static final int txtWait=0x7f0a0018;
+        public static final int txtSpeed=0x7f0a001c;
+        public static final int txtWait=0x7f0a001a;
     }
     public static final class layout {
         public static final int activity_main=0x7f030000;
@@ -259,7 +266,8 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
         public static final int fullscreen_item=0x7f030003;
         public static final int function_item=0x7f030004;
         public static final int image_item=0x7f030005;
-        public static final int slideshow_dialog=0x7f030006;
+        public static final int progressing_dialog=0x7f030006;
+        public static final int slideshow_dialog=0x7f030007;
     }
     public static final class menu {
         public static final int context_menu_album_item=0x7f090000;

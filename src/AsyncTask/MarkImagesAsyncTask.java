@@ -4,18 +4,32 @@ import java.util.ArrayList;
 
 import BusinessLayer.ImageSupporter;
 import BusinessLayer.MarkManager;
+import android.app.Dialog;
 import android.os.AsyncTask;
+import android.widget.Toast;
 
 public class MarkImagesAsyncTask extends AsyncTask<Object, Void, Boolean> 
 {
+	private Dialog _dialog;
+	
+	public MarkImagesAsyncTask(Dialog dialog)
+	{
+		_dialog = dialog;
+	}
+	
+	protected void onPreExecute()
+	{
+		if (_dialog != null)
+			_dialog.show();
+    } 
 
 	@Override
 	protected Boolean doInBackground(Object... params) 
 	{
 		try
 		{
-			ArrayList<String> imagePaths = (ArrayList<String>) params[0];
-			MarkManager markManager = (MarkManager) params[1];
+			MarkManager markManager = (MarkManager) params[0];
+			ArrayList<String> imagePaths = (ArrayList<String>) params[1];
 			
 			markManager.marksImages(imagePaths);
 			
@@ -30,5 +44,12 @@ public class MarkImagesAsyncTask extends AsyncTask<Object, Void, Boolean>
 	protected void onPostExecute(Boolean result) 
     {
 		// Xử lý kết quả trả về
+		if (_dialog != null)
+			_dialog.dismiss();
+		
+		if (result == true)
+			Toast.makeText(_dialog.getContext(), "Marked Succesully", Toast.LENGTH_SHORT).show();
+		else
+			Toast.makeText(_dialog.getContext(), "Fail ! +_+ !", Toast.LENGTH_SHORT).show();
     }
 }

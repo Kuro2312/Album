@@ -19,6 +19,16 @@ import Adapter.AlbumAdapter;
 import Adapter.FolderAdapter;
 import Adapter.ImageAdapter;
 import Adapter.ImageViewHolder;
+import AsyncTask.AddImagesToAlbumAsyncTask;
+import AsyncTask.DeleteImagesInAlbumAsyncTask;
+import AsyncTask.DeleteImagesInFolderAsyncTask;
+import AsyncTask.DeleteLockedImagesAsyncTask;
+import AsyncTask.LockImagesInAlbumAsyncTask;
+import AsyncTask.LockImagesInFolderAsyncTask;
+import AsyncTask.MarkImagesAsyncTask;
+import AsyncTask.RemoveImagesFromAlbumAsyncTask;
+import AsyncTask.UnlockImagesAsyncTask;
+import AsyncTask.UnmarkImagesAsyncTask;
 import BusinessLayer.AlbumManager;
 import BusinessLayer.FolderManager;
 import BusinessLayer.ImageSupporter;
@@ -47,6 +57,7 @@ import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.RadioGroup.OnCheckedChangeListener;
@@ -91,6 +102,8 @@ public class MainActivity extends Activity {
 	private View btnEditImage;
 	
 	private View btnSlideshow;
+	
+	private ProgressBar _progressBar;
 	
 	// Các xữ lý chức năng cho sự kiện nhấn nút.
 	private OnClickListener onClickSlideshow;
@@ -157,12 +170,12 @@ public class MainActivity extends Activity {
 		setOnFolderSelected();
 		setOnAlbumSelected();
 		setOnTabChange();
+		//_progressBar.setVisibility(View.VISIBLE);
 		
-		//_lockManager.locksImage(this, _folderManager.getsFolderImages(ImageSupporter.DEFAULT_PICTUREPATH).get(0));
-		//_lockManager.locksImage(this, ImageSupporter.DEFAULT_PICTUREPATH + File.separator + );
-		//_lockManager.locksImage(_folderManager.getsFolderImages(ImageSupporter.DEFAULT_PICTUREPATH).get(0));
+		//setProgressingDialog();
 	}
 	
+	// Xử lý cập nhật dữ liệu sau khi quay lại ứng dụng
 	protected void onRestart()
 	{
 		super.onRestart();
@@ -174,52 +187,34 @@ public class MainActivity extends Activity {
 		_folderAdapter.updateData(_folderManager.getsFolderPathList());
 		_albumAdapter.updateData(_albumManager.getsAlbumList());
 		
+		// Cập nhật dữ liệu trên imageAdpater và gridView
 		if (_radioAll.isChecked())
-		{
-			if (_folderManager.containsFolder(_selectedFolderPath))
-				_imageAdapter.updateData(_folderManager.getsFolderImages(_selectedFolderPath));
-			else
-				_imageAdapter.updateData(new ArrayList<String>());
-		}
+			_imageAdapter.updateData(_folderManager.getsFolderImages(_selectedFolderPath));
 		else if (_radioAlbum.isChecked())
-		{
-			if (_albumManager.containsAlbum(_selectedAlbumName))
-				_imageAdapter.updateData(_albumManager.getsAlbumImages(_selectedAlbumName));
-			else
-				_imageAdapter.updateData(new ArrayList<String>());
-		}
+			_imageAdapter.updateData(_albumManager.getsAlbumImages(_selectedAlbumName));
 		else if (_radioMarks.isChecked())
 			_imageAdapter.updateData(_markManager.getsMarkedImages());
 		else if (_radioLocks.isChecked())
 			_imageAdapter.updateData(_lockManager.getsLockedImages());
 		else
-			_imageAdapter.updateData(new ArrayList<String>());
-		
-		_folderAdapter.refresh();
-		_albumAdapter.refresh();
-		_imageAdapter.refresh();
+			_imageAdapter.updateData(new ArrayList<String>());	
 	}
 	
 	// Cài đặt sự kiện chọn 1 item trong danh sách thư mục
 	public void setOnFolderSelected()
-	{			
-		// mặc định hiển thị ảnh chụp từ camera
-		ArrayList<String> folderPaths = _folderManager.getsFolderPathList();	
-		String dcim = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM).getAbsolutePath() + File.separator + "Camera";
-		_selectedFolderPath = dcim;
+	{		
+		// Xử lý cài đặt mặc định thê hiện
+		ArrayList<String> folderPaths = _folderManager.getsFolderPathList();
 		
-		int defaultPos = 0;
-		for (int i = 0; i < folderPaths.size(); i++) 
+		if (folderPaths.size() > 0)
 		{
-			if (folderPaths.get(i).equals(dcim)) {
-				defaultPos = i;
-				break;
-			}
+			_selectedFolderPath = folderPaths.get(0);
+			_lastIndexFolder = 0;
 		}
 		
-		_imageAdapter.updateData(_folderManager.getsFolderImages(folderPaths.get(defaultPos)));
-		_listViewFolder.setItemChecked(defaultPos, true);
-		_lastIndexFolder = defaultPos;
+		// Gán dữ liệu
+		_imageAdapter.updateData(_folderManager.getsFolderImages(_selectedFolderPath));
+		_listViewFolder.setItemChecked(_lastIndexFolder, true);
 
 		_listViewFolder.setOnItemClickListener(new OnItemClickListener() 
 		{	
@@ -235,8 +230,6 @@ public class MainActivity extends Activity {
             	
             	// Thay dữ liệu vô
         		_imageAdapter.updateData(_folderManager.getsFolderImages(_selectedFolderPath));
-            	
-                //_folderAdapter.setChecked(view);
             }
         });
 	}
@@ -272,88 +265,116 @@ public class MainActivity extends Activity {
     	btnUnmarkImage.setVisibility(View.GONE);
     	btnUnlockImage.setVisibility(View.GONE);
     	btnRemoveFromAlbum.setVisibility(View.GONE);
-    	
+
+    	// Cập nhật dữ liệu và giao diện khi thay đổi tab
 		_radioViewgroup.setOnCheckedChangeListener(new OnCheckedChangeListener() 
 	    {
 	        @Override
 	        public void onCheckedChanged(RadioGroup group, int checkedId) 
 	        {
 	            if (_radioAll.isChecked())
-	            {
-	            	currentTab = 0;
-	            	String currentFolder = (String)_folderAdapter.getItem(_listViewFolder.getCheckedItemPosition());
-	            	_imageAdapter.updateData(_folderManager.getsFolderImages(currentFolder));
-	            	
-	            	_listViewFolder.setVisibility(View.VISIBLE);
-	            	_listViewAlbum.setVisibility(View.GONE);
-	            	
-	            	btnDeleteImage.setVisibility(View.VISIBLE);
-	            	btnAddToAlbum.setVisibility(View.VISIBLE);
-	            	btnMarkImage.setVisibility(View.VISIBLE);
-	            	btnLockImage.setVisibility(View.VISIBLE);
-	            	
-	            	btnUnmarkImage.setVisibility(View.GONE);
-	            	btnUnlockImage.setVisibility(View.GONE);
-	            	btnRemoveFromAlbum.setVisibility(View.GONE);
-	            }
+	            	onTabAllSelect();
 	            else if (_radioAlbum.isChecked())
-	            {
-	            	currentTab = 1;
-	            	int pos = _listViewAlbum.getCheckedItemPosition();
-	            	if (pos == ListView.INVALID_POSITION)
-	            		_imageAdapter.updateData(new ArrayList<String>());
-	            	else
-	            		_imageAdapter.updateData(_albumManager.getsAlbumImages(_albumManager.getsAlbumList().get(pos)));
-	            	
-	            	_listViewAlbum.setVisibility(View.VISIBLE);
-	            	_listViewFolder.setVisibility(View.INVISIBLE);
-	            	
-	            	btnDeleteImage.setVisibility(View.VISIBLE);
-	            	btnMarkImage.setVisibility(View.VISIBLE);
-	            	btnLockImage.setVisibility(View.VISIBLE);
-	            	btnRemoveFromAlbum.setVisibility(View.VISIBLE);
-	            	
-	            	btnUnmarkImage.setVisibility(View.GONE);
-	            	btnUnlockImage.setVisibility(View.GONE);
-	            	btnAddToAlbum.setVisibility(View.GONE);
-	            }
+	            	onTabAlbumSelect();
 	            else if (_radioMarks.isChecked())
-	            {
-	            	currentTab = 2;
-	            	_imageAdapter.updateData(_markManager.getsMarkedImages());
-	            	_listViewFolder.setVisibility(View.GONE);
-	            	_listViewAlbum.setVisibility(View.GONE);
-	            	
-	            	btnUnmarkImage.setVisibility(View.VISIBLE);
-	            	
-	            	btnDeleteImage.setVisibility(View.GONE);
-	            	btnLockImage.setVisibility(View.GONE);
-	            	btnRemoveFromAlbum.setVisibility(View.GONE);            	
-	            	btnMarkImage.setVisibility(View.GONE);
-	            	btnUnlockImage.setVisibility(View.GONE);
-	            	btnAddToAlbum.setVisibility(View.GONE);
-	            }
+	            	onTabMarksSelect();
 	            else if (_radioLocks.isChecked())
-	            {
-	            	currentTab = 3;
-	            	_imageAdapter.updateData(_lockManager.getsLockedImages());
-	            	
-	            	_listViewFolder.setVisibility(View.GONE);
-	            	_listViewAlbum.setVisibility(View.GONE);
-	            	
-	            	btnDeleteImage.setVisibility(View.VISIBLE);
-            		btnUnlockImage.setVisibility(View.VISIBLE);
-	            	
-	            	btnLockImage.setVisibility(View.GONE);
-	            	btnRemoveFromAlbum.setVisibility(View.GONE);
-	            	btnMarkImage.setVisibility(View.GONE);
-	            	btnUnmarkImage.setVisibility(View.GONE);
-	            	btnLockImage.setVisibility(View.GONE);
-	            	btnAddToAlbum.setVisibility(View.GONE);
-	            }
+	            	onTabLocksSelect();
 	        }
 	    });
 	}
+	
+	// Khi tab All được chọn
+	public void onTabAllSelect()
+	{
+		// Cập nhật vị trí tab
+    	currentTab = 0;
+    	
+    	// Cập nhật dữ liệu 
+    	_imageAdapter.updateData(_folderManager.getsFolderImages(_selectedFolderPath));
+    	
+    	// Cập nhật giao diện
+    	_listViewFolder.setVisibility(View.VISIBLE);
+    	_listViewAlbum.setVisibility(View.GONE);
+    	
+    	btnDeleteImage.setVisibility(View.VISIBLE);
+    	btnAddToAlbum.setVisibility(View.VISIBLE);
+    	btnMarkImage.setVisibility(View.VISIBLE);
+    	btnLockImage.setVisibility(View.VISIBLE);
+    	
+    	btnUnmarkImage.setVisibility(View.GONE);
+    	btnUnlockImage.setVisibility(View.GONE);
+    	btnRemoveFromAlbum.setVisibility(View.GONE);
+	}
+	
+	// Khi tab Album được chọn
+	public void onTabAlbumSelect()
+	{
+		// Cập nhật vị trí tab
+    	currentTab = 1;
+    	
+    	// Cập nhật dữ liệu 
+		_imageAdapter.updateData(_albumManager.getsAlbumImages(_selectedAlbumName));
+    	
+    	_listViewAlbum.setVisibility(View.VISIBLE);
+    	_listViewFolder.setVisibility(View.INVISIBLE);
+    	
+    	btnDeleteImage.setVisibility(View.VISIBLE);
+    	btnMarkImage.setVisibility(View.VISIBLE);
+    	btnLockImage.setVisibility(View.VISIBLE);
+    	btnRemoveFromAlbum.setVisibility(View.VISIBLE);
+    	
+    	btnUnmarkImage.setVisibility(View.GONE);
+    	btnUnlockImage.setVisibility(View.GONE);
+    	btnAddToAlbum.setVisibility(View.GONE);
+    }
+	
+	// Khi tab Marks được chọn
+	public void onTabMarksSelect()
+	 {
+    	// Cập nhật vị trí tab
+    	currentTab = 2;
+    	
+    	// Cập nhật dữ liệu 
+    	_imageAdapter.updateData(_markManager.getsMarkedImages());
+    	
+    	// Cập nhật giao diện
+    	_listViewFolder.setVisibility(View.GONE);
+    	_listViewAlbum.setVisibility(View.GONE);
+    	
+    	btnUnmarkImage.setVisibility(View.VISIBLE);
+    	
+    	btnDeleteImage.setVisibility(View.GONE);
+    	btnLockImage.setVisibility(View.GONE);
+    	btnRemoveFromAlbum.setVisibility(View.GONE);            	
+    	btnMarkImage.setVisibility(View.GONE);
+    	btnUnlockImage.setVisibility(View.GONE);
+    	btnAddToAlbum.setVisibility(View.GONE);
+    }
+	
+	// Khi tab Locks được chọn
+	public void onTabLocksSelect()
+	{
+    	// Cập nhật vị trí tab
+    	currentTab = 3;
+    	
+    	// Cập nhật dữ liệu 
+    	_imageAdapter.updateData(_lockManager.getsLockedImages());
+    	
+    	// Cập nhật giao diện
+    	_listViewFolder.setVisibility(View.GONE);
+    	_listViewAlbum.setVisibility(View.GONE);
+    	
+    	btnDeleteImage.setVisibility(View.VISIBLE);
+		btnUnlockImage.setVisibility(View.VISIBLE);
+    	
+    	btnLockImage.setVisibility(View.GONE);
+    	btnRemoveFromAlbum.setVisibility(View.GONE);
+    	btnMarkImage.setVisibility(View.GONE);
+    	btnUnmarkImage.setVisibility(View.GONE);
+    	btnLockImage.setVisibility(View.GONE);
+    	btnAddToAlbum.setVisibility(View.GONE);
+    }
 	
 	// Thực hiện nạp dữ liệu
 	// Khi xoay màn hình, thay đổi cấu hình, resume
@@ -395,17 +416,14 @@ public class MainActivity extends Activity {
 				 String parent = file.getParent();
 
 				 // Chưa có thư mục này, thêm vào dữ liệu
-				 if ((parent.equals(ImageSupporter.DEFAULT_PICTUREPATH) 
-						 && !_albumManager.containsAlbum(file.getName())) 
-					|| (!parent.equals(ImageSupporter.DEFAULT_PICTUREPATH) 
-						 &&!_folderManager.containsFolder(filePath)))
+				 if (!_albumManager.isAlbum(filePath) && !_folderManager.containsFolder(filePath))
 					 _folderManager.addsFolder(file.getAbsolutePath());
 
 				 // Thêm ảnh vào dữ liệu
-				 if (_albumManager.containsImage(f.getAbsolutePath()))
-					 _albumManager.addImage(f.getAbsolutePath());
-				 else
+				 if (_folderManager.containsFolder(filePath))
 					 _folderManager.addsImage(file.getAbsolutePath(), f.getAbsolutePath());	
+				 else
+					 _albumManager.addImage(f.getAbsolutePath());					 
 			 }
 
 			 // Kiểm tra phải thư mục không
@@ -435,6 +453,8 @@ public class MainActivity extends Activity {
 		_radioAll = (RadioButton) findViewById(R.id.radioAll);
 		_radioMarks = (RadioButton) findViewById(R.id.radioMarks);
 		_radioLocks = (RadioButton) findViewById(R.id.radioLocks);
+		
+		_progressBar = (ProgressBar) this.findViewById(R.id.progressBar);
 		
 		registerForContextMenu(_gridViewImage);
 		registerForContextMenu(_listViewAlbum);
@@ -532,8 +552,27 @@ public class MainActivity extends Activity {
 		return true;
 	}
 	
+	// Lấy danh sách các ảnh được chọn
+	private ArrayList<String> getSelectedPaths() 
+	{
+ 		int count = _imageAdapter.getCount();
+ 		ArrayList<String> result = new ArrayList<String>();
+ 		
+        for (int i = 0; i < count; i++) 
+        {
+            ImageViewHolder holder = (ImageViewHolder) this.getViewByPosition(i, _gridViewImage).getTag();
+            
+            if (holder.checkbox.isChecked())
+            	result.add(holder.filePath);
+        }
+        
+        return result;
+ 	}
+	
+	// Khởi tạo sự kiện cho các nút chức năng
 	private void setUpOnClickListeners() 
 	{
+		// Nút xóa ảnh
 		onClickDeleteImage = new View.OnClickListener() {
 			
 			@Override
@@ -542,20 +581,20 @@ public class MainActivity extends Activity {
 			}
 		};
 		
+		// Nút đánh dấu ảnh
 		onClickMarkImage = new View.OnClickListener() {
 			
 			@Override
-			public void onClick(View v) {				
-				_markManager.marksImages(getSelectedPaths());								
+			public void onClick(View v) {								
+				marksImages(getSelectedPaths());
 			}
 		};
-
+		
 		onClickUnmarkImage = new View.OnClickListener() {
 			
 			@Override
 			public void onClick(View v) {
-				_markManager.unmarksImages(getSelectedPaths());
-				_imageAdapter.updateData(_markManager.getsMarkedImages());
+				unmarksImages(getSelectedPaths());
 			}
 		};
 		
@@ -571,8 +610,7 @@ public class MainActivity extends Activity {
 			
 			@Override
 			public void onClick(View v) {
-				ArrayList<String> paths = getSelectedPaths();
-				removeFromAlbum(paths);				
+				removeFromAlbum(getSelectedPaths());				
 			}
 		};
 		
@@ -596,73 +634,7 @@ public class MainActivity extends Activity {
 			
 			@Override
 			public void onClick(View v) {
-
-				final Dialog dialog = new Dialog(_this);
-				dialog.setContentView(R.layout.slideshow_dialog);
-				dialog.setTitle("Settings");
-			
-				final TextView txtWait = (TextView) dialog.findViewById(R.id.txtWait);
-				final SeekBar sbrWait = (SeekBar) dialog.findViewById(R.id.sbrWait);
-				sbrWait.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {					
-					@Override
-					public void onStopTrackingTouch(SeekBar seekBar) {}					
-					@Override
-					public void onStartTrackingTouch(SeekBar seekBar) {}
-					
-					@Override
-					public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-						float wait = ((float) progress) / 2;
-						txtWait.setText("Wait: " + wait + "s");
-					}
-				});
-				
-				final TextView txtSpeed = (TextView) dialog.findViewById(R.id.txtSpeed);
-				final SeekBar sbrSpeed = (SeekBar) dialog.findViewById(R.id.sbrSpeed);
-				sbrSpeed.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {					
-					@Override
-					public void onStopTrackingTouch(SeekBar seekBar) {}					
-					@Override
-					public void onStartTrackingTouch(SeekBar seekBar) {}
-					
-					@Override
-					public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-						
-						txtSpeed.setText("Spped: " + (progress + 1));
-					}
-				});
-				
-				Button btnOk = (Button) dialog.findViewById(R.id.btnOk);
-				btnOk.setOnClickListener(new OnClickListener() {
-					@Override
-					public void onClick(View v) {
-						ArrayList<String> paths = getSelectedPaths();
-						
-			        	// Đóng gói dữ liệu truyền đi
-			        	Intent intent = new Intent(_this, ViewImageActivity.class);
-			        	
-			        	if (paths.size() == 0)
-			        		intent.putExtra("filePaths", _imageAdapter.getItems());
-			        	else
-			        		intent.putExtra("filePaths", paths);
-			        	intent.putExtra("position", 0);
-			        	intent.putExtra("slideshow", true);
-			        	intent.putExtra("internal", true);
-			        	intent.putExtra("wait", sbrWait.getProgress() * 500);
-			        	intent.putExtra("slide", 3000 / (sbrSpeed.getProgress() + 1));
-			        	_this.startActivity(intent);
-			        	dialog.dismiss();
-					}
-				});
-				
-				Button btnCancel = (Button) dialog.findViewById(R.id.btnCancel);
-				btnCancel.setOnClickListener(new OnClickListener() {
-					@Override
-					public void onClick(View v) {
-						dialog.dismiss();
-					}
-				});
-
-				dialog.show();				
+				doSlideShow();			
 			}
 		};
 		
@@ -683,35 +655,74 @@ public class MainActivity extends Activity {
 		};
 	}
 	
-	private ArrayList<String> getSelectedPaths() {
- 		int count = _imageAdapter.getCount();
- 		ArrayList<String> result = new ArrayList<String>();
- 		
-        for (int i = 0; i < count; i++) 
-        {
-            View view = this.getViewByPosition(i, _gridViewImage);
-            ImageViewHolder holder = (ImageViewHolder) view.getTag();
-            if (holder.checkbox.isChecked()) {
-            	result.add(holder.filePath);
-            }
-        }
-        
-        return result;
- 	}
-	
- 	private String getZipFileName() {
-		String folder = ImageSupporter.DEFAULT_PICTUREPATH + File.separator + "zipped";
-		File f = new File(folder);
-		f.mkdirs();
-		
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss");
-		sdf.setTimeZone(TimeZone.getDefault());
-		String time = sdf.format(new Date());
-		
-		return folder + File.separator + "GalleryDS_" + time + ".zip";
+	// Tạo dialog thê hiện dấu hiệu đang xử lý
+	private Dialog getProgressingDialog()
+	{
+		Dialog dialog = new Dialog(MainActivity.this);
+		dialog.setContentView(R.layout.progressing_dialog);
+		dialog.setCanceledOnTouchOutside(false);
+		dialog.setTitle("Processing");
+		return dialog;
 	}
-
+	
+	// Thực hiện đánh dấu nhiều ảnh
+	private void marksImages(ArrayList<String> images)
+	{
+		new MarkImagesAsyncTask(getProgressingDialog()).execute(_markManager, images);
+	}
+	
+	// Thực hiện bỏ đánh dấu nhiều ảnh
+	private void unmarksImages(ArrayList<String> images)
+	{
+		new UnmarkImagesAsyncTask(getProgressingDialog(), _imageAdapter).execute(_markManager, images);
+	}
+	
+	// Thực hiện xóa nhiều ảnh
+	private void deleteImages(final ArrayList<String> images) 
+    {
+    	if (images.size() == 0)
+    		return;
+    	
+		AlertDialog.Builder builder = new AlertDialog.Builder(_this);
+		builder.setMessage("Are you sure you want to delete?")
+			   .setTitle("Delete");
+		
+		builder.setPositiveButton("Delete", new DialogInterface.OnClickListener() 
+		{		
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				
+				// Xử lý xóa ảnh theo tứng mục
+				if (_radioAll.isChecked()) 			
+					new DeleteImagesInFolderAsyncTask(getProgressingDialog(), _imageAdapter).execute(_folderManager, _markManager, images);
+				else if (_radioAlbum.isChecked())	
+					new DeleteImagesInAlbumAsyncTask(getProgressingDialog(), _imageAdapter).execute(_albumManager, _markManager, images);	
+				else if (_radioLocks.isChecked()) 
+					new DeleteLockedImagesAsyncTask(getProgressingDialog(), _imageAdapter).execute(_lockManager, images);
+				else
+					return;
+			}
+		});
+		
+		builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() 
+		{	
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				dialog.dismiss();				
+			}
+		});
+		
+		builder.show();
+	}
+	 
+	// Thực hiện bỏ ảnh khỏi album
+    private void removeFromAlbum(ArrayList<String> images) 
+    {
+    	new RemoveImagesFromAlbumAsyncTask(getProgressingDialog(), _imageAdapter).execute(_albumManager, _markManager, images);
+    }
+    
  	// Hiện dialog dể chọn album 
+    // Thực hiện thêm ảnh vào album
     private void chooseAlbum(final ArrayList<String> images)
     {
     	AlertDialog.Builder builderSingle = new AlertDialog.Builder(this);
@@ -736,78 +747,120 @@ public class MainActivity extends Activity {
     	builderSingle.setAdapter(arrayAdapter, new DialogInterface.OnClickListener() 
     	{
             @Override
-            public void onClick(DialogInterface dialog, int which) {
-                String strName = arrayAdapter.getItem(which);
+            public void onClick(DialogInterface dialog, int which) 
+            {	
+                String albumName = arrayAdapter.getItem(which);
                 
-                for (String path: images) {
-                	_albumManager.addsImageToAlbum(strName, path);
-                }
-                
+                new AddImagesToAlbumAsyncTask(getProgressingDialog()).execute(_albumManager, albumName, images);               
             }
         });
     	
     	builderSingle.show();
     }
- 	
-    private void deleteImages(final ArrayList<String> images) {
+ 	   
+    // Thực hiện khóa ảnh
+    private void lockImages(ArrayList<String> images) 
+    {
     	if (images.size() == 0)
-    		return;
-    	
-		AlertDialog.Builder builder = new AlertDialog.Builder(_this);
-		builder.setMessage("Are you sure you want to delete?")
-			   .setTitle("Delete");
-		
-		builder.setPositiveButton("Delete", new DialogInterface.OnClickListener() {
-			
-			@Override
-			public void onClick(DialogInterface dialog, int which) {
-				
-				_imageAdapter.removeImages(images);
-				
-				if (_radioAll.isChecked()) { 
-					
-					// Xóa ảnh trong thư mục					
-                 	if (_folderManager.deletesImages(images)) {
-                 		_markManager.unmarksImages(images);
-                 		Toast.makeText(getApplicationContext(), "Deleted", Toast.LENGTH_SHORT).show();
-                 	}
-                 	else
-                 		Toast.makeText(getApplicationContext(), "Fail To Delete", Toast.LENGTH_SHORT).show();
-				
-				} else if (_radioAlbum.isChecked()) {
-					
-                	// Xóa ảnh trong album			
-                 	if (_albumManager.deletesImages(images)) {
-                 		_markManager.unmarksImages(images);
-                 		Toast.makeText(getApplicationContext(), "Deleted", Toast.LENGTH_SHORT).show();
-                 	}
-                 	else
-                 		Toast.makeText(getApplicationContext(), "Fail To Delete", Toast.LENGTH_SHORT).show();
-                
-				} else if (_radioLocks.isChecked()) {
-					
-					// Xóa ảnh trong locks			
-                 	if (_lockManager.deletesImages(images)) {
-                 		Toast.makeText(getApplicationContext(), "Deleted", Toast.LENGTH_SHORT).show();
-                 	}
-                 	else
-                 		Toast.makeText(getApplicationContext(), "Fail To Delete", Toast.LENGTH_SHORT).show();
-					
-				}
-			}
-		});
-		
-		builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-			
-			@Override
-			public void onClick(DialogInterface dialog, int which) {
-				dialog.dismiss();				
-			}
-		});
-		
-		builder.show();
-	}
+			return;
+	
+		if (_radioAll.isChecked())
+			new LockImagesInFolderAsyncTask(getProgressingDialog(), _imageAdapter).execute(_lockManager, _folderManager, _markManager, images);
+		else if (_radioAlbum.isChecked())
+			new LockImagesInAlbumAsyncTask(getProgressingDialog(), _imageAdapter).execute(_lockManager, _albumManager, _markManager, images);
+    }
     
+    // Thực hiện bỏ khóa ảnh
+    private void unlockImages(ArrayList<String> images) 
+    {
+    	if (images.size() == 0)
+			return;
+		
+    	new UnlockImagesAsyncTask(getProgressingDialog(), _imageAdapter, _folderAdapter).execute(_lockManager, _folderManager, images);
+    }
+    
+	private void doSlideShow()
+	{
+		final Dialog dialog = new Dialog(_this);
+		dialog.setContentView(R.layout.slideshow_dialog);
+		dialog.setTitle("Settings");
+	
+		final TextView txtWait = (TextView) dialog.findViewById(R.id.txtWait);
+		final SeekBar sbrWait = (SeekBar) dialog.findViewById(R.id.sbrWait);
+		sbrWait.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {					
+			@Override
+			public void onStopTrackingTouch(SeekBar seekBar) {}					
+			@Override
+			public void onStartTrackingTouch(SeekBar seekBar) {}
+			
+			@Override
+			public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+				float wait = ((float) progress) / 2;
+				txtWait.setText("Wait: " + wait + "s");
+			}
+		});
+		
+		final TextView txtSpeed = (TextView) dialog.findViewById(R.id.txtSpeed);
+		final SeekBar sbrSpeed = (SeekBar) dialog.findViewById(R.id.sbrSpeed);
+		sbrSpeed.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {					
+			@Override
+			public void onStopTrackingTouch(SeekBar seekBar) {}					
+			@Override
+			public void onStartTrackingTouch(SeekBar seekBar) {}
+			
+			@Override
+			public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+				
+				txtSpeed.setText("Spped: " + (progress + 1));
+			}
+		});
+		
+		Button btnOk = (Button) dialog.findViewById(R.id.btnOk);
+		btnOk.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				ArrayList<String> paths = getSelectedPaths();
+				
+	        	// Đóng gói dữ liệu truyền đi
+	        	Intent intent = new Intent(_this, ViewImageActivity.class);
+	        	
+	        	if (paths.size() == 0)
+	        		intent.putExtra("filePaths", _imageAdapter.getItems());
+	        	else
+	        		intent.putExtra("filePaths", paths);
+	        	intent.putExtra("position", 0);
+	        	intent.putExtra("slideshow", true);
+	        	intent.putExtra("internal", true);
+	        	intent.putExtra("wait", sbrWait.getProgress() * 500);
+	        	intent.putExtra("slide", 3000 / (sbrSpeed.getProgress() + 1));
+	        	_this.startActivity(intent);
+	        	dialog.dismiss();
+			}
+		});
+		
+		Button btnCancel = (Button) dialog.findViewById(R.id.btnCancel);
+		btnCancel.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				dialog.dismiss();
+			}
+		});
+
+		dialog.show();	
+	}
+	
+ 	private String getZipFileName() {
+		String folder = ImageSupporter.DEFAULT_PICTUREPATH + File.separator + "zipped";
+		File f = new File(folder);
+		f.mkdirs();
+		
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss");
+		sdf.setTimeZone(TimeZone.getDefault());
+		String time = sdf.format(new Date());
+		
+		return folder + File.separator + "GalleryDS_" + time + ".zip";
+	}
+
     private void shareImages(ArrayList<String> images) {
     	if (images.size() == 0)
 			return;
@@ -879,60 +932,7 @@ public class MainActivity extends Activity {
         
         _this.startActivity(intent);	
     }
-    
-    private void lockImages(ArrayList<String> images) 
-    {
-    	if (images.size() == 0)
-			return;
-		
-		_lockManager.locksImages(images);
-		
-		if (_radioAll.isChecked())
-			_folderManager.deletesImages(images);
-		else
-			_albumManager.deletesImages(images);
-		
-		_markManager.unmarksImages(images);
-		
-		_imageAdapter.removeImages(images);
-    }
-    
-    private void unlockImages(ArrayList<String> images) {
-    	if (images.size() == 0)
-			return;
-		
-		_lockManager.unlocksImages(images);
-		
-		// Xóa sạch dữ liệu 
-		// Nếu chưa có trong danh sách thư mục thì tạo mới
-		if (_folderManager.containsFolder(ImageSupporter.DEFAULT_PICTUREPATH))
-			_folderManager.getsFolderImages(ImageSupporter.DEFAULT_PICTUREPATH).clear();
-		else
-			_folderManager.addsFolder(ImageSupporter.DEFAULT_PICTUREPATH);
-		
-		// Duyệt lại dữ liệu
-		File file = new File(ImageSupporter.DEFAULT_PICTUREPATH);
-		File[] files = file.listFiles();
-		
-		// Cập nhật ảnh trong thư mục Picture mặc định
-		for (File f : files)
-			if (ImageSupporter.isImage(f))
-				_folderManager.addsImage(ImageSupporter.DEFAULT_PICTUREPATH, f.getAbsolutePath());
-		
-		// Cập nhật dữ liệu trên các Adapter
-		_folderAdapter.updateData(_folderManager.getsFolderPathList());
-		_imageAdapter.removeImages(images);
-    }
-    
-    private void removeFromAlbum(ArrayList<String> images) {
-    	for (String path : images) {
-    		_albumManager.removesImageFromAlbum(path);
-    	}
-    	_markManager.unmarksImages(images);
-    	int pos = _listViewAlbum.getCheckedItemPosition();
-    	_imageAdapter.updateData(_albumManager.getsAlbumImages(_albumManager.getsAlbumList().get(pos)));
-    }
-    
+         
     @Override
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
         

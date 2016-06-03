@@ -42,10 +42,8 @@ public class LockManager {
 		
 		// Duyệt ảnh trong internal storage
 		for (File f : files) 
-		{
 			if (ImageSupporter.isImage(f))
 				_lockData.put(f.getAbsolutePath(), f.getAbsolutePath());
-		}	
 	}
 	
 	// Lấy danh sách ảnh bị khóa
@@ -126,7 +124,8 @@ public class LockManager {
 		return true;
 	}
 	
-	public boolean deletesImages(ArrayList<String> imagePaths) {	
+	public boolean deletesImages(ArrayList<String> imagePaths) 
+	{	
 		for (String path : imagePaths)
     		if (!deletesImage(path))
     			return false;

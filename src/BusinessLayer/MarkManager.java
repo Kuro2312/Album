@@ -32,19 +32,13 @@ public class MarkManager
 		ArrayList<String> markedImages = getsMarkedImagePaths(_context);
 		int n = markedImages.size();
 		
-		// Kiểm tra xem có tồn tại không
+		// Kiểm tra xem có được đánh dấu và còn tồn tại không
 		// Nếu không thì bỏ qua
 		for (int i = 0; i < n; i++)
-		{
-			if (!_markData.containsKey(markedImages.get(i)))		
-			{
-				File f = new File(markedImages.get(i));
-				
-				if (f.exists())
+			if (!_markData.containsKey(markedImages.get(i)) && ImageSupporter.checkFileExisted(markedImages.get(i)))		
 					_markData.put(markedImages.get(i), markedImages.get(i));
-			}
-		}
 		
+		// Lưu dữ liệu hiện tại
 		MarkManager.savesMarkedImagePaths(_context, getsMarkedImages());
 	}
 		
