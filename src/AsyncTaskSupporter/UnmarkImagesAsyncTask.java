@@ -2,6 +2,8 @@ package AsyncTaskSupporter;
 
 import java.util.ArrayList;
 
+import com.example.neogalleryds.MainActivity;
+
 import Adapter.ImageAdapter;
 import BusinessLayer.ImageSupporter;
 import BusinessLayer.MarkManager;
@@ -47,10 +49,11 @@ public class UnmarkImagesAsyncTask extends AsyncTask<Object, Void, Boolean>
 	
 	protected void onPostExecute(Boolean result) 
     {
-		// Xử lý kết quả trả v�?
+		// Xử lý kết quả trả v�?
 		if (_dialog != null)
 			_dialog.dismiss();
 		
+		MainActivity.cancelLoadImage = false;
 		_imageAdapter.updateData(_markManager.getsMarkedImages());
 		
 		if (result == true)
@@ -62,7 +65,7 @@ public class UnmarkImagesAsyncTask extends AsyncTask<Object, Void, Boolean>
 
 /*int n = imagePaths.size();
 
-// Thực hiện đánh dấu từng ảnh trong danh sách được ch�?n
+// Thực hiện đánh dấu từng ảnh trong danh sách được ch�?n
 for (int i = 0; i < n; i++)
 	if (markManager.isMarkImage(imagePaths.get(i)))
 		markManager.marksImage(imagePaths.get(i));*/

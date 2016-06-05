@@ -2,6 +2,8 @@ package AsyncTaskSupporter;
 
 import java.util.ArrayList;
 
+import com.example.neogalleryds.MainActivity;
+
 import Adapter.ImageAdapter;
 import BusinessLayer.FolderManager;
 import BusinessLayer.ImageSupporter;
@@ -39,10 +41,10 @@ public class DeleteImagesInFolderAsyncTask extends AsyncTask<Object, Void, Boole
 
 			int n = _imagePaths.size();
 			
-			// B�? đánh dấu
+			// B�? đánh dấu
 			markManager.unmarksImages(_imagePaths);
 			
-			// Thực hiện xóa từng ảnh trong danh sách được ch�?n
+			// Thực hiện xóa từng ảnh trong danh sách được ch�?n
 			// Nếu có lỗi thì dừng ngay
 			for (int i = 0; i < n; i++)
 				if (!folderManager.deletesImage(_imagePaths.get(i)))
@@ -58,10 +60,11 @@ public class DeleteImagesInFolderAsyncTask extends AsyncTask<Object, Void, Boole
 	
 	protected void onPostExecute(Boolean result) 
     {
-		// Xử lý kết quả trả v�?
+		// Xử lý kết quả trả v�?
 		if (_dialog != null)
 			_dialog.dismiss();
 		
+		MainActivity.cancelLoadImage = false;
 		_imageAdapter.removeImages(_imagePaths);
 		
 		if (result == true)

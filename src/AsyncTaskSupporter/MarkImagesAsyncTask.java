@@ -2,6 +2,8 @@ package AsyncTaskSupporter;
 
 import java.util.ArrayList;
 
+import com.example.neogalleryds.MainActivity;
+
 import BusinessLayer.ImageSupporter;
 import BusinessLayer.MarkManager;
 import android.app.Dialog;
@@ -43,10 +45,11 @@ public class MarkImagesAsyncTask extends AsyncTask<Object, Void, Boolean>
 	
 	protected void onPostExecute(Boolean result) 
     {
-		// Xử lý kết quả trả v�?
+		// Xử lý kết quả trả v�?
 		if (_dialog != null)
 			_dialog.dismiss();
 		
+		MainActivity.cancelLoadImage = false;
 		if (result == true)
 			Toast.makeText(_dialog.getContext(), "Marked Succesully", Toast.LENGTH_SHORT).show();
 		else

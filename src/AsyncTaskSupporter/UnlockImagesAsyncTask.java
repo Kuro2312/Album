@@ -3,6 +3,8 @@ package AsyncTaskSupporter;
 import java.io.File;
 import java.util.ArrayList;
 
+import com.example.neogalleryds.MainActivity;
+
 import Adapter.FolderAdapter;
 import Adapter.ImageAdapter;
 import BusinessLayer.FolderManager;
@@ -76,10 +78,11 @@ public class UnlockImagesAsyncTask extends AsyncTask<Object, Void, Boolean>
 	
 	protected void onPostExecute(Boolean result) 
     {
-		// Xử lý kết quả trả v�?
+		// Xử lý kết quả trả v�?
 		if (_dialog != null)
 			_dialog.dismiss();
 		
+		MainActivity.cancelLoadImage = false;
 		// Cập nhật dữ liệu trên các Adapter
 		_folderAdapter.updateData(_folderList);
 		_imageAdapter.updateData(_lockedList);

@@ -2,6 +2,8 @@ package AsyncTaskSupporter;
 
 import java.util.ArrayList;
 
+import com.example.neogalleryds.MainActivity;
+
 import Adapter.ImageAdapter;
 import BusinessLayer.AlbumManager;
 import BusinessLayer.ImageSupporter;
@@ -37,10 +39,10 @@ public class DeleteImagesInAlbumAsyncTask extends AsyncTask<Object, Void, Boolea
 			MarkManager markManager = (MarkManager) params[1];
 			_imagePaths = (ArrayList<String>) params[2];
 			
-			// B�? đánh dấu
+			// B�? đánh dấu
 			markManager.unmarksImages(_imagePaths);
 			
-			// Thực hiện xóa từng ảnh trong danh sách được ch�?n
+			// Thực hiện xóa từng ảnh trong danh sách được ch�?n
 			// Nếu có lỗi thì dừng ngay
 			return albumManager.deletesImages(_imagePaths);
 		}
@@ -52,10 +54,11 @@ public class DeleteImagesInAlbumAsyncTask extends AsyncTask<Object, Void, Boolea
 	
 	protected void onPostExecute(Boolean result) 
     {
-		// Xử lý kết quả trả v�?
+		// Xử lý kết quả trả v�?
 		if (_dialog != null)
 			_dialog.dismiss();
 		
+		MainActivity.cancelLoadImage = false;
 		_imageAdapter.removeImages(_imagePaths);
 		
 		if (result == true)

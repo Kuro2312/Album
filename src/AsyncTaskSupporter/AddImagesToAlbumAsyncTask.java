@@ -2,6 +2,8 @@ package AsyncTaskSupporter;
 
 import java.util.ArrayList;
 
+import com.example.neogalleryds.MainActivity;
+
 import BusinessLayer.AlbumManager;
 import BusinessLayer.ImageSupporter;
 import android.app.Dialog;
@@ -34,7 +36,7 @@ public class AddImagesToAlbumAsyncTask extends AsyncTask<Object, Void, Boolean>
 			
 			int n = imagePaths.size();
 			
-			// Thực hiện xóa từng ảnh trong danh sách được ch�?n
+			// Thực hiện xóa từng ảnh trong danh sách được ch�?n
 			// Nếu có lỗi thì dừng ngay
 			for (int i = 0; i < n; i++)
 				albumManager.addsImageToAlbum(albumName, imagePaths.get(i));
@@ -49,10 +51,12 @@ public class AddImagesToAlbumAsyncTask extends AsyncTask<Object, Void, Boolean>
 	
 	protected void onPostExecute(Boolean result) 
     {
-		// Xử lý kết quả trả v�?
+		// Xử lý kết quả trả v�?
 		if (_dialog != null)
 			_dialog.dismiss();
 		
+		
+		MainActivity.cancelLoadImage = false;
 		if (result == true)
 			Toast.makeText(_dialog.getContext(), "Added Succesully", Toast.LENGTH_SHORT).show();
 		else

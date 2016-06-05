@@ -2,6 +2,8 @@ package AsyncTaskSupporter;
 
 import java.util.ArrayList;
 
+import com.example.neogalleryds.MainActivity;
+
 import Adapter.ImageAdapter;
 import BusinessLayer.ImageSupporter;
 import BusinessLayer.LockManager;
@@ -45,10 +47,11 @@ public class DeleteLockedImagesAsyncTask extends AsyncTask<Object, Void, Boolean
 	
 	protected void onPostExecute(Boolean result) 
     {
-		// Xử lý kết quả trả v�?
+		// Xử lý kết quả trả v�?
 		if (_dialog != null)
 			_dialog.dismiss();
 		
+		MainActivity.cancelLoadImage = false;		
 		// Cập nhật dữ liệu trên image Adapter
 		_imageAdapter.updateData(_lockManager.getsLockedImages());
 		

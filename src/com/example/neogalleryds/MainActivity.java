@@ -130,6 +130,8 @@ public class MainActivity extends Activity {
 	private int _contextPosition;
 	private int _albumContextPosition;
 	public static int currentTab = 0;
+	public static boolean cancelLoadImage = false;
+	private static int SLIDE_SHOW = 2984;
 	
 	// Adapter
 	private FolderAdapter _folderAdapter;
@@ -762,12 +764,14 @@ public class MainActivity extends Activity {
 	// Thực hiện đánh dấu nhiều ảnh
 	private void marksImages(ArrayList<String> images)
 	{
+		MainActivity.cancelLoadImage = true;
 		new MarkImagesAsyncTask(getProgressingDialog()).execute(_markManager, images);
 	}
 	
 	// Thực hiện bỏ đánh dấu nhiều ảnh
 	private void unmarksImages(ArrayList<String> images)
 	{
+		MainActivity.cancelLoadImage = true;
 		new UnmarkImagesAsyncTask(getProgressingDialog(), _imageAdapter).execute(_markManager, images);
 	}
 	
@@ -776,6 +780,8 @@ public class MainActivity extends Activity {
     {
     	if (images.size() == 0)
     		return;
+    	
+    	cancelLoadImage = true;
     	
 		AlertDialog.Builder builder = new AlertDialog.Builder(_this);
 		builder.setMessage("Are you sure you want to delete?")
@@ -802,7 +808,8 @@ public class MainActivity extends Activity {
 		{	
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
-				dialog.dismiss();				
+				dialog.dismiss();
+				cancelLoadImage = false;
 			}
 		});
 		
@@ -812,6 +819,7 @@ public class MainActivity extends Activity {
 	// Thực hiện bỏ ảnh khỏi album
     private void removeFromAlbum(ArrayList<String> images) 
     {
+    	MainActivity.cancelLoadImage = true;
     	//new RemoveImagesFromAlbumAsyncTask(getProgressingDialog(), _imageAdapter).execute(_albumManager, _markManager, images);
     	new RemoveImagesFromAlbumAsyncTask(getProgressingDialog(), _imageAdapter).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, _albumManager, _markManager, images);
     }
@@ -845,7 +853,7 @@ public class MainActivity extends Activity {
             public void onClick(DialogInterface dialog, int which) 
             {	
                 String albumName = arrayAdapter.getItem(which);
-                
+                MainActivity.cancelLoadImage = true;
                 new AddImagesToAlbumAsyncTask(getProgressingDialog()).execute(_albumManager, albumName, images);               
             }
         });
@@ -864,6 +872,8 @@ public class MainActivity extends Activity {
     	
     	if (images.size() == 0)
 			return;
+    	
+    	MainActivity.cancelLoadImage = true;
     		  	
 		if (_radioAll.isChecked())
 			new LockImagesInFolderAsyncTask(getProgressingDialog(), _imageAdapter).execute(_lockManager, _folderManager, _markManager, images);
@@ -883,12 +893,15 @@ public class MainActivity extends Activity {
     	if (images.size() == 0)
 			return;
 		
+    	MainActivity.cancelLoadImage = true;
     	
     	new UnlockImagesAsyncTask(getProgressingDialog(), _imageAdapter, _folderAdapter).execute(_lockManager, _folderManager, images);
     }
     
 	private void doSlideShow()
 	{
+		cancelLoadImage = true;
+		
 		final Dialog dialog = new Dialog(_this);
 		dialog.setContentView(R.layout.slideshow_dialog);
 		dialog.setTitle("Settings");
@@ -941,7 +954,8 @@ public class MainActivity extends Activity {
 	        	intent.putExtra("internal", true);
 	        	intent.putExtra("wait", sbrWait.getProgress() * 500);
 	        	intent.putExtra("slide", 3000 / (sbrSpeed.getProgress() + 1));
-	        	_this.startActivity(intent);
+	        	//_this.startActivity(intent);
+	        	_this.startActivityForResult(intent, SLIDE_SHOW);
 	        	dialog.dismiss();
 			}
 		});
@@ -950,10 +964,11 @@ public class MainActivity extends Activity {
 		btnCancel.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
+				cancelLoadImage = false;
 				dialog.dismiss();
 			}
 		});
-
+		
 		dialog.show();	
 	}
 	
@@ -1263,4 +1278,15 @@ public class MainActivity extends Activity {
 		
 		return super.onOptionsItemSelected(item);
 	}
+
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+
+		if (requestCode == SLIDE_SHOW) {
+			cancelLoadImage = false;
+		}
+		
+	}
+	
+	
 }

@@ -2,6 +2,8 @@ package AsyncTaskSupporter;
 
 import java.util.ArrayList;
 
+import com.example.neogalleryds.MainActivity;
+
 import Adapter.ImageAdapter;
 import BusinessLayer.AlbumManager;
 import BusinessLayer.FolderManager;
@@ -42,7 +44,7 @@ public class LockImagesInAlbumAsyncTask extends AsyncTask<Object, Void, Boolean>
 
 			int n = _imagePaths.size();
 			
-			// B�? đánh dấu
+			// B�? đánh dấu
 			markManager.unmarksImages(_imagePaths);
 			
 			// Khóa	ảnh				
@@ -60,10 +62,11 @@ public class LockImagesInAlbumAsyncTask extends AsyncTask<Object, Void, Boolean>
 	
 	protected void onPostExecute(Boolean result) 
     {
-		// Xử lý kết quả trả v�?
+		// Xử lý kết quả trả v�?
 		if (_dialog != null)
 			_dialog.dismiss();
 		
+		MainActivity.cancelLoadImage = false;
 		_imageAdapter.removeImages(_imagePaths);
 		
 		if (result == true)

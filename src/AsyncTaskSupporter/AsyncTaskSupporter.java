@@ -1,5 +1,7 @@
 package AsyncTaskSupporter;
 
+import com.example.neogalleryds.MainActivity;
+
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
@@ -33,13 +35,13 @@ public class AsyncTaskSupporter
 	        
 	        // Nếu dữ liệu vẫn chưa khởi tạo hay khác với giá trị dữ liệu mới
 	        // Hủy task bất đồng bộ trước đó. Ngược lại, tiếp tục công việc
-	        if (bitmapData == null || bitmapData != data)
+	        if (bitmapData == null || bitmapData != data || MainActivity.cancelLoadImage)
 	        	bitmapLoadingTask.cancel(true);
 	        else
 	            return false;
 	    }
 
-	    // Nếu không có task bất đồng bộ nào liên quan tới ImageView hay đã bị hủy, trả v�? true
+	    // Nếu không có task bất đồng bộ nào liên quan tới ImageView hay đã bị hủy, trả v�? true
 	    return true;
 	}
 	
