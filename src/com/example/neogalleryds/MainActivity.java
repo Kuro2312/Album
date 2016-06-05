@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.TimeZone;
+import java.util.concurrent.Executor;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -19,28 +20,30 @@ import Adapter.AlbumAdapter;
 import Adapter.FolderAdapter;
 import Adapter.ImageAdapter;
 import Adapter.ImageViewHolder;
-import AsyncTask.AddImagesToAlbumAsyncTask;
-import AsyncTask.DeleteImagesInAlbumAsyncTask;
-import AsyncTask.DeleteImagesInFolderAsyncTask;
-import AsyncTask.DeleteLockedImagesAsyncTask;
-import AsyncTask.LockImagesInAlbumAsyncTask;
-import AsyncTask.LockImagesInFolderAsyncTask;
-import AsyncTask.MarkImagesAsyncTask;
-import AsyncTask.RemoveImagesFromAlbumAsyncTask;
-import AsyncTask.UnlockImagesAsyncTask;
-import AsyncTask.UnmarkImagesAsyncTask;
+import AsyncTaskSupporter.AddImagesToAlbumAsyncTask;
+import AsyncTaskSupporter.DeleteImagesInAlbumAsyncTask;
+import AsyncTaskSupporter.DeleteImagesInFolderAsyncTask;
+import AsyncTaskSupporter.DeleteLockedImagesAsyncTask;
+import AsyncTaskSupporter.LockImagesInAlbumAsyncTask;
+import AsyncTaskSupporter.LockImagesInFolderAsyncTask;
+import AsyncTaskSupporter.MarkImagesAsyncTask;
+import AsyncTaskSupporter.RemoveImagesFromAlbumAsyncTask;
+import AsyncTaskSupporter.UnlockImagesAsyncTask;
+import AsyncTaskSupporter.UnmarkImagesAsyncTask;
 import BusinessLayer.AlbumManager;
 import BusinessLayer.FolderManager;
 import BusinessLayer.ImageSupporter;
 import BusinessLayer.LockManager;
 import BusinessLayer.MarkManager;
 import BusinessLayer.ResourceManager;
+import BusinessLayer.UserInfo;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.view.ContextMenu;
@@ -138,6 +141,7 @@ public class MainActivity extends Activity {
 	public static AlbumManager _albumManager;
 	public static MarkManager _markManager;
 	public static LockManager _lockManager;
+	public static boolean _isLogined = false;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) 
@@ -200,6 +204,90 @@ public class MainActivity extends Activity {
 			_imageAdapter.updateData(new ArrayList<String>());	
 	}
 	
+	public void showsSignUpDialog()
+	{
+		final Dialog dialog = new Dialog(_this);
+		dialog.setContentView(R.layout.signup_dialog);
+		dialog.setTitle("Sign Up");
+	
+		final EditText txtEmail = (EditText) dialog.findViewById(R.id.editTextEmail);
+		final EditText txtPass = (EditText) dialog.findViewById(R.id.editTextPass);
+		
+		Button btnOk = (Button) dialog.findViewById(R.id.btnOk1);
+		btnOk.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				String email = txtEmail.getText().toString();
+				String pass = txtPass.getText().toString();
+				
+				if (pass == null || email == null || email.equals("") || pass.equals(""))	
+					Toast.makeText(_this, "Empty data", Toast.LENGTH_SHORT).show();
+				else
+				{
+					UserInfo.savesUserInfo(_this, email, pass);
+					_isLogined = true;
+                	dialog.dismiss();
+                	
+        			if (_radioLocks.isChecked())
+        				_imageAdapter.updateData(_lockManager.getsLockedImages());
+				}
+			}
+		});
+		
+		Button btnCancel = (Button) dialog.findViewById(R.id.btnCancel1);
+		btnCancel.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				dialog.dismiss();
+			}
+		});
+
+		dialog.show();	
+	}
+	
+	public void showsLoginDialog()
+	{	
+		AlertDialog.Builder alertDialog = new AlertDialog.Builder(MainActivity.this);
+        alertDialog.setTitle("Login");
+        alertDialog.setMessage("Enter password");
+        
+        final EditText input = new EditText(MainActivity.this);  
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                              LinearLayout.LayoutParams.MATCH_PARENT,
+                              LinearLayout.LayoutParams.MATCH_PARENT);
+        input.setLayoutParams(lp);
+        alertDialog.setView(input);
+
+        alertDialog.setPositiveButton("OK",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        String pass = input.getText().toString();
+                        if (UserInfo.checksPassword(_this, pass)) {
+                        	_isLogined = true;
+                        	dialog.dismiss();
+                        	
+                			if (_radioLocks.isChecked())
+                				_imageAdapter.updateData(_lockManager.getsLockedImages());
+                        	
+                        	Toast.makeText(_this, "Logined Successfully", Toast.LENGTH_SHORT).show();
+                        }
+                        else
+                        {
+                        	Toast.makeText(_this, "Login Fail!", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
+        
+        alertDialog.setNegativeButton("Cancel",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                });
+
+        alertDialog.show();
+	}
+	
 	// Cài đặt sự kiện chọn 1 item trong danh sách thư mục
 	public void setOnFolderSelected()
 	{		
@@ -243,9 +331,9 @@ public class MainActivity extends Activity {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 
             	if (_lastIndexAlbum != -1)
-            		_listViewFolder.setItemChecked(_lastIndexFolder, false);
+            		_listViewAlbum.setItemChecked(_lastIndexAlbum, false);
             	
-            	_listViewFolder.setItemChecked(position, true);
+            	_listViewAlbum.setItemChecked(position, true);
             	_lastIndexAlbum = position;
             	_selectedAlbumName = (String) _albumAdapter.getItem(position);
             	
@@ -279,7 +367,7 @@ public class MainActivity extends Activity {
 	            else if (_radioMarks.isChecked())
 	            	onTabMarksSelect();
 	            else if (_radioLocks.isChecked())
-	            	onTabLocksSelect();
+	        		onTabLocksSelect();
 	        }
 	    });
 	}
@@ -354,12 +442,18 @@ public class MainActivity extends Activity {
 	
 	// Khi tab Locks được chọn
 	public void onTabLocksSelect()
-	{
+	{		
     	// Cập nhật vị trí tab
     	currentTab = 3;
     	
     	// Cập nhật dữ liệu 
-    	_imageAdapter.updateData(_lockManager.getsLockedImages());
+    	if (_isLogined == true)
+    		_imageAdapter.updateData(_lockManager.getsLockedImages());
+    	else
+    	{
+    		_imageAdapter.updateData(new ArrayList<String>());
+    		Toast.makeText(_this, "Locked images isn't showed if you don't login", Toast.LENGTH_SHORT).show();
+    	}
     	
     	// Cập nhật giao diện
     	_listViewFolder.setVisibility(View.GONE);
@@ -718,7 +812,8 @@ public class MainActivity extends Activity {
 	// Thực hiện bỏ ảnh khỏi album
     private void removeFromAlbum(ArrayList<String> images) 
     {
-    	new RemoveImagesFromAlbumAsyncTask(getProgressingDialog(), _imageAdapter).execute(_albumManager, _markManager, images);
+    	//new RemoveImagesFromAlbumAsyncTask(getProgressingDialog(), _imageAdapter).execute(_albumManager, _markManager, images);
+    	new RemoveImagesFromAlbumAsyncTask(getProgressingDialog(), _imageAdapter).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, _albumManager, _markManager, images);
     }
     
  	// Hiện dialog dể chọn album 
@@ -760,10 +855,16 @@ public class MainActivity extends Activity {
  	   
     // Thực hiện khóa ảnh
     private void lockImages(ArrayList<String> images) 
-    {
+    {  	
+    	if (_isLogined == false)
+    	{
+    		Toast.makeText(_this, "Can't do this function if you don't login", Toast.LENGTH_SHORT).show();
+    		return;
+    	}
+    	
     	if (images.size() == 0)
 			return;
-	
+    		  	
 		if (_radioAll.isChecked())
 			new LockImagesInFolderAsyncTask(getProgressingDialog(), _imageAdapter).execute(_lockManager, _folderManager, _markManager, images);
 		else if (_radioAlbum.isChecked())
@@ -773,9 +874,16 @@ public class MainActivity extends Activity {
     // Thực hiện bỏ khóa ảnh
     private void unlockImages(ArrayList<String> images) 
     {
+    	if (_isLogined == false)
+    	{
+    		Toast.makeText(_this, "Can't do this function if you don't login", Toast.LENGTH_SHORT).show();
+    		return;
+    	}
+    	
     	if (images.size() == 0)
 			return;
 		
+    	
     	new UnlockImagesAsyncTask(getProgressingDialog(), _imageAdapter, _folderAdapter).execute(_lockManager, _folderManager, images);
     }
     
@@ -1145,6 +1253,14 @@ public class MainActivity extends Activity {
 			
 			return true;
 		}
+		else if (id == R.id.login)
+		{
+			if (_isLogined == false && UserInfo.isEmpty(_this))
+    			showsSignUpDialog();
+    		else if (_isLogined == false)
+    			showsLoginDialog();
+		}
+		
 		return super.onOptionsItemSelected(item);
 	}
 }

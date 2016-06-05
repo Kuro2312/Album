@@ -6,9 +6,11 @@ import com.example.neogalleryds.R;
 import com.example.neogalleryds.R.drawable;
 import com.example.neogalleryds.R.id;
 import com.example.neogalleryds.R.layout;
+
+import AsyncTaskSupporter.AsyncTaskSupporter;
+
 import com.example.neogalleryds.ViewImageActivity;
 
-import AsyncTask.AsyncTaskSupporter;
 import BusinessLayer.ImageSupporter;
 import android.content.Context;
 import android.content.Intent;

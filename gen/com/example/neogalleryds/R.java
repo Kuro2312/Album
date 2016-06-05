@@ -205,40 +205,45 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
         public static final int ic_launcher=0x7f020010;
         public static final int icon=0x7f020011;
         public static final int lock_image=0x7f020012;
-        public static final int mark_image=0x7f020013;
-        public static final int orange_folder=0x7f020014;
-        public static final int progress=0x7f020015;
-        public static final int radiotab_selector=0x7f020016;
-        public static final int radiotab_textcolor_selector=0x7f020017;
-        public static final int remove_image_album=0x7f020018;
-        public static final int select=0x7f020019;
-        public static final int share=0x7f02001a;
-        public static final int trash_bg_selected=0x7f02001b;
-        public static final int trashbutton_selector=0x7f02001c;
-        public static final int unlock_image=0x7f02001d;
-        public static final int unmark_image=0x7f02001e;
-        public static final int white_add=0x7f02001f;
-        public static final int white_lock=0x7f020020;
-        public static final int white_mark=0x7f020021;
-        public static final int white_share=0x7f020022;
-        public static final int white_trash=0x7f020023;
-        public static final int white_unlock=0x7f020024;
-        public static final int white_unmark=0x7f020025;
-        public static final int yellow_folder=0x7f020026;
+        public static final int login=0x7f020013;
+        public static final int mark_image=0x7f020014;
+        public static final int orange_folder=0x7f020015;
+        public static final int progress=0x7f020016;
+        public static final int radiotab_selector=0x7f020017;
+        public static final int radiotab_textcolor_selector=0x7f020018;
+        public static final int remove_image_album=0x7f020019;
+        public static final int select=0x7f02001a;
+        public static final int share=0x7f02001b;
+        public static final int trash_bg_selected=0x7f02001c;
+        public static final int trashbutton_selector=0x7f02001d;
+        public static final int unlock_image=0x7f02001e;
+        public static final int unmark_image=0x7f02001f;
+        public static final int white_add=0x7f020020;
+        public static final int white_lock=0x7f020021;
+        public static final int white_mark=0x7f020022;
+        public static final int white_share=0x7f020023;
+        public static final int white_trash=0x7f020024;
+        public static final int white_unlock=0x7f020025;
+        public static final int white_unmark=0x7f020026;
+        public static final int yellow_folder=0x7f020027;
     }
     public static final class id {
         public static final int LinearLayout1=0x7f0a001d;
-        public static final int action_settings=0x7f0a002d;
-        public static final int addNewAlbum=0x7f0a002e;
+        public static final int action_settings=0x7f0a0034;
+        public static final int addNewAlbum=0x7f0a0035;
         public static final int btnAdd=0x7f0a0017;
-        public static final int btnCancel=0x7f0a002b;
+        public static final int btnCancel=0x7f0a0032;
+        public static final int btnCancel1=0x7f0a002c;
         public static final int btnDelete=0x7f0a001a;
         public static final int btnLock=0x7f0a0013;
         public static final int btnMark=0x7f0a000f;
-        public static final int btnOk=0x7f0a002c;
+        public static final int btnOk=0x7f0a0033;
+        public static final int btnOk1=0x7f0a002d;
         public static final int btnShare=0x7f0a000d;
         public static final int checkBox0=0x7f0a0024;
         public static final int container=0x7f0a0025;
+        public static final int editTextEmail=0x7f0a0029;
+        public static final int editTextPass=0x7f0a002b;
         public static final int fullScreenImage=0x7f0a0020;
         public static final int gridViewImage=0x7f0a000a;
         public static final int horizontalScrollView1=0x7f0a0000;
@@ -254,6 +259,7 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
         public static final int llDelete=0x7f0a0019;
         public static final int llLock=0x7f0a0012;
         public static final int llMark=0x7f0a000e;
+        public static final int login=0x7f0a0037;
         public static final int pagerFullscreenImage=0x7f0a000b;
         public static final int progressBar=0x7f0a0026;
         public static final int radioAlbum=0x7f0a0005;
@@ -261,16 +267,19 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
         public static final int radioLocks=0x7f0a0007;
         public static final int radioMarks=0x7f0a0006;
         public static final int radioTabGroup=0x7f0a0003;
-        public static final int sbrSpeed=0x7f0a002a;
-        public static final int sbrWait=0x7f0a0028;
-        public static final int selectMode=0x7f0a002f;
+        public static final int sbrSpeed=0x7f0a0031;
+        public static final int sbrWait=0x7f0a002f;
+        public static final int selectMode=0x7f0a0036;
         public static final int textViewFolder=0x7f0a001f;
         public static final int textViewFunction=0x7f0a0022;
         public static final int txtDelete=0x7f0a001b;
+        public static final int txtEmail=0x7f0a0028;
         public static final int txtLock=0x7f0a0014;
         public static final int txtMark=0x7f0a0010;
-        public static final int txtSpeed=0x7f0a0029;
-        public static final int txtWait=0x7f0a0027;
+        public static final int txtMessage=0x7f0a0027;
+        public static final int txtPass=0x7f0a002a;
+        public static final int txtSpeed=0x7f0a0030;
+        public static final int txtWait=0x7f0a002e;
         public static final int vwAdd=0x7f0a0018;
         public static final int vwDelete=0x7f0a001c;
         public static final int vwLock=0x7f0a0015;
@@ -284,7 +293,8 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
         public static final int function_item=0x7f030004;
         public static final int image_item=0x7f030005;
         public static final int progressing_dialog=0x7f030006;
-        public static final int slideshow_dialog=0x7f030007;
+        public static final int signup_dialog=0x7f030007;
+        public static final int slideshow_dialog=0x7f030008;
     }
     public static final class menu {
         public static final int context_menu_album_item=0x7f090000;
@@ -297,16 +307,17 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
     public static final class string {
         public static final int action_settings=0x7f070002;
         public static final int addNewAlbum=0x7f070003;
-        public static final int albums=0x7f070006;
-        public static final int all=0x7f070005;
+        public static final int albums=0x7f070007;
+        public static final int all=0x7f070006;
         public static final int app_name=0x7f070000;
-        public static final int dummy_button=0x7f07000a;
-        public static final int dummy_content=0x7f07000b;
+        public static final int dummy_button=0x7f07000b;
+        public static final int dummy_content=0x7f07000c;
         public static final int hello_world=0x7f070001;
-        public static final int locks=0x7f070008;
-        public static final int marks=0x7f070007;
+        public static final int locks=0x7f070009;
+        public static final int logIn=0x7f070005;
+        public static final int marks=0x7f070008;
         public static final int selectMode=0x7f070004;
-        public static final int title_activity_view_image=0x7f070009;
+        public static final int title_activity_view_image=0x7f07000a;
     }
     public static final class style {
         /** 

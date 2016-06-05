@@ -10,7 +10,7 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import AsyncTask.DeleteAlbumAsyncTask;
+import AsyncTaskSupporter.DeleteAlbumAsyncTask;
 import android.content.Context;
 import android.os.Environment;
 import android.util.Log;
@@ -257,11 +257,14 @@ public class AlbumManager {
     	ArrayList<String> albumImages = this.getsAlbumImages(parent);
     	
     	if (albumImages == null)
-    		return false;
+    		return true;
     	
     	// Xóa dữ liệu khỏi album
     	if (!albumImages.remove(imagePath))
     		return false;
+    	
+    	if (!f.exists())
+    		return true;
     	
         // Xóa file
     	return f.delete();
