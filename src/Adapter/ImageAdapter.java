@@ -17,6 +17,8 @@ import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.ImageView;
@@ -29,6 +31,7 @@ public class ImageAdapter extends ArrayAdapter
 	public static int REQ_HEIGHT;
 	public static int REQ_WIDTH;
 	public static int SELECT_MODE = View.INVISIBLE;
+	public int _lastPosition = -1;
 	
 	public ImageAdapter(Context context, ArrayList<String> data) 
 	{
@@ -105,16 +108,28 @@ public class ImageAdapter extends ArrayAdapter
 		        	intent.putExtra("internal", true);
 		        	_context.startActivity(intent);
 					
+		        	// Animation để chuyển Activity
 					((Activity) _context).overridePendingTransition(R.animator.animator_slide_in_right, R.animator.animator_zoom_out);
 		        }
 		    }
 		});
         
 	    holder.filePath = _items.get(position);
+	    
+	    // Thực hiện load bitmap bất đồng bộ
 	    AsyncTaskSupporter.loadBitmap(_context, _items.get(position), holder.imageview);
 		holder.checkbox.setChecked(false);
         holder.id = position;
         
+        if (position > _lastPosition) {
+        	 
+            Animation animation = AnimationUtils.loadAnimation(_context, R.animator.up_from_bottom);
+
+            convertView.startAnimation(animation);
+        } 
+        
+        _lastPosition = position;
+                
         return convertView;
     }
     

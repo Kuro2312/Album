@@ -15,6 +15,7 @@ public final class R {
         public static final int in_from_right=0x7f040003;
         public static final int out_to_left=0x7f040004;
         public static final int out_to_right=0x7f040005;
+        public static final int up_from_bottom=0x7f040006;
     }
     public static final class attr {
         /** <p>Must be a reference to another resource, in the form "<code>@[+][<i>package</i>:]<i>type</i>:<i>name</i></code>"
