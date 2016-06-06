@@ -24,7 +24,7 @@ public class TouchImageView extends ImageView {
 	PointF _last = new PointF();
 	PointF _start = new PointF();
 	float _minScale = 1f;
-	float _maxScale = 3f;
+	float _maxScale = 4f;
 	float[] _m;
 
 	int _viewWidth, _viewHeight;
@@ -36,7 +36,7 @@ public class TouchImageView extends ImageView {
 	ScaleGestureDetector _scaleDetector;
 
 	Context _context;
-
+	
 	public TouchImageView(Context context) {
 		super(context);
 		initialize(context);
@@ -50,7 +50,7 @@ public class TouchImageView extends ImageView {
 	private void initialize(Context context) {
 		super.setClickable(true);
 		this._context = context;
-		_scaleDetector = new ScaleGestureDetector(context, new ScaleListener());
+		_scaleDetector = new ScaleGestureDetector(context, new ScaleListener(this));
 		_matrix = new Matrix();
 		_m = new float[9];
 		setImageMatrix(_matrix);
@@ -112,6 +112,13 @@ public class TouchImageView extends ImageView {
 
 	private class ScaleListener extends
 			ScaleGestureDetector.SimpleOnScaleGestureListener {
+		
+		TouchImageView _image;
+		
+		public ScaleListener(TouchImageView image) {
+			_image = image;
+		}
+		
 		@Override
 		public boolean onScaleBegin(ScaleGestureDetector detector) {
 			_state = ZOOM;
@@ -135,9 +142,9 @@ public class TouchImageView extends ImageView {
 			// nếu zoom out xuống còn x1.0
 			if (_origWidth * _savedScale <= _viewWidth || _origHeight * _savedScale <= _viewHeight)
 				_matrix.postScale(scaleFactor, scaleFactor, _viewWidth / 2, _viewHeight / 2);
-			else // vẫn còn zoom in
+			else {// vẫn còn zoom in
 				_matrix.postScale(scaleFactor, scaleFactor, detector.getFocusX(), detector.getFocusY());
-
+			}
 			fixTrans();
 			return true;
 		}
@@ -190,47 +197,61 @@ public class TouchImageView extends ImageView {
 		_viewWidth = MeasureSpec.getSize(widthMeasureSpec);
 		_viewHeight = MeasureSpec.getSize(heightMeasureSpec);
 
-		if (_oldMeasuredHeight == _viewWidth && _oldMeasuredHeight == _viewHeight
+		if (_oldMeasuredWidth == _viewWidth && _oldMeasuredHeight == _viewHeight
 				|| _viewWidth == 0 || _viewHeight == 0)
 			return;
 		_oldMeasuredHeight = _viewHeight;
 		_oldMeasuredWidth = _viewWidth;
 
+		
+		Drawable drawable = getDrawable();
+		if (drawable == null || drawable.getIntrinsicWidth() == 0 || drawable.getIntrinsicHeight() == 0)
+			return;
+		// lấy kích thước gốc của ảnh
+		int bmWidth = drawable.getIntrinsicWidth();
+		int bmHeight = drawable.getIntrinsicHeight();
+		
+		float scale;
+		// tính tỉ lệ giữa kích thước màn hình và ảnh
+		float scaleX = (float) _viewWidth / (float) bmWidth;
+		float scaleY = (float) _viewHeight / (float) bmHeight;
+		scale = Math.min(scaleX, scaleY);		
+		
+		// tính phần màn hình thừa ra
+		float redundantYSpace = (float) _viewHeight - (scale * (float) bmHeight);
+		float redundantXSpace = (float) _viewWidth - (scale * (float) bmWidth);
+		redundantYSpace /= (float) 2;
+		redundantXSpace /= (float) 2;
+		
 		if (_savedScale == 1) {
-			float scale;
-
-			Drawable drawable = getDrawable();
-			if (drawable == null || drawable.getIntrinsicWidth() == 0
-					|| drawable.getIntrinsicHeight() == 0)
-				return;
-			// lấy kích thước gốc của ảnh
-			int bmWidth = drawable.getIntrinsicWidth();
-			int bmHeight = drawable.getIntrinsicHeight();
-			
-			// tính tỉ lệ giữa kích thước màn hình và ảnh
-			float scaleX = (float) _viewWidth / (float) bmWidth;
-			float scaleY = (float) _viewHeight / (float) bmHeight;
-			scale = Math.min(scaleX, scaleY);
 			// phong to ảnh sát mép màn hình
 			_matrix.setScale(scale, scale);
-
-			// tính phần màn hình thừa ra
-			float redundantYSpace = (float) _viewHeight
-					- (scale * (float) bmHeight);
-			float redundantXSpace = (float) _viewWidth
-					- (scale * (float) bmWidth);
-			redundantYSpace /= (float) 2;
-			redundantXSpace /= (float) 2;
-
 			// đưa ảnh ra giữa màn hình
 			_matrix.postTranslate(redundantXSpace, redundantYSpace);
 
 			// kích thước ảnh toàn màn hình
 			_origWidth = _viewWidth - 2 * redundantXSpace;
+			_origHeight = _viewHeight - 2 * redundantYSpace;		
+		} else {
+			
+			float[] temp = new float[9];
+			_matrix.getValues(temp);			
+			float transX = temp[Matrix.MTRANS_X];
+			float transY = temp[Matrix.MTRANS_Y];
+						
+			// cập nhật scale
+			_savedScale = (_origWidth * _savedScale) / (_viewWidth - 2 * redundantXSpace); 
+			
+			_matrix.setScale(scale * _savedScale, scale * _savedScale);
+		
+			_matrix.postTranslate(transX + (_viewWidth - _viewHeight) /2, transY + (_viewHeight - _viewWidth)/2 );
+			
+			_origWidth = _viewWidth - 2 * redundantXSpace;
 			_origHeight = _viewHeight - 2 * redundantYSpace;
-			setImageMatrix(_matrix);
 		}
+		setImageMatrix(_matrix);
 		fixTrans();
+		
 	}
 
 }
