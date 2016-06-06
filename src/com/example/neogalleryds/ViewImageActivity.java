@@ -258,6 +258,13 @@ public class ViewImageActivity extends Activity {
 				if (curTab == 3) { // tab Lock --> chức năng unlock
 					_lockManager.unlocksImage(path);					
 				} else { // chức năng lock
+					
+					if (MainActivity._isLogined == false)
+			    	{
+			    		Toast.makeText(_this, "You must login first to use this function", Toast.LENGTH_SHORT).show();
+			    		return;
+			    	}
+					
 					_lockManager.locksImage(path);
 					_markManager.unmarksImage(path);
 					if (curTab == 0) { // tab All
