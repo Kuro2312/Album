@@ -2,6 +2,7 @@ package Adapter;
 
 import java.util.ArrayList;
 
+import com.example.neogalleryds.MainActivity;
 import com.example.neogalleryds.R;
 import com.example.neogalleryds.R.drawable;
 import com.example.neogalleryds.R.id;
@@ -106,6 +107,7 @@ public class ImageAdapter extends ArrayAdapter
 		        	intent.putExtra("position", cb.getId());
 		        	intent.putExtra("slideshow", false);
 		        	intent.putExtra("internal", true);
+		        	intent.putExtra("status", ((MainActivity) _context)._isLogined);
 		        	_context.startActivity(intent);
 					
 		        	// Animation để chuyển Activity

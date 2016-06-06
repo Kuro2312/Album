@@ -45,7 +45,7 @@ public class MarkImagesAsyncTask extends AsyncTask<Object, Void, Boolean>
 	
 	protected void onPostExecute(Boolean result) 
     {
-		// Xử lý kết quả trả v�?
+		// Xử lý kết quả trả về
 		if (_dialog != null)
 			_dialog.dismiss();
 		

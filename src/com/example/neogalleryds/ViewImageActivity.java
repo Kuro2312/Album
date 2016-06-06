@@ -150,6 +150,7 @@ public class ViewImageActivity extends Activity {
 	private AlbumManager _albumManager;
 	private MarkManager _markManager;
 	private LockManager _lockManager;
+	private boolean _isLogined = false;
 	
 	// dành cho slideshow
 	private Timer timer;
@@ -181,6 +182,8 @@ public class ViewImageActivity extends Activity {
 		int slide = -1;
 		
 		int position;
+		
+		_isLogined = intent.getBooleanExtra("status", false);
 		
 		boolean internal = intent.getBooleanExtra("internal", false);
 		if (internal == true) { // nếu được gọi từ bên trong app
@@ -259,7 +262,7 @@ public class ViewImageActivity extends Activity {
 					_lockManager.unlocksImage(path);					
 				} else { // chức năng lock
 					
-					if (MainActivity._isLogined == false)
+					if (_isLogined == false)
 			    	{
 			    		Toast.makeText(_this, "You must login first to use this function", Toast.LENGTH_SHORT).show();
 			    		return;
@@ -307,8 +310,8 @@ public class ViewImageActivity extends Activity {
 						ArrayList<String> paths = new ArrayList<String>();
 						paths.add(path);
 						
-						if (MainActivity._imageAdapter != null)
-							MainActivity._imageAdapter.removeImages(paths);
+						//if (MainActivity._imageAdapter != null)
+							//MainActivity._imageAdapter.removeImages(paths);
 						
 						switch (curTab) {
 						case 0: // tab All
@@ -421,17 +424,10 @@ public class ViewImageActivity extends Activity {
  	public void loadData()
  	{		
  		// Tạo mới để cập nhật dữ liệu nếu cần
- 		if (MainActivity._albumManager == null) {
-	 		_folderManager = new FolderManager(this);
-	 		_albumManager = new AlbumManager(this);
-	 		_markManager = new MarkManager(this);
-	 		_lockManager = new LockManager(this);
- 		} else {
- 			_folderManager = MainActivity._folderManager;
- 			_albumManager = MainActivity._albumManager;
- 			_markManager = MainActivity._markManager;
- 			_lockManager = MainActivity._lockManager;
- 		}
+ 		_folderManager = new FolderManager(this);
+ 		_albumManager = new AlbumManager(this);
+ 		_markManager = new MarkManager(this);
+ 		_lockManager = new LockManager(this);
  		
  		File imageDir = new File(Environment.getExternalStorageDirectory().toString());
  		

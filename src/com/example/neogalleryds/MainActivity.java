@@ -21,6 +21,7 @@ import Adapter.FolderAdapter;
 import Adapter.ImageAdapter;
 import Adapter.ImageViewHolder;
 import AsyncTaskSupporter.AddImagesToAlbumAsyncTask;
+import AsyncTaskSupporter.DeleteAlbumAsyncTask;
 import AsyncTaskSupporter.DeleteImagesInAlbumAsyncTask;
 import AsyncTaskSupporter.DeleteImagesInFolderAsyncTask;
 import AsyncTaskSupporter.DeleteLockedImagesAsyncTask;
@@ -135,15 +136,15 @@ public class MainActivity extends Activity {
 	
 	// Adapter
 	private FolderAdapter _folderAdapter;
-	public static ImageAdapter _imageAdapter;
+	private ImageAdapter _imageAdapter;
 	private AlbumAdapter _albumAdapter;
 	
 	// Các thuộc tính quản lý
-	public static FolderManager _folderManager;
-	public static AlbumManager _albumManager;
-	public static MarkManager _markManager;
-	public static LockManager _lockManager;
-	public static boolean _isLogined = false;
+	private FolderManager _folderManager;
+	private AlbumManager _albumManager;
+	private MarkManager _markManager;
+	private LockManager _lockManager;
+	public  boolean _isLogined = false;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) 
@@ -820,8 +821,7 @@ public class MainActivity extends Activity {
     private void removeFromAlbum(ArrayList<String> images) 
     {
     	MainActivity.cancelLoadImage = true;
-    	//new RemoveImagesFromAlbumAsyncTask(getProgressingDialog(), _imageAdapter).execute(_albumManager, _markManager, images);
-    	new RemoveImagesFromAlbumAsyncTask(getProgressingDialog(), _imageAdapter).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, _albumManager, _markManager, images);
+    	new RemoveImagesFromAlbumAsyncTask(getProgressingDialog(), _imageAdapter).execute(_albumManager, _markManager, images);
     }
     
  	// Hiện dialog dể chọn album 
@@ -1155,7 +1155,7 @@ public class MainActivity extends Activity {
                             	Toast.makeText(_this, "Album renamed", Toast.LENGTH_SHORT).show();
                             }
                             else
-                            	Toast.makeText(_this, "Failed to rename album", Toast.LENGTH_SHORT).show();
+                            	Toast.makeText(_this, "Existed name! Fail to rename album!", Toast.LENGTH_SHORT).show();
                         }
                     });
             
@@ -1180,14 +1180,19 @@ public class MainActivity extends Activity {
     			public void onClick(DialogInterface dialog, int which) 
     			{
     				String name = _albumManager.getsAlbumList().get(_albumContextPosition);
-    				if (_albumManager.deletesAlbum(name)) {
+    				Dialog progressDialog = MainActivity.this.getProgressingDialog();
+    				
+    				new DeleteAlbumAsyncTask(progressDialog, _listViewAlbum, _albumAdapter, _imageAdapter).execute(name, _albumManager, _albumContextPosition, _selectedAlbumName);
+    				
+    				
+    				/*if (_albumManager.deletesAlbum(name)) {
     					_listViewAlbum.setItemChecked(_albumContextPosition, false);
     					_albumAdapter.updateData(_albumManager.getsAlbumList());
     					_imageAdapter.updateData(new ArrayList<String>());
     					
                     	Toast.makeText(_this, "Album deleted", Toast.LENGTH_SHORT).show();
     				} else
-    					Toast.makeText(_this, "Failed to delete album", Toast.LENGTH_SHORT).show();
+    					Toast.makeText(_this, "Failed to delete album", Toast.LENGTH_SHORT).show();*/
     			}
     		});
     		
@@ -1237,7 +1242,7 @@ public class MainActivity extends Activity {
                             	Toast.makeText(_this, "Album created", Toast.LENGTH_SHORT).show();
                             }
                             else
-                            	Toast.makeText(_this, "Failed to create album", Toast.LENGTH_SHORT).show();
+                            	Toast.makeText(_this, "Existed name! Fail to create album!", Toast.LENGTH_SHORT).show();
                         }
                     });
             
