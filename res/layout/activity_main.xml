@@ -2,13 +2,14 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:animateLayoutChanges="true" 
     tools:context="com.example.neogalleryds.MainActivity" >
-     
+    
     <HorizontalScrollView
         android:id="@+id/horizontalScrollView1"
         android:layout_width="match_parent"
         android:layout_height="70dip"
-       
+       	android:animateLayoutChanges="true"
         android:layout_alignParentBottom="true"
         android:background="@color/AliceBlue">
 
@@ -124,7 +125,7 @@
         android:id="@+id/gridViewImage"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_toRightOf="@+id/listViewFolder"
+        android:layout_toRightOf="@+id/listViewAlbum"
         android:layout_below="@+id/listViewTabs"
         android:layout_above="@+id/horizontalScrollView1"
         android:background="@color/LightSteelBlue"

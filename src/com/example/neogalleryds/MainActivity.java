@@ -53,6 +53,8 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -386,7 +388,7 @@ public class MainActivity extends Activity {
     	
     	// Cập nhật giao diện
     	_listViewFolder.setVisibility(View.VISIBLE);
-    	_listViewAlbum.setVisibility(View.GONE);
+    	_listViewAlbum.setVisibility(View.INVISIBLE);
     	
     	btnDeleteImage.setVisibility(View.VISIBLE);
     	btnAddToAlbum.setVisibility(View.VISIBLE);
@@ -407,8 +409,9 @@ public class MainActivity extends Activity {
     	// Cập nhật dữ liệu 
 		_imageAdapter.updateData(_albumManager.getsAlbumImages(_selectedAlbumName));
     	
+		_listViewFolder.setVisibility(View.GONE);
     	_listViewAlbum.setVisibility(View.VISIBLE);
-    	_listViewFolder.setVisibility(View.INVISIBLE);
+    	
     	
     	btnDeleteImage.setVisibility(View.VISIBLE);
     	btnMarkImage.setVisibility(View.VISIBLE);
@@ -539,7 +542,7 @@ public class MainActivity extends Activity {
 		// View thể hiện các thư mục/album
 		_listViewFolder = (ListView) this.findViewById(R.id.listViewFolder);
 		_listViewAlbum = (ListView) this.findViewById(R.id.listViewAlbum);
-		_listViewAlbum.setVisibility(View.GONE);
+		_listViewAlbum.setVisibility(View.INVISIBLE);
 		
 		// View thể hiện danh sách ảnh
 		_gridViewImage = (GridView) this.findViewById(R.id.gridViewImage);
@@ -562,7 +565,8 @@ public class MainActivity extends Activity {
 	{
 		setUpOnClickListeners();
 		initializeAllFunctionButtons();
-		_scrollView.setVisibility(View.GONE);
+		
+		_scrollView.setVisibility(View.GONE);		
 	}
 	
 	// Xây các nút trong thanh công cụ chức năng
@@ -765,6 +769,9 @@ public class MainActivity extends Activity {
 	// Thực hiện đánh dấu nhiều ảnh
 	private void marksImages(ArrayList<String> images)
 	{
+		if (images.size() == 0)
+			return;
+		
 		MainActivity.cancelLoadImage = true;
 		new MarkImagesAsyncTask(getProgressingDialog()).execute(_markManager, images);
 	}
@@ -772,6 +779,9 @@ public class MainActivity extends Activity {
 	// Thực hiện bỏ đánh dấu nhiều ảnh
 	private void unmarksImages(ArrayList<String> images)
 	{
+		if (images.size() == 0)
+			return;
+		
 		MainActivity.cancelLoadImage = true;
 		new UnmarkImagesAsyncTask(getProgressingDialog(), _imageAdapter).execute(_markManager, images);
 	}
@@ -1182,6 +1192,7 @@ public class MainActivity extends Activity {
     				String name = _albumManager.getsAlbumList().get(_albumContextPosition);
     				Dialog progressDialog = MainActivity.this.getProgressingDialog();
     				
+    				cancelLoadImage = true;
     				new DeleteAlbumAsyncTask(progressDialog, _listViewAlbum, _albumAdapter, _imageAdapter).execute(name, _albumManager, _albumContextPosition, _selectedAlbumName);
     				
     				
@@ -1217,10 +1228,7 @@ public class MainActivity extends Activity {
 		// as you specify a parent activity in AndroidManifest.xml.
 		
 		int id = item.getItemId();
-		if (id == R.id.action_settings) {
-			return true;
-		}
-		else if (id == R.id.addNewAlbum)
+		if (id == R.id.addNewAlbum)
 		{
 			AlertDialog.Builder alertDialog = new AlertDialog.Builder(MainActivity.this);
             alertDialog.setTitle("New Album");
@@ -1260,7 +1268,11 @@ public class MainActivity extends Activity {
 		{
 			if (_scrollView.getVisibility() == View.GONE)
 			{
-				_scrollView.setVisibility(View.VISIBLE);
+				_scrollView.setVisibility(View.VISIBLE);		
+				//Animation animation = AnimationUtils.loadAnimation(_this, R.animator.up_from_bottom);
+				//_scrollView.startAnimation(animation);
+				
+				
 				ImageAdapter.SELECT_MODE = View.VISIBLE;
 				//_imageAdapter.refresh();
 			}

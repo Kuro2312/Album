@@ -230,8 +230,7 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
     }
     public static final class id {
         public static final int LinearLayout1=0x7f0a001d;
-        public static final int action_settings=0x7f0a0034;
-        public static final int addNewAlbum=0x7f0a0035;
+        public static final int addNewAlbum=0x7f0a0034;
         public static final int btnAdd=0x7f0a0017;
         public static final int btnCancel=0x7f0a0032;
         public static final int btnCancel1=0x7f0a002c;
@@ -260,7 +259,7 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
         public static final int llDelete=0x7f0a0019;
         public static final int llLock=0x7f0a0012;
         public static final int llMark=0x7f0a000e;
-        public static final int login=0x7f0a0037;
+        public static final int login=0x7f0a0036;
         public static final int pagerFullscreenImage=0x7f0a000b;
         public static final int progressBar=0x7f0a0026;
         public static final int radioAlbum=0x7f0a0005;
@@ -270,7 +269,7 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
         public static final int radioTabGroup=0x7f0a0003;
         public static final int sbrSpeed=0x7f0a0031;
         public static final int sbrWait=0x7f0a002f;
-        public static final int selectMode=0x7f0a0036;
+        public static final int selectMode=0x7f0a0035;
         public static final int textViewFolder=0x7f0a001f;
         public static final int textViewFunction=0x7f0a0022;
         public static final int txtDelete=0x7f0a001b;

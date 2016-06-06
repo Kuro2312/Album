@@ -187,7 +187,7 @@ public class AlbumManager {
 	        	_albumData.put(newName, data);
 			    
 			    // Lưu dữ liệu trên tập tin dữ liệu
-			    AlbumManager.savesAlbumPaths(_context, data);
+			    AlbumManager.savesAlbumPaths(_context, new ArrayList<String>(_albumData.keySet()));
 			    
 		        return true;
 	        }
